@@ -356,15 +356,113 @@ const SU=[
  read:['세 빔을 직사각형 상자의 세 꼭짓점에 맞춰 렌즈로 샘플에 모은다.','신호는 위상 정합 조건 k_s = −k₁ + k₂ + k₃ 방향, 즉 네 번째 꼭짓점으로 나간다. 다른 빔이 없는 방향이라 배경이 없다.','이 순서(k₁이 먼저)는 rephasing(photon echo) 신호. k₁과 k₂의 도착 순서를 바꾸면 non-rephasing.','신호가 약하고 위상 정보도 필요해서, local oscillator(LO)를 신호에 겹쳐 분광기에서 간섭시켜 읽는다(heterodyne). 그래서 ω₃는 여기서도 분광기가 바로 준다.','t₁과 T는 각 빔의 지연으로 조절한다. 2DES에서는 회절 광학 소자로 네 빔을 한 번에 만드는 경우가 많다.'],
  q:'BOXCARS는 왜 rephasing과 non-rephasing을 따로 볼 수 있나?',a:'두 신호가 서로 다른 방향(−k₁+k₂+k₃와 +k₁−k₂+k₃)으로 나가기 때문. pump-probe 배치는 k₁ = k₂라 두 방향이 같아 합쳐져 나온다.'}];
 
+/* ---------- Feynman 다이어그램 (DSFD) ----------
+   규약(논문 부록 C): 왼쪽 선 = ket, 오른쪽 선 = bra, 시간은 위로. 선으로 들어오는 화살표 = 올림, 선에서 나가는 화살표 = 내림.
+   마지막 점선 화살표(ket 쪽) = 신호. 부호 = (−1)^(bra 쪽 상호작용 수). 회색 = pump, 초록 = probe. */
+const FD_W=58;
+function fdArr(x,y,sd,up,k){const xb=x+FD_W;let a;
+ if(sd==='k')a=up?[x-26,y+10,x-3,y]:[x-3,y,x-26,y-10];else a=up?[xb+26,y+10,xb+3,y]:[xb+3,y,xb+26,y-10];
+ return LN(a[0],a[1],a[2],a[3],COL[k],{w:2,mk:k})}
+/* o: ys = [아래 끝, 상호작용들..., 신호, 위 끝], it = [[쪽 'k'|'b', 올림?, 색 키], ...], rho = 구간마다 밀도 행렬 원소, sig = 신호 색 키, name/sub = 아래 글자, n = 번호, hi = 강조할 구간 */
+function fdDiag(x,o){const ys=o.ys||[256,228,200,138,88,56],xb=x+FD_W,xm=x+FD_W/2,top=ys[ys.length-1],ni=o.it.length;
+ let s=`<line x1="${x}" x2="${x}" y1="${ys[0]}" y2="${top}" style="stroke:var(--fg)" stroke-width="1.5"/><line x1="${xb}" x2="${xb}" y1="${ys[0]}" y2="${top}" style="stroke:var(--fg)" stroke-width="1.5"/>`;
+ o.it.forEach(([sd,up,k],i)=>{s+=fdArr(x,ys[i+1],sd,up,k)});
+ const ye=ys[ni+1];s+=`<line x1="${x-3}" y1="${ye}" x2="${x-26}" y2="${ye-10}" style="stroke:${COL[o.sig]}" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#m${o.sig})"/>`+T(x-24,ye-18,'신호','sub','middle',COL[o.sig]);
+ o.rho.forEach((r,i)=>{s+=T(xm,(ys[i]+ys[i+1])/2+4,r,'sub','middle',o.hi===i?'var(--fg)':undefined)});
+ if(o.name)s+=T(xm,ys[0]+18,o.name,'labn','middle');
+ if(o.sub)s+=T(xm,ys[0]+33,o.sub,'sub','middle');
+ if(o.n)s+=`<g data-n="${o.n}">${badge(xm-(o.name?o.name.length*4+16:0),ys[0]+14,o.n,COL[o.sig])}</g>`;
+ return s}
+const FD_GSB={it:[['k',1,'g'],['k',0,'g'],['k',1,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'};
+const FD_SE={it:[['k',1,'g'],['b',1,'g'],['b',0,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|e⟩⟨e|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'};
+const FD_ESA={it:[['k',1,'g'],['b',1,'g'],['k',1,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|e⟩⟨e|','|f⟩⟨e|','|e⟩⟨e|'],sig:'r'};
+const FD_GSBR={it:[['b',1,'g'],['b',0,'g'],['k',1,'s3']],rho:['|g⟩⟨g|','|g⟩⟨e|','|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'};
+const fdKey=(x,y)=>LN(x,y,x+20,y,'var(--pump)',{w:2})+T(x+26,y+4,'pump','sub')+LN(x+64,y,x+84,y,'var(--s3)',{w:2})+T(x+90,y+4,'probe','sub')+`<line x1="${x+136}" x2="${x+156}" y1="${y}" y2="${y}" style="stroke:var(--fg)" stroke-width="2" stroke-dasharray="4 3"/>`+T(x+162,y+4,'신호','sub');
+const fdLor=(w,w0,g=12)=>g*g/((w-w0)**2+g*g);
+const FD_W0=2500; /* 예시 ω_eg (cm⁻¹) */
+function fdSpec(D,show){const P=plot({x:[2380,2560],y:[-2.4,2.4],xt:[{v:2400,l:'2400'},{v:2450,l:'2450'},{v:2500,l:'2500'},{v:2550,l:'2550'}],yt:[{v:2,l:'+'},{v:0,l:'0'},{v:-2,l:'−'}],xl:'probe wavenumber ω₃ (cm⁻¹)',yl:'ΔT/T (상대)',T:30});
+ let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`;
+ const gs=w=>2*fdLor(w,FD_W0),es=w=>-2*fdLor(w,FD_W0-D);
+ if(show==='gse'){s+=crv(P,gs,2380,2560,'var(--s1)',{n:300})+crv(P,w=>fdLor(w,FD_W0),2380,2560,'var(--s1)',{n:300,dash:1,w:1.2})+T(P.R,P.T-12,'실선 = GSB + SE, 점선 = 하나씩','sub','end')}
+ else{s+=crv(P,gs,2380,2560,'var(--s1)',{n:300,dash:1,w:1.3})+crv(P,es,2380,2560,'var(--s2)',{n:300,dash:1,w:1.3})+crv(P,w=>gs(w)+es(w),2380,2560,'var(--fg)',{n:400})
+  +`<g data-n="3">${badge(P.X(FD_W0-D)-16,P.Y(-2)+4,3,'var(--s2)')}</g>`+T(P.R,P.T-12,D===0?'조화(Δ = 0): 완전히 상쇄 → 신호 0':'실선 = 합, 점선 = 성분','sub','end')}
+ s+=`<g data-n="1">${badge(P.X(FD_W0)-14,P.Y(2)-14,1,'var(--s1)')}</g><g data-n="2">${badge(P.X(FD_W0)+14,P.Y(2)-14,2,'var(--s1)')}</g>`;
+ return s}
+const FD=[
+{t:'밀도 행렬: 집단과 결맞음',ec:'밀도 행렬 (두 준위 g, e)',mc:'시간에 따라 하는 일 (예시)',
+ e:()=>{const C=(x,y,n,a,b,k)=>`<g data-n="${n}"><rect x="${x}" y="${y}" width="70" height="60" rx="4" style="fill:${COL[k]};fill-opacity:.15;stroke:${COL[k]}"/>`+T(x+35,y+26,a,'labn','middle')+T(x+35,y+44,b,'sub','middle')+'</g>';
+  return T(150,40,'⟨g|','lab','middle')+T(220,40,'⟨e|','lab','middle')+T(100,84,'|g⟩','lab','end')+T(100,144,'|e⟩','lab','end')+T(255,40,'← bra (열)','sub')+T(26,114,'ket (행)','sub')
+   +C(115,50,1,'ρ_gg','집단','s3')+C(185,50,2,'ρ_ge','결맞음','s5')+C(115,110,2,'ρ_eg','결맞음','s5')+C(185,110,1,'ρ_ee','집단','s3')
+   +TM(20,206,['밀도 행렬 = |ket⟩⟨bra|. 대각선은 각 상태에 있는 분자 비율,','비대각선은 두 상태가 같이 섞여 위상이 맞는 정도다.','Feynman 다이어그램은 ket(왼쪽)과 bra(오른쪽)를','따로 그린 이 행렬의 변화 기록이다.'],'sub')},
+ m:()=>{const P1=plot({x:[0,10],y:[0,1.1],T:30,B:118,L:40,noy:1,xt:[]}),P2=plot({x:[0,10],y:[-1.1,1.1],T:150,B:262,L:40,noy:1,xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10'}],xl:'시간 (임의 단위)'});
+  return P1.s+P2.s+`<g data-n="1">${crv(P1,t=>.8*Math.exp(-t/40),0,10,'var(--s3)')}${badge(P1.L-18,P1.Y(.8),1,'var(--s3)')}</g>`+T(P1.L,22,'집단 ρ_ee: 진동하지 않고 천천히 준다','sub')
+   +`<line x1="${P2.L}" x2="${P2.R}" y1="${P2.Y(0)}" y2="${P2.Y(0)}" class="lvl2"/><g data-n="2">${crv(P2,t=>Math.cos(2*Math.PI*1.2*t)*Math.exp(-t/3.5),0,10,'var(--s5)',{n:500,w:1.5})}${badge(P2.L-18,P2.Y(.6),2,'var(--s5)')}</g>`+T(P2.L,142,'결맞음 ρ_eg: ω_eg로 진동하며 빛을 낸다','sub')},
+ read:['분자 집합의 상태를 밀도 행렬 ρ = |ket⟩⟨bra|로 쓴다. 행이 ket, 열이 bra다.',`${c(1,'s3')} 대각선(ρ_gg, ρ_ee)은 집단(population)이다. 각 상태에 분자가 몇 %인지 나타내고, 진동하지 않는다.`,`${c(2,'s5')} 비대각선(ρ_eg, ρ_ge)은 결맞음(coherence)이다. 두 상태 에너지 차이 ω_eg로 진동하고, 이 진동이 빛을 낸다. 그래서 신호는 결맞음에서 나온다.`,'빛과 한 번 상호작용할 때마다 ket이나 bra 중 한쪽 지표만 바뀐다. 이 규칙을 그림으로 그린 것이 이중 Feynman 다이어그램(DSFD)이다.'],
+ q:'pump-probe에서 지연 T 동안 시료는 집단과 결맞음 중 어느 상태에 있나?',a:'집단(|e⟩⟨e| 또는 |g⟩⟨g|). 그래서 pump-probe는 집단 동역학을 잰다(5단계).'},
+{t:'그리는 규칙: 선형 흡수(FTIR) 하나로 연습',ec:'1차 다이어그램',mc:'결맞음의 감쇠(FID) → 흡수선',
+ e:()=>fdDiag(120,{ys:[250,206,112,60],it:[['k',1,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'})+`<g data-n="1">${badge(206,159,1,'var(--s5)')}</g>`+T(218,163,'결맞음 구간','sub')
+   +T(200,206,'← 빛이 ket을 올림','sub')+T(20,24,'시간 ↑ (아래에서 위로)','sub')+fdKey(20,284),
+ m:()=>{const P1=plot({x:[0,10],y:[-1.1,1.1],T:30,B:118,L:40,noy:1,xt:[{v:0,l:'0'},{v:10,l:'시간 →'}]}),P2=plot({x:[2400,2600],y:[0,1.1],T:166,B:262,L:40,noy:1,xt:[{v:2450,l:'2450'},{v:2500,l:'2500'},{v:2550,l:'2550'}],xl:'wavenumber (cm⁻¹)'});
+  return P1.s+P2.s+`<line x1="${P1.L}" x2="${P1.R}" y1="${P1.Y(0)}" y2="${P1.Y(0)}" class="lvl2"/><g data-n="1">${crv(P1,t=>Math.cos(2*Math.PI*1.2*t)*Math.exp(-t/2.5),0,10,'var(--s5)',{n:500,w:1.5})}${badge(P1.L-18,P1.Y(.7),1,'var(--s5)')}</g>`
+   +T(P1.L,22,'자유 유도 감쇠 (FID)','sub')+LN(160,124,160,152,'var(--muted)',{w:1.5,mk:'g'})+T(168,142,'푸리에 변환','sub')
+   +`<g data-n="2">${crv(P2,w=>fdLor(w,2500,14),2400,2600,'var(--fg)')}${badge(P2.X(2500)+22,P2.Y(1)+4,2,'var(--s1)')}</g>`+T(P2.R,P2.Y(.6),'흡수선','sub','end')+T(P2.L,P2.T-4,'감쇠가 빠를수록 선이 넓다 (예시)','sub')},
+ read:['두 세로선 중 왼쪽이 ket, 오른쪽이 bra다. 시간은 아래에서 위로 흐른다. 선 사이에 그 구간의 밀도 행렬 원소를 적는다.','화살표 하나 = 빛과 한 번의 상호작용. 선으로 들어오는 화살표는 그 쪽 상태를 올리고, 선에서 나가는 화살표는 내린다.',`마지막 점선 화살표는 시료가 내보내는 ${c(2,'s1')} 신호다. 신호가 나간 뒤에는 집단(대각선)으로 끝나야 한다.`,`FTIR은 가장 단순한 1차 다이어그램이다. 빛이 한 번 ket을 올려 ${c(1,'s5')} 결맞음 |e⟩⟨g|를 만들고, 이 결맞음이 줄어들며 내는 빛(FID)을 푸리에 변환하면 흡수선이 된다.`,'부호 규칙: bra 쪽 상호작용이 하나 늘 때마다 부호가 바뀐다. 부호 = (−1)^(bra 쪽 수). 다음 단계부터 쓴다.'],
+ q:'FID가 더 빨리 사라지면 흡수선은?',a:'더 넓어진다. 결맞음이 빨리 깨지는 것(dephasing)이 선 폭을 정한다.'},
+{t:'GSB와 SE: bra 쪽이 짝수 번 → +',ec:'pump-probe 경로 두 개 (non-rephasing)',mc:'probe 스펙트럼 (ω_eg = 2500 cm⁻¹ 예시)',
+ e:()=>fdDiag(48,{...FD_GSB,name:'GSB',sub:'bra 0번 → +',n:1})+fdDiag(204,{...FD_SE,name:'SE',sub:'bra 2번 → +',n:2,hi:2})+fdKey(40,20),
+ m:()=>fdSpec(0,'gse'),
+ read:['pump-probe에서는 처음 두 상호작용이 pump 한 펄스에서, 세 번째가 probe에서 온다. 신호는 probe 방향으로 나와 probe와 함께 검출된다.',`${c(1,'s1')} GSB: pump 두 번이 ket만 올렸다 내려, 바닥 상태에 "구멍"을 남긴다(|g⟩⟨g|). probe가 다시 |e⟩⟨g|를 만들고 ω_eg에서 신호가 나온다. bra 쪽 0번이라 부호 +.`,`${c(2,'s1')} SE: pump가 ket과 bra를 하나씩 올려 들뜬 집단 |e⟩⟨e|를 만든다. probe가 bra를 내려 |e⟩⟨g|가 되고, 역시 ω_eg에서 신호가 나온다. bra 쪽 2번이라 부호 +.`,'둘 다 probe 흡수를 줄인다(투과가 는다). 이 페이지의 ΔT/T 규약으로 + (빨강)이다. ΔA로 그리면 음수라 색이 반대다.','진동 전이에서는 두 경로가 같은 자리(ω_eg), 같은 크기로 겹친다. 2D IR 탭 2단계의 "GSB+SE" 피크가 이것이다.'],
+ q:'SE 다이어그램에서 T 구간(가운데 긴 구간)의 원소는?',a:'|e⟩⟨e|. 들뜬 상태의 집단이다. 그래서 T 동안 들뜬 상태가 사라지면 SE도 함께 줄어든다.'},
+{t:'ESA: bra 쪽이 홀수 번 → −, 그리고 상쇄',ec:'ESA 경로와 준위',mc:'probe 스펙트럼: 합과 성분',
+ slider:{min:0,max:80,step:2,init:30,label:'비조화성 Δ',fmt:v=>Math.round(v)+' cm⁻¹'},
+ e:v=>{const Y=[248,176,116];return fdDiag(40,{...FD_ESA,name:'ESA',sub:'bra 1번 → −',n:3,hi:2})+fdKey(40,20)
+   +['g','e','f'].map((l,i)=>L(200,280,Y[i])+T(286,Y[i]+4,l,'sub')).join('')+A(214,Y[0]-2,214,Y[1]+3,'g',0)+A(236,Y[0]-2,236,Y[1]+3,'g',0)+A(262,Y[1]-2,262,Y[2]+3,'s3',3,{dx:14})
+   +T(196,76,'ω_fe = ω_eg − Δ','sub')+T(196,94,`Δ = ${Math.round(v)} cm⁻¹`,'sub')},
+ m:v=>fdSpec(v,'all'),
+ read:[`${c(3,'s2')} ESA: pump가 만든 |e⟩⟨e|에서 probe가 ket을 한 번 더 올려 |f⟩⟨e|가 된다. 신호는 ω_fe에서 나오고, bra 쪽 1번이라 부호 −(파랑)다. probe 흡수가 늘어난다.`,'세기도 다이어그램이 정한다. GSB, SE는 각각 μ_eg⁴, ESA는 μ_eg²μ_fe²에 비례한다. 조화 진동자는 μ_fe² = 2μ_eg²라 ESA 하나가 GSB + SE 둘과 크기가 같다.','슬라이더로 Δ를 0으로 줄이면 ω_fe = ω_eg가 되어 + 와 −가 정확히 지워진다. 조화 진동자는 pump-probe 신호가 없다. 신호가 보이는 것은 비조화성 덕분이다(2D IR 탭 3단계와 같은 논리).','Δ가 선 폭보다 크면 + 띠와 − 띠가 따로 보인다. Δ가 작으면 두 띠가 겹쳐 봉우리 위치가 실제 ω_eg, ω_fe에서 밀려난다. 그래서 두 봉우리 간격은 Δ와 꼭 같지 않다.'],
+ q:'Δ가 선 폭보다 훨씬 작으면 스펙트럼은 어떤 모양인가?',a:'+ 와 − 가 거의 지워지고, 미분 모양(위아래로 붙은 작은 쌍)만 남는다. 크기도 Δ에 비례해 작아진다.'},
+{t:'시간 변수: t₁ ≈ 0, T를 스캔, t₃는 분광기가',ec:'SE 경로의 세 구간',mc:'T에 따른 신호 (집단 수명 1.5 ps 예시)',
+ slider:{min:0,max:5,step:.05,init:0,label:'지연 T',fmt:v=>v.toFixed(2)+' ps',play:1},
+ e:v=>{const ys=[262,238,216,120,78,52],x=60,xb=x+FD_W,bx=xb+40;const pop=Math.exp(-v/1.5);
+  const brace=(a,b,lab,sub)=>`<path d="M${bx-4},${a} H${bx} V${b} H${bx-4}" fill="none" style="stroke:var(--muted)"/>`+T(bx+6,(a+b)/2+(sub?-2:4),lab,'labn')+(sub?T(bx+6,(a+b)/2+13,sub,'sub'):'');
+  return fdDiag(x,{...FD_SE,ys,hi:2})+brace(ys[1],ys[2],'t₁ ≈ 0','')+brace(ys[2],ys[3],'T = 지연','스테이지로 스캔')+brace(ys[3],ys[4],'t₃','분광기 → ω₃')+fdKey(40,20)
+   +`<rect x="${x+6}" y="${ys[2]-8-(ys[2]-ys[3]-16)*pop}" width="${FD_W-12}" height="${(ys[2]-ys[3]-16)*pop}" style="fill:var(--s1);fill-opacity:.15"/>`+T(bx+6,286,`남은 집단 ${Math.round(pop*100)}%`,'sub')},
+ m:v=>{const P=plot({x:[0,5],y:[0,1.1],xt:[0,1,2,3,4,5].map(t=>({v:t,l:String(t)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'지연 T (ps)',yl:'ΔT/T (상대)',T:30});
+  return P.s+crv(P,t=>Math.exp(-t/1.5),0,5,'var(--s1)')+`<circle cx="${P.X(v)}" cy="${P.Y(Math.exp(-v/1.5))}" r="6" style="fill:var(--s1)"/>`+T(P.R,P.T-12,'ω_eg에서 본 GSB + SE','sub','end')},
+ read:['상호작용 사이 세 구간을 t₁, T(= t₂), t₃라 한다. 2D IR 탭 첫 단계 위 "공통" 상자의 시간 축과 같은 것이다.','t₁: 두 pump 상호작용이 한 펄스 안에서 일어나 거의 0이다. 그래서 pump-probe에는 ω₁ 축이 없다. 2D IR은 이 t₁을 스캔해 ω₁ 축을 얻는다.','T: pump와 probe 사이 지연이다. 지연 스테이지로 직접 스캔하는 유일한 구간이다. 이 동안 시료는 집단(|e⟩⟨e|)에 있다. 그래서 pump-probe는 집단이 줄어드는 속도를 잰다.','t₃: 신호가 나오는 구간이다. 스캔하지 않는다. 투과한 probe를 분광기로 펼쳐 배열 검출기로 찍으면 t₃가 바로 ω₃ 축으로 바뀐다(검출과 분광기 노트).','재생을 누르면 T가 늘며 |e⟩⟨e| 집단이 줄고(왼쪽 색칠), 신호가 같이 준다(오른쪽). 1.5 ps는 예시 값이다.'],
+ q:'pump와 probe가 겹치는 T ≈ 0 근처 데이터를 조심해야 하는 이유는?',a:'펄스가 겹치면 상호작용 순서가 정해지지 않고, 용매·창의 비공명 신호(coherent artifact)가 더해진다. 그래서 이 구간은 피팅에서 빼거나 따로 다룬다.'},
+{t:'rephasing과 non-rephasing',ec:'같은 GSB, 순서만 다른 두 경로',mc:'신호가 나가는 방향',
+ e:()=>fdDiag(48,{...FD_GSBR,name:'rephasing',sub:'t₁: |g⟩⟨e|'})+fdDiag(204,{...FD_GSB,name:'non-rephasing',sub:'t₁: |e⟩⟨g|'})+fdKey(40,20),
+ m:()=>{const S=[170,160];return TM(14,26,['rephasing:  k_s = −k₁ + k₂ + k₃','non-rephasing:  k_s = +k₁ − k₂ + k₃'],'lab','start',18)
+   +LN(30,236,S[0]-6,S[1]+4,'var(--pump)',{w:2.5,mk:'g'})+T(30,256,'pump (k₁ = k₂)','sub')+LN(30,96,S[0]-6,S[1]-4,'var(--s3)',{w:2.5,mk:'s3'})+T(30,88,'probe (k₃)','sub')
+   +`<circle cx="${S[0]}" cy="${S[1]}" r="10" class="dev"/>`+T(S[0],S[1]+28,'시료','sub','middle')
+   +LN(S[0]+10,S[1]+6,300,226,'var(--s1)',{w:2.5,dash:1,mk:'b'})+T(300,244,'신호 = probe 방향','sub','end')+T(300,258,'(두 경로가 합쳐짐)','sub','end')},
+ read:['같은 GSB라도 pump의 두 상호작용 순서에 따라 두 경로가 있다. t₁ 동안 결맞음이 |g⟩⟨e|(rephasing)인지 |e⟩⟨g|(non-rephasing)인지가 다르다.','rephasing은 t₁에서 거꾸로 돌던 위상을 t₃에서 되감는다. 그래서 주파수가 조금씩 다른 분자들의 위상이 다시 모이는 echo가 생긴다.','두 경로는 나가는 방향이 다르다(위 식). 그런데 pump-probe에서는 k₁ = k₂(같은 pump 빔)라 두 식이 모두 k_s = k₃가 되어, 둘 다 probe 방향으로 나와 합쳐진다.','그래서 pump-probe로는 둘을 나눌 수 없다. 나누려면 세 빔을 따로 쓰는 BOXCARS 배치나 위상 순환(phase cycling)이 필요하다(셋업 탭).'],
+ q:'GSB, SE, ESA 각각에 rephasing·non-rephasing이 있다면 pump-probe 경로는 모두 몇 개인가?',a:'6개(3 × 2). 3준위계에서 바닥 아래로 내려가거나 결맞음으로 끝나는 경로를 빼면 이만큼 남는다.'},
+{t:'편광: magic angle 54.7°',ec:'pump와 probe 편광 방향',mc:'T에 따른 신호 (예시: 집단 5 ps, 회전 3 ps)',
+ slider:{min:0,max:90,step:.5,init:54.7,label:'편광 사이 각 θ',fmt:v=>v.toFixed(1)+'°'},
+ e:v=>{const th=v*Math.PI/180,cx=160,cy=170,R=90,f=3*Math.cos(th)**2-1;
+  return LN(cx,cy,cx,cy-R,'var(--pump)',{w:3,mk:'g'})+T(cx-8,cy-R-6,'pump 편광','sub','end')+LN(cx,cy,cx+R*Math.sin(th),cy-R*Math.cos(th),'var(--s3)',{w:3,mk:'s3'})+T(cx+R*Math.sin(th)+6,cy-R*Math.cos(th)+(v>70?16:0),'probe 편광','sub','start','var(--s3)')
+   +`<path d="M${cx},${cy-34} A34,34 0 0 1 ${cx+34*Math.sin(th)},${cy-34*Math.cos(th)}" fill="none" style="stroke:var(--muted)"/>`+(v<16?T(cx-8,cy-40,'θ','sub','end'):T(cx+50*Math.sin(th/2),cy-50*Math.cos(th/2)+4,'θ','sub','middle'))
+   +TM(20,212,['S(θ) = S_iso · [1 + r · (3cos²θ − 1)]',`지금 3cos²θ − 1 = ${f.toFixed(2)}`,Math.abs(f)<.02?'→ r 항이 사라져 S = S_iso':'→ 분자 회전(r)이 신호에 섞인다'],'sub','start',16)},
+ m:v=>{const th=v*Math.PI/180,f=3*Math.cos(th)**2-1,iso=t=>Math.exp(-t/5),r=t=>.4*Math.exp(-t/3),S=(t,g)=>iso(t)*(1+r(t)*g);
+  const P=plot({x:[0,10],y:[0,1.9],xt:[0,2,4,6,8,10].map(t=>({v:t,l:String(t)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'지연 T (ps)',yl:'ΔT/T (상대)',T:30});
+  return P.s+crv(P,t=>S(t,2),0,10,'var(--s4)',{dash:1,w:1.3})+crv(P,t=>S(t,-1),0,10,'var(--s5)',{dash:1,w:1.3})+crv(P,iso,0,10,'var(--muted)',{dash:1,w:1})+crv(P,t=>S(t,f),0,10,'var(--fg)')
+   +LN(P.R-110,P.T,P.R-90,P.T,'var(--s4)',{dash:1})+T(P.R-84,P.T+4,'평행 (0°)','sub')+LN(P.R-110,P.T+16,P.R-90,P.T+16,'var(--s5)',{dash:1})+T(P.R-84,P.T+20,'수직 (90°)','sub')+LN(P.R-110,P.T+32,P.R-90,P.T+32,'var(--fg)',{w:2})+T(P.R-84,P.T+36,'지금 θ','sub')},
+ read:['pump는 편광 방향과 나란한 전이 쌍극자를 가진 분자를 더 많이 들뜨게 한다(광선택). 그래서 신호는 pump와 probe 편광 사이 각 θ에 따라 달라진다.','들뜬 분자가 회전하면 이 치우침이 풀리며 신호가 변한다. 이 효과가 이방성 r(T)이다. 평행(0°)은 크게, 수직(90°)은 작게 보인다.','3cos²θ − 1 = 0이 되는 θ ≈ 54.7°(magic angle)에서는 r 항이 사라진다. 그러면 분자 회전이 집단 감소처럼 보이는 일을 막을 수 있다.','슬라이더로 θ를 바꾸면 실선이 평행과 수직 사이를 오가고, 54.7°에서 점선(S_iso)과 겹친다. 수명 5 ps, 회전 3 ps, r(0) = 0.4는 예시 값이다.','반대로 평행과 수직을 둘 다 재면 r(T)를 따로 얻어 회전 동역학을 볼 수 있다. 이때 두 채널이 정말 서로 다른 편광인지 확인해야 한다.'],
+ q:'평행과 수직 신호로 등방성 신호를 만드는 식은?',a:'S_iso = (S_∥ + 2S_⊥) / 3. 수직 방향이 두 개(공간의 나머지 두 축)라 2를 곱한다.'}];
+
 /* ---------- 탭 ---------- */
 const TABS=[
 {id:'ir',name:'2D IR',sub:'진동, 비조화성과 coupling',desc:'에너지 그림과 2D 맵을 번호로 이으며, 비조화성 Δ와 모드 사이 coupling이 피크를 만드는 과정을 한 단계씩 본다.',ec:'에너지 그림',mc:'2D 맵',tl:'T = 0',steps:IR},
 {id:'es',name:'2DES',sub:'전자 상태와 에너지 전달',desc:'밀린 포물선으로 흡수와 SE, vibronic 구조, ESA, 에너지 전달, fs 시간대의 파속 운동을 본다.',ec:'에너지 그림',mc:'2D 맵',tl:'T = 0',steps:ES},
+{id:'fd',name:'Feynman',title:'Feynman 다이어그램',sub:'신호의 부호와 자리',desc:'이중 Feynman 다이어그램(DSFD)으로 GSB, SE, ESA가 어느 주파수에 어떤 부호로 나오는지 미리 읽는다. pump-probe와 2D 신호의 바탕이다.',ec:'Feynman 다이어그램',mc:'신호',tl:'',ev:'0 0 320 300',mv:'0 0 320 300',steps:FD},
 {id:'su',name:'셋업',title:'실험 셋업',sub:'펄스 순서와 빔 배치',desc:'펄스 1, 2, 3이 샘플에 닿는 순서와 pump-probe, BOXCARS 배치를 움직여 본다.',ec:'에너지 그림',mc:'2D 맵',tl:'T = 0',mv:'-10 30 330 230',steps:SU}];
 const NOTE={key:'2dsteps',ev:'0 0 320 316',mv:'-30 0 350 312',
  top:`<details class="axisnote" id="axisnote" open><summary>공통: 왜 축이 ω₁, ω₃이고 ω₂는 없나?</summary><svg id="axissvg" viewBox="-12 96 330 150" role="img" aria-label="펄스 세 개와 신호의 시간 순서" style="max-width:420px;margin-top:6px"></svg><p id="axistext"></p></details>`,
  afterCtl:`<div class="legend"><span><i style="background:var(--s1)"></i>GSB/SE (ΔT/T &gt; 0)</span><span><i style="background:var(--s2)"></i>ESA (ΔT/T &lt; 0)</span><span><i style="background:var(--pump)"></i>pump</span><span>같은 번호 = 같은 전이 (마우스를 올리면 짝이 강조됨)</span></div>`,
- init(){document.getElementById('axistext').innerHTML=AXIS_NOTE;document.getElementById('axissvg').innerHTML=DEFS+timeline(0,['1','2','3'],1)},
+ init(){document.getElementById('axistext').innerHTML=AXIS_NOTE;/* 공통 상자의 marker id를 따로 둔다: 같은 id가 숨은 상자에 먼저 있으면 본 그림의 화살촉이 안 그려진다 */
+  document.getElementById('axissvg').innerHTML=(DEFS+timeline(0,['1','2','3'],1)).replace(/id="m/g,'id="axm').replace(/url\(#m/g,'url(#axm')},
  onRender(){document.getElementById('axisnote').hidden=idx!==0;document.querySelector('.legend').hidden=TABS[tab].id==='su'}};
 /* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
    노트 파일이 정의해야 하는 것:

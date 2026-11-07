@@ -420,7 +420,120 @@ const SF=[
   return P.s+crv(P,ir,2700,3100,'var(--s1)',{dash:1})+crv(P,w=>ir(w)*res(w)/1.45,2700,3100,'var(--s6)')+crv(P,w=>res(w)/1.45,2700,3100,'var(--s2)')+TM(P.L+4,P.T+6,['점선: IR 펄스 모양 (기준 시료로 측정)','회색: 측정한 SFG','파랑: 나눈 결과 (정규화)'],'sub')},
  read:['광대역 방식: 넓은 fs IR(OPA·DFG로 만듦)과 좁은 대역 가시광(에탈론 등으로 좁힌 800 nm)을 계면에 겹친다. 분광기 앞에는 800 nm를 막는 필터를 두어 SFG만 받는다.','SF 주파수 = IR + 가시광이라, 가시광 폭이 그대로 스펙트럼 해상도가 된다. 넓은 IR은 여러 진동을 한 번에 들뜨게 한다(CARS의 multiplex와 같은 아이디어).','측정 SFG에는 IR 펄스 모양이 곱해져 있다. z-cut 석영이나 금처럼 응답이 평평한 기준 시료로 IR 모양을 재서 나눈다.','펌프 펄스를 하나 더 넣으면 시간 분해(pump–VSFG)로 계면 동역학도 볼 수 있다. 랩의 IR pump-probe 경험과 바로 이어진다.'],
  q:'가시광 대역을 넓게 쓰면?',a:'SF 스펙트럼이 가시광 폭만큼 번져 해상도가 떨어진다. 좁은 피크들이 뭉개진다.'}];
-const TABS=[{id:'fu',name:'FTIR · UV-Vis',sub:'선형 흡수 분광',desc:'샘플링과 경로 길이, 장비 구조, 창·셀 재질, 용매까지. 측정 전에 고를 것들을 정리했다.',steps:FU},{id:'ra',name:'Raman',sub:'자발 산란',desc:'Stokes와 anti-Stokes, IR과 다른 선택 규칙, 형광과 레이저 선택, 필터 배치.',steps:RA},{id:'ca',name:'CARS',sub:'χ⁽³⁾ 결맞음 Raman',desc:'네 빛의 에너지 그림, N² 결맞음, 위상 정합, 비공명 배경과 줄이는 법.',steps:CA},{id:'sf',name:'VSFG',sub:'χ⁽²⁾ 계면 진동 분광',desc:'IR과 Raman 둘 다 활성인 진동이 계면에서만 보이는 이유와 측정 배치.',steps:SF},{id:'ms',name:'DEMS · OEMS',sub:'전기화학 기체 분석',desc:'전극에서 나오는 기체를 질량 분석으로 나눠 보는 두 방법과 정량, 배터리 예.',steps:MS}];
+/* ======================= In situ FTIR (광섬유 탐침) ======================= */
+/* 원리와 방법만 다룬다. 그림 값은 모두 예시다. */
+function fpFlask(x,y){return `<path d="M${x-6},${y} v14 a18,18 0 1 0 12,0 v-14" style="fill:var(--s2);fill-opacity:.12;stroke:var(--fg)" stroke-width="1.2"/>`}
+const fpIrX=(P0)=>({x:[4000,1000],xt:[4000,3000,2000,1000].map(v=>({v,l:String(v)})),xl:'wavenumber (cm⁻¹)',...P0});
+/* 2D 상관: 시간 0–1200 s, 10 s 간격 121장, 띠 둘의 세기 변화(시그모이드)에서 Φ, Ψ 계산 (Noda) */
+function fpCos(t1,t2){const n=121,ts=Array.from({length:n},(_,i)=>i*10),sg=(t,t0)=>1/(1+Math.exp(-(t-t0)/60));
+ const a=ts.map(t=>sg(t,t1)),b=ts.map(t=>sg(t,t2)),ma=a.reduce((x,y)=>x+y)/n,mb=b.reduce((x,y)=>x+y)/n,da=a.map(x=>x-ma),db=b.map(x=>x-mb);
+ let F=0,Q=0;for(let j=0;j<n;j++){F+=da[j]*db[j];let s=0;for(let k=0;k<n;k++)if(k!==j)s+=db[k]/(Math.PI*(k-j));Q+=da[j]*s}
+ return{phi:F/(n-1),psi:Q/(n-1),ts,a,b}}
+const fpBand=(x,x0,w)=>Math.exp(-(((x-x0)/w)**2)*2.77);
+const FP=[
+{t:'왜 반응 용기 안으로 들어가나',ec:'반응 중인 액체를 재는 세 방법',mc:'빛이 지나는 액체 두께 (log, 대략)',
+ e:()=>{const row=(y0,n,k,title,body)=>`<g data-n="${n}">${badge(14,y0+4,n,COL[k])}</g>`+T(28,y0+8,title,'lab')+fpFlask(46,y0+18)+body;
+  return row(10,1,'s6','꺼내서 셀로 보내기',LN(52,24+14,120,38,'var(--muted)',{w:1.5})+box(120,26,48,24,'셀')+LN(168,38,206,38,'var(--pump)',{mk:'g'})+box(208,26,56,24,'FTIR')+T(120,76,'옮기는 동안 늦고, 공기가 섞일 수 있다','sub'))
+   +row(100,2,'s4','ATR 탐침 넣기',`<rect x="43" y="${100+14}" width="6" height="44" style="fill:var(--line);stroke:var(--fg)"/><polygon points="40,${100+58} 52,${100+58} 46,${100+66}" style="fill:var(--s4)"/>`+LN(49,130,208,128,'var(--pump)',{w:1.5})+box(208,116,56,24,'FTIR')+T(80,158,'결정 표면 약 1 µm 안쪽만 본다','sub'))
+   +row(190,3,'s3','투과 탐침 넣기',`<rect x="40" y="${190+14}" width="12" height="36" style="fill:var(--line);stroke:var(--fg)"/><rect x="40" y="${190+54}" width="12" height="8" style="fill:var(--line);stroke:var(--fg)"/><rect x="40" y="${190+50}" width="12" height="4" style="fill:var(--s2);fill-opacity:.6"/>`+LN(52,220,208,218,'var(--pump)',{w:1.5})+box(208,206,56,24,'FTIR')+T(80,246,'끝의 액체 틈 폭을 직접 정한다','sub'))},
+ m:()=>{const P=plot({x:[.1,1e4],logx:1,xt:[{v:.1,l:'0.1 µm'},{v:1,l:'1 µm'},{v:10,l:'10'},{v:100,l:'100'},{v:1e3,l:'1 mm'},{v:1e4,l:'10 mm'}],xl:'액체 두께 (µm)',L:20,R:304,noy:1,T:30,B:236});
+  const it=[['① 투과 셀 (흔한 범위)',5,500,'s6'],['② ATR 침투 깊이',.5,2,'s4'],['③ 투과 탐침 틈 (조절, 예시)',20,3000,'s3']];
+  return P.s+it.map(([l,a,b,k],i)=>{const y=70+i*56;return `<g data-n="${i+1}"><rect x="${P.X(a)}" y="${y}" width="${P.X(b)-P.X(a)}" height="16" rx="3" style="fill:${COL[k]}" fill-opacity=".55"/></g>`+T(P.L,y-8,l,'sub')}).join('')},
+ read:['반응을 끝난 뒤가 아니라 진행 중에 재면 속도, 중간체, 반응이 멈춘 시점을 알 수 있다. 공정 분석(PAT)도 같은 생각이다.','문제는 용기다. 유리·금속 벽은 중적외선 대부분을 막는다. 특히 이중 결합과 지문 영역(대략 2000 cm⁻¹ 아래, 경계 파수 확인 필요)이 벽에 가린다.',`${c(1,'s6')} 액체를 꺼내 셀로 보내면 옮기는 시간만큼 늦어서 빠른 반응을 놓치고, 순환 회로가 공기나 압력·온도를 바꿀 수 있다.`,`${c(2,'s4')} ATR 탐침은 결정 표면의 소멸파만 쓴다. 보는 두께가 약 1 µm라 약한 띠가 묻히고, 띠 세기가 파장에 따라 일그러지고, 결정에 막이나 거품이 붙으면 그것만 보인다(FTIR 탭 샘플링 단계와 같은 논리).`,`${c(3,'s3')} 투과 탐침은 용기 안에서 보통 투과 측정을 한다. 경로 길이를 실험자가 정하니 Beer–Lambert 법칙을 그대로 쓴다.`],
+ q:'ATR 탐침보다 투과 탐침이 유리한 경우는?',a:'묽은 성분이나 약한 띠를 볼 때, 그리고 농도를 정량할 때. 투과 탐침은 틈을 넓혀 흡광도를 키울 수 있고 띠 세기가 파장 때문에 일그러지지 않는다.'},
+{t:'속 빈 광섬유: 빛을 공기 속으로 보낸다',ec:'속 빈 광섬유 (단면, 보기 쉽게 과장)',mc:'광섬유 투과 (모양만 예시)',
+ e:()=>{let s=`<rect x="20" y="70" width="280" height="12" style="fill:var(--soft);stroke:var(--fg)"/><rect x="20" y="150" width="280" height="12" style="fill:var(--soft);stroke:var(--fg)"/>`+`<rect x="20" y="82" width="280" height="3" style="fill:var(--s6)"/><rect x="20" y="147" width="280" height="3" style="fill:var(--s6)"/>`;
+  s+=PL([[24,95],[70,144],[118,88],[166,144],[214,88],[262,144],[296,110]],'var(--s1)',{w:1.6,mk:'s1'});
+  s+=`<rect x="14" y="85" width="6" height="62" style="fill:var(--s2);fill-opacity:.35;stroke:var(--s2)"/><rect x="300" y="85" width="6" height="62" style="fill:var(--s2);fill-opacity:.35;stroke:var(--s2)"/>`;
+  s+=T(20,60,'플라스틱 관','sub')+T(300,60,'끝은 창으로 막는다','sub','end')+T(20,198,'가운데 = 공기 심 (빛이 지나는 곳)','sub')+T(20,182,'안쪽 벽 = 은 반사층 + 얇은 보호층(유전체)','sub');
+  s+=`<circle cx="70" cy="234" r="22" style="fill:var(--soft);stroke:var(--fg)"/><circle cx="70" cy="234" r="16" style="fill:#fff;stroke:var(--s6)" stroke-width="3"/>`+T(100,230,'단면: 바깥 관, 은 반사층,','sub')+T(100,246,'가운데는 비어 있다 (예: 구멍 약 1.5 mm)','sub');
+  return s},
+ m:()=>{const P=plot(fpIrX({y:[0,1.05],yt:[{v:0,l:'0'},{v:1,l:'1'}],yl:'투과 (상대)',T:30}));
+  const sil=x=>1/(1+Math.exp(-(x-3200)/120)),hol=x=>.55+.05*Math.sin(x/300);
+  return P.s+crv(P,sil,4000,1000,'var(--s6)',{dash:1})+crv(P,hol,4000,1000,'var(--s3)')
+   +`<line x1="${P.X(3000)}" x2="${P.X(2820)}" y1="${P.Y(.9)}" y2="${P.Y(.9)}" style="stroke:var(--s6)" stroke-width="2" stroke-dasharray="5 4"/>`+T(P.X(2780),P.Y(.9)+4,'속이 찬 실리카 광섬유','sub')
+   +`<line x1="${P.X(3000)}" x2="${P.X(2820)}" y1="${P.Y(.78)}" y2="${P.Y(.78)}" style="stroke:var(--s3)" stroke-width="2"/>`+T(P.X(2780),P.Y(.78)+4,'속 빈 광섬유 (반사 손실만)','sub')},
+ read:['보통 광섬유는 실리카 유리로 속이 차 있다. 실리카는 가시광은 잘 보내지만 중적외선으로 몇 µm만 가도 빛을 먹는다(경계는 확인 필요). 그래서 중적외선 탐침에는 그대로 못 쓴다.','속 빈 광섬유는 가운데가 공기다. 안쪽 벽의 은 반사층이 빛을 가두고, 빛은 공기 속을 지나니 광섬유 자체의 흡수가 거의 없다.','대신 벽에서 반사될 때마다 조금씩 잃는다. 구부리면 반사 횟수가 늘어 손실이 커진다.','심이 뚫려 있어 액체나 먼지가 들어가면 안 된다. 그래서 양 끝을 창으로 막는다.','두 가닥을 쓴다. 하나는 빛을 탐침 끝으로 보내고, 하나는 돌려받는다.'],
+ q:'속 빈 광섬유를 크게 구부려 놓으면?',a:'벽 반사 횟수가 늘어 빛이 줄어든다. 측정 중 광섬유 모양이 바뀌면 기준선도 흔들릴 수 있다. 측정 동안 광섬유를 고정해 둔다.'},
+{t:'탐침 끝: 접힌 빛길과 조절되는 틈',ec:'탐침 끝 (단면, 단순화)',mc:'창 재질이 정하는 범위 (CaF₂ 예)',
+ slider:{min:0,max:3000,step:50,init:600,label:'틈 d',fmt:v=>Math.round(v)+' µm'},
+ e:v=>{const g=4+v/3000*40,yw=176,ym=yw-g;
+  let s=`<rect x="0" y="120" width="320" height="160" style="fill:var(--s2);fill-opacity:.08"/>`+T(316,272,'반응 액체','sub','end');
+  s+=`<rect x="100" y="16" width="120" height="${ym-16-6}" style="fill:var(--soft);stroke:var(--fg)"/>`;
+  s+=`<rect x="126" y="16" width="18" height="${ym-16-6}" style="fill:#fff;stroke:var(--s6)"/><rect x="178" y="16" width="18" height="${yw+44-16}" style="fill:#fff;stroke:var(--s6)"/>`;
+  s+=`<rect x="122" y="${ym-6}" width="26" height="6" style="fill:var(--s2);fill-opacity:.5;stroke:var(--s2)"/>`;
+  s+=`<rect x="100" y="${yw}" width="120" height="66" style="fill:var(--soft);stroke:var(--fg)"/><rect x="122" y="${yw}" width="26" height="6" style="fill:var(--s2);fill-opacity:.5;stroke:var(--s2)"/>`;
+  s+=`<g data-n="1"><rect x="100" y="${ym}" width="70" height="${g}" style="fill:var(--s2);fill-opacity:.35"/>${badge(158,ym+g/2,1,'var(--s2)')}</g>`;
+  s+=`<g data-n="2"><polygon points="124,${yw+22} 146,${yw+22} 146,${yw+44}" style="fill:var(--s4);fill-opacity:.7"/><polygon points="176,${yw+22} 198,${yw+22} 176,${yw+44}" style="fill:var(--s4);fill-opacity:.7"/>${badge(240,yw+40,2,'var(--s4)')}</g>`;
+  s+=PL([[135,24],[135,yw+33],[187,yw+33],[187,24]],'var(--s1)',{w:1.8,mk:'s1'});
+  s+=`<g data-n="3"><rect x="226" y="40" width="20" height="26" rx="3" style="fill:var(--line);stroke:var(--fg)"/>${badge(262,53,3,'var(--fg)')}</g>`+T(226,84,'마이크로미터','sub');
+  s+=T(96,30,'보내는 쪽','sub','end')+T(224,104,'돌려받는 쪽','sub')+T(96,ym-12,'움직이는 창','sub','end')+T(96,yw+16,'고정 창','sub','end')+T(226,146,`d = ${Math.round(v)} µm`,'sub');
+  return s+T(160,272,'틈 폭은 보기 쉽게 과장','sub','middle')},
+ m:()=>{const P=plot(fpIrX({y:[0,1.05],yt:[{v:0,l:'0'},{v:1,l:'1'}],yl:'창 투과 (예시)',T:30}));
+  const tr=x=>1/(1+Math.exp(-(x-1000)/45));
+  return P.s+`<rect x="${P.X(4000)}" y="${P.T}" width="${P.X(1000)-P.X(4000)}" height="${P.B-P.T}" style="fill:var(--s3);fill-opacity:.08"/>`+crv(P,tr,4000,1000,'var(--s2)')+T(P.X(2500),P.Y(.8),'CaF₂ 창','sub','middle','var(--s2)')+T(P.X(2500),P.Y(.4),'쓸 수 있는 범위 대략 1000–4000 cm⁻¹','sub','middle')},
+ read:[`빛은 보내는 광섬유를 따라 내려와 움직이는 창 → ${c(1,'s2')} 액체 틈 → 고정 창을 지난 뒤, ${c(2,'s4')} 금 코팅 반사면 두 개에서 180° 꺾여 돌려받는 광섬유로 올라간다.`,`${c(3,'f')} 마이크로미터 손잡이로 보내는 쪽 광섬유와 창을 위아래로 움직여 틈 d를 바꾼다. 슬라이더가 이 손잡이다.`,'탐침 몸통은 가늘어서 보통 플라스크 목으로 들어간다. 분광기 쪽에는 결합 장치를 두어 빛을 광섬유에 넣고 받은 빛을 검출기로 보낸다.','창 재질이 쓸 수 있는 파수 범위를 정한다. CaF₂는 대략 1000 cm⁻¹ 아래를 막지만 물에 거의 녹지 않아 수용액에도 쓴다(FTIR 탭의 창 재질 단계와 같은 논리).'],
+ q:'KBr 창을 쓰면 범위는 넓어지는데 왜 안 쓰나?',a:'KBr은 물에 녹는다. 반응 액체에 직접 담그는 탐침에는 물·용매에 강한 창이 필요하다.'},
+{t:'틈을 맞춰 흡광도를 좋은 범위로',ec:'세어 보기: 빛 100 중 검출기에 남는 몫',mc:'흡광도 vs 틈 (log-log, 예시)',
+ slider:{min:1,max:3.5,step:.02,init:2,label:'틈 d',fmt:v=>Math.round(10**v)+' µm'},
+ e:v=>{const d=10**v,cm=d*1e-4,sm=[['① 진한 띠 (ε 300, 5 M)',300*5,'s1'],['② 묽은 띠 (ε 300, 0.01 M)',300*.01,'s2']];
+  return T(20,26,`A = ε · 농도 · d,  d = ${Math.round(d)} µm`,'lab')+sm.map(([l,ec,k],i)=>{const A=ec*cm,Tt=100*10**(-A),y=70+i*96,w=Math.max(1,2.4*Tt);
+   return `<g data-n="${i+1}">`+T(20,y,l,'lab','start',COL[k])+`<rect x="20" y="${y+10}" width="240" height="18" style="fill:var(--line)"/><rect x="20" y="${y+10}" width="${w}" height="18" style="fill:${COL[k]}"/></g>`
+    +T(20,y+46,`A = ${A<.01?A.toExponential(1):A.toFixed(2)} → 남는 빛 ${Tt<.01?'0.01개 미만':Tt.toFixed(Tt<10?2:0)+'개'}`,'sub')+T(20,y+62,A<.1?'너무 약하다: 잡음에 묻힌다':A>2?'너무 세다: 남는 빛이 거의 없다':'좋은 범위','sub')}).join('')},
+ m:v=>{const d=10**v;const P=plot({x:[10,3162],y:[1e-3,1000],logx:1,logy:1,xt:[{v:10,l:'10'},{v:100,l:'100'},{v:1000,l:'1000'}],yt:[{v:1e-3,l:'0.001'},{v:.1,l:'0.1'},{v:1,l:'1'},{v:10,l:'10'},{v:1000,l:'1000'}],xl:'틈 d (µm)',yl:'흡광도 A',L:62,T:30});
+  let s=P.s+`<rect x="${P.L}" y="${P.Y(2)}" width="${P.R-P.L}" height="${P.Y(.1)-P.Y(2)}" style="fill:var(--s3);fill-opacity:.12"/>`+T(P.L+4,P.Y(.2),'좋은 범위 (A 약 0.1–2)','sub');
+  [[1500,'s1',1],[3,'s2',2]].forEach(([ec,k,n])=>{s+=`<g data-n="${n}">${crv(P,x=>ec*x*1e-4,10,3162,COL[k],{clip:[1e-3,1000]})}<circle cx="${P.X(d)}" cy="${P.Y(Math.min(1000,Math.max(1e-3,ec*d*1e-4)))}" r="5" style="fill:${COL[k]}"/></g>`});
+  return s+`<line x1="${P.X(d)}" x2="${P.X(d)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`},
+ read:['A = ε · 농도 · d. 같은 시료라도 틈 d를 바꾸면 흡광도가 비례해서 바뀐다.','A가 작으면 띠가 기준선 잡음에 묻힌다. A가 크면 띠 가운데로 빛이 거의 안 지나가 잡음과 떠도는 빛(stray light)이 값을 정한다. 세어 보기: A = 2면 빛 100 중 1만 남는다.',`${c(1,'s1')} 진한 띠(예: 순수 액체의 C=O)는 수 µm–수십 µm에서 이미 넘친다. ${c(2,'s2')} 묽은 띠는 mm 근처까지 넓혀야 잘 보인다(숫자는 예시).`,'고정된 셀이나 ATR은 이걸 못 한다. 틈을 조절하는 탐침은 진한 반응액과 묽은 용액을 같은 좋은 범위로 가져올 수 있다.','"좋은 범위"의 위 경계는 장비마다 다르다. 여기서는 대략 2로 두었다(확인 필요).'],
+ q:'진한 띠와 묽은 띠를 한 번에 다 좋은 범위에 넣을 수 있나?',a:'보통 못 한다. 두 띠의 εc 차이가 수백 배면 한 d로는 둘 중 하나가 범위를 벗어난다. 보고 싶은 띠에 맞춰 d를 고르거나 두 번 잰다.'},
+{t:'Beer–Lambert 점검: 직선인가, 0을 지나나',ec:'틈을 바꾸며 재기 (예시)',mc:'농도를 바꾸며 재기 (예시)',
+ e:()=>{const P=plot({x:[0,1000],y:[0,1.2],xt:[0,250,500,750,1000].map(v=>({v,l:String(v)})),yt:[{v:0,l:'0'},{v:.5,l:'0.5'},{v:1,l:'1'}],xl:'눈금으로 읽은 틈 (µm)',yl:'흡광도 A',T:30});
+  const off=100,f=x=>(x+off)*1e-3;let s=P.s+crv(P,f,0,1000,'var(--s3)',{dash:1})+[0,200,400,600,800,1000].map(x=>`<circle cx="${P.X(x)}" cy="${P.Y(f(x)+.02*Math.sin(x))}" r="4" style="fill:var(--s3)"/>`).join('');
+  s+=`<g data-n="1">${LN(P.X(0)+2,P.Y(f(0)),P.X(0)+2,P.Y(0),'var(--s1)',{w:2})}${badge(P.X(0)+20,P.Y(f(0)/2),1,'var(--s1)')}</g>`+T(P.X(80),P.Y(.12),'눈금 0에서도 A가 남는다','sub');
+  return s+T(P.R,P.T-12,'유효 경로 = 눈금 + 남는 틈 (예시 100 µm)','sub','end')},
+ m:()=>{const P=plot({x:[0,10],y:[0,3],xt:[0,2,4,6,8,10].map(v=>({v,l:String(v)})),yt:[0,1,2,3].map(v=>({v,l:String(v)})),xl:'농도 (상대)',yl:'흡광도 A',T:30});
+  const ideal=x=>.3*x,meas=x=>{const a=.3*x;return a<1.6?a:1.6+(a-1.6)*.45};
+  let s=P.s+`<rect x="${P.L}" y="${P.T}" width="${P.R-P.L}" height="${P.Y(2)-P.T}" style="fill:var(--s6);fill-opacity:.1"/>`+crv(P,ideal,0,10,'var(--muted)',{dash:1,w:1.2})+crv(P,meas,0,10,'var(--s2)');
+  s+=`<g data-n="2">${badge(P.X(8.4),P.Y(meas(8.4))+18,2,'var(--s2)')}</g>`+T(P.X(.4),P.Y(2.75),'A > 2: 직선에서 벗어난다','sub')+T(P.X(5.2),P.Y(.6),'점선 = 직선 기대값','sub');
+  return s},
+ read:['탐침 값이 정말 투과 흡광도인지 두 가지로 확인한다. 농도를 고정하고 틈을 바꾸면 A가 d에 비례해야 하고, 틈을 고정하고 농도를 바꾸면 A가 농도에 비례해야 한다.',`${c(1,'s1')} 창을 맞붙인 눈금 0에서도 A가 0이 아닐 수 있다. 창이 조금 기울었거나 가장자리 덮개 때문에 액체 층이 남는 것이다. 절대 농도를 구할 때는 이 남는 틈을 더한 유효 경로를 쓴다.`,`${c(2,'s2')} A가 너무 크면 직선에서 벗어난다. 검출기 포화, 떠도는 빛 등 원인은 따로 따져야 한다(대략 A 2를 작업 한계로 둔 예시).`,'성능 지표로 정리할 것: 기울기(감도), 직선이 유지되는 범위, 남는 틈(오프셋), 잡음과 검출 한계. 검출 한계는 따로 재야 한다(확인 필요).','틈 사이 가는 띠 무늬(간섭 무늬)의 간격으로 빈 틈 폭을 재는 방법도 있다: d = 1 / (2 · 무늬 간격).'],
+ q:'눈금 300 µm, 남는 틈 100 µm일 때 눈금만 믿고 농도를 구하면?',a:'실제 경로가 400 µm라 농도가 4/3배, 약 33% 크게 나온다.'},
+{t:'반응 따라가기: 띠 하나는 줄고 하나는 는다',ec:'시간에 따른 스펙트럼 (예시: C=O → C=N)',mc:'띠 높이 vs 시간',
+ slider:{min:0,max:1200,step:10,init:300,label:'시간',fmt:v=>Math.round(v)+' s',play:1},
+ e:v=>{const mix=t=>1-Math.exp(-t/60),pr=t=>mix(t)*(1-Math.exp(-t/350)),P=plot({x:[1800,1550],y:[0,1.1],xt:[1800,1700,1600].map(x=>({v:x,l:String(x)})),xl:'wavenumber (cm⁻¹)',yl:'흡광도 (상대)',T:30});
+  const sp=t=>x=>.9*(1-.6*pr(t))*fpBand(x,1715,18)+.7*pr(t)*fpBand(x,1665,16);
+  let s=P.s+[0,1200].map(t=>crv(P,sp(t),1800,1550,'var(--s6)',{w:1,dash:1})).join('')+crv(P,sp(v),1800,1550,'var(--fg)');
+  s+=`<g data-n="1">${badge(P.X(1750),P.Y(.9*(1-.6*pr(v))),1,'var(--s2)')}</g><g data-n="2">${badge(P.X(1630),P.Y(Math.max(.2,.7*pr(v))),2,'var(--s1)')}</g>`;
+  return s+T(P.R,P.T-12,'점선 = 처음과 끝','sub','end')},
+ m:v=>{const mix=t=>1-Math.exp(-t/60),pr=t=>mix(t)*(1-Math.exp(-t/350));const P=plot({x:[0,1200],y:[0,1],xt:[0,300,600,900,1200].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:.5,l:'0.5'},{v:1,l:'1'}],xl:'시간 (s)',yl:'띠 높이 (상대)',T:30});
+  let s=P.s+`<g data-n="1">${crv(P,t=>.9*(1-.6*pr(t)),0,1200,'var(--s2)')}<circle cx="${P.X(v)}" cy="${P.Y(.9*(1-.6*pr(v)))}" r="5" style="fill:var(--s2)"/></g><g data-n="2">${crv(P,t=>.7*pr(t),0,1200,'var(--s1)')}<circle cx="${P.X(v)}" cy="${P.Y(.7*pr(v))}" r="5" style="fill:var(--s1)"/></g>`;
+  s+=T(P.X(1180),P.Y(.25),'반응물 C=O (줄어듦)','sub','end','var(--s2)')+T(P.X(1180),P.Y(.78),'생성물 C=N (늘어남)','sub','end','var(--s1)');
+  return s+`<line x1="${P.X(60)}" x2="${P.X(60)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(60)+4,P.Y(.97)-6,'섞임 시간 (예시 60 s)','sub')},
+ read:['스펙트럼을 일정한 간격(예: 10 s마다)으로 저장하면 띠마다 시간 곡선이 나온다.',`예시로 케톤과 아민이 이민(Schiff base)이 되는 반응을 그렸다. ${c(1,'s2')} 반응물 C=O 띠는 줄고 ${c(2,'s1')} 생성물 C=N 띠는 는다. 숫자와 모양은 예시다.`,'유리벽이 가리는 C=N, O–H 영역을 용기 안에서 액체를 빼지 않고 계속 볼 수 있다는 것이 탐침의 핵심이다.','처음 수십 초는 반응보다 섞임이 정한다. 넣은 시약이 탐침 틈 안까지 들어와 섞이는 데 시간이 걸린다. 빠른 초기 반응은 이 섞임 시간 아래로 볼 수 없다.','띠 높이를 농도로 바꾸려면 앞 단계의 유효 경로와 직선 범위가 필요하다. 진한 띠가 범위를 넘으면 그 띠는 정량에서 뺀다.'],
+ q:'저장 간격을 1 s로 줄이면 반응 초기를 더 잘 보나?',a:'저장 간격만 줄여서는 안 된다. 틈 안 액체가 섞이는 시간이 더 길면 그게 한계다. 섞임을 빠르게 하거나(저어 주기, 틈 구조) 섞임 시간을 따로 재야 한다.'},
+{t:'2D 상관 분석: 어느 띠가 먼저 변하나',ec:'두 띠의 시간 곡선 (예시)',mc:'동시(Φ) · 비동시(Ψ) 상관 부호',
+ slider:{min:-200,max:200,step:10,init:120,label:'② 띠의 늦음',fmt:v=>(v>0?'+':'')+Math.round(v)+' s'},
+ e:v=>{const r=fpCos(400,400+v);const P=plot({x:[0,1200],y:[0,1.05],xt:[0,400,800,1200].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'시간 (s)',yl:'세기 변화 (상대)',T:30});
+  return P.s+`<g data-n="1">${PL(r.ts.map((t,i)=>[P.X(t),P.Y(r.a[i])]),'var(--s3)',{w:2})}</g><g data-n="2">${PL(r.ts.map((t,i)=>[P.X(t),P.Y(r.b[i])]),'var(--s5)',{w:2,dash:1})}</g>`
+   +`<line x1="${P.X(820)}" x2="${P.X(860)}" y1="${P.Y(.3)}" y2="${P.Y(.3)}" style="stroke:var(--s3)" stroke-width="2"/>`+T(P.X(870),P.Y(.3)+4,'① 띠','sub')+`<line x1="${P.X(820)}" x2="${P.X(860)}" y1="${P.Y(.15)}" y2="${P.Y(.15)}" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="4 3"/>`+T(P.X(870),P.Y(.15)+4,'② 띠','sub')},
+ m:v=>{const r=fpCos(400,400+v),m=fpCos(400,400).phi,ph=r.phi/m,ps=r.psi/m,y0=150,sc=95;
+  const bar=(x,val,lab)=>{const h=Math.abs(val)*sc,col=val>=0?'var(--s1)':'var(--s2)';return `<rect x="${x}" y="${val>=0?y0-h:y0}" width="56" height="${Math.max(1,h)}" style="fill:${col}"/>`+T(x+28,y0+(val>=0?18:-h-8)+0,lab,'lab','middle')+T(x+28,val>=0?y0-h-8:y0+h+16,(val>=0?'+':'')+val.toFixed(2),'sub','middle')};
+  const verdict=Math.abs(ps)<.02?'Ψ ≈ 0: 같이 변한다':(ps>0?'Φ, Ψ 부호가 같다 → ① 띠가 먼저':'Φ, Ψ 부호가 다르다 → ② 띠가 먼저');
+  return `<line x1="40" x2="300" y1="${y0}" y2="${y0}" class="ax"/>`+bar(80,ph,'Φ 동시')+bar(190,ps,'Ψ 비동시')+T(160,20,verdict,'labn','middle')+T(160,272,'빨강 = +, 파랑 = − (Φ 최대값으로 나눔)','sub','middle')},
+ read:['2D 상관 분석(2D-COS)은 시간에 따라 쌓인 스펙트럼들에서 "두 파수의 세기가 어떻게 함께 변하나"를 본다. 2D IR(2D 분광 노트)과 이름만 비슷하고 다른 방법이다.','먼저 각 스펙트럼에서 평균 스펙트럼을 빼 변화분만 남긴다(동적 스펙트럼).','동시 상관 Φ는 두 파수의 변화가 같은 방향(+)인지 반대 방향(−)인지 알려 준다. 비동시 상관 Ψ는 변화의 시점이 어긋났는지 알려 준다.','Noda 규칙: Φ와 Ψ의 부호가 같으면 ① 띠가 먼저, 다르면 ② 띠가 먼저 변한다. Ψ가 0에 가까우면 같이 변한다. 슬라이더로 ② 띠의 늦음을 바꾸면 Ψ 부호가 뒤집힌다.','주의: 순서가 곧 반응 단계 순서는 아니다. 섞임, 띠 겹침, 흡광도 비선형성도 시점 차이를 만든다. Ψ/Φ가 작으면 순서도 불확실하다.'],
+ q:'Φ < 0, Ψ > 0이면 어느 띠가 먼저인가?',a:'부호가 다르므로 ② 띠가 먼저 변한다. Φ < 0은 한 띠가 늘 때 다른 띠가 준다는 뜻이다.'},
+{t:'점검 시료 H₂O/D₂O와 탐침의 한계',ec:'H₂O에 D₂O를 넣으면 (모양만 예시)',mc:'지금 탐침의 한계',
+ tg:[{k:'d',l:'D₂O 넣은 뒤',on:true}],
+ e:(v,tg)=>{const P=plot(fpIrX({x:[3000,1800],xt:[3000,2600,2200,1800].map(v=>({v,l:String(v)})),y:[0,1],yt:[{v:0,l:'0'}],yl:'흡광도 (상대)',T:30}));
+  const w=x=>.25*fpBand(x,2130,180),od=x=>.6*fpBand(x,2500,160);
+  let s=P.s+crv(P,w,3000,1800,'var(--s6)',{dash:1});
+  if(tg.d)s+=`<g data-n="1">${crv(P,x=>w(x)+od(x),3000,1800,'var(--s3)')}${badge(P.X(2500),P.Y(.6)-18,1,'var(--s3)')}</g>`+T(P.R,P.Y(.75),'HDO의 O–D 신축 (약 2500 cm⁻¹)','sub','end');
+  return s+T(P.R,P.Y(.4),'H₂O 결합 띠','sub','end')+T(P.L,P.T-12,'O–H 신축(약 3400 cm⁻¹)은 너무 세서 범위 밖','sub')},
+ m:()=>{const rows=[['빛이 적다','초점이 광섬유 구멍보다 커 일부만 들어간다 (대략 10%)'],['최소 틈이 0이 아니다','창 기울기·덮개 → 진한 띠는 넘친다'],['내구성','접착제·덮개가 일부 용매에 약하다'],['섞임 시간','틈 안 액체가 바뀌는 데 수십 초 이상'],['매번 d가 바뀐다','닫을 때마다 알려진 띠로 다시 잰다']];
+  return rows.map(([a,b],i)=>{const y=34+i*48;return `<line x1="8" x2="316" y1="${y-18}" y2="${y-18}" style="stroke:var(--line)"/>`+T(8,y,a,'labn')+T(8,y+18,b,'sub')}).join('')+T(8,272,'(정성적 정리, 값은 대략)','sub')},
+ read:['H₂O에 D₂O를 넣으면 수소 교환으로 HDO가 생긴다. HDO의 O–D 신축은 약 2500 cm⁻¹에 나타나 H₂O 띠와 겹치지 않는다(문헌 수준 설명). IR pump-probe에서도 셋업 점검 시료로 많이 쓴다.',`${c(1,'s3')} 탐침으로 이 띠가 자라는 것을 용기 안에서 바로 볼 수 있다. 섞임과 교환이 끝나면 일정해진다.`,'물은 아주 세게 흡수한다. 틈이 수십 µm여도 O–H 신축(약 3400 cm⁻¹)은 범위를 넘고, O–D 영역만 볼 수 있다(대략).','유효 경로는 이미 광학 상수가 알려진 H₂O 결합 띠(약 2130 cm⁻¹) 모양을 맞춰 구할 수 있다. 탐침을 닫을 때마다 바뀔 수 있으니 매번 잰다.','오른쪽 표의 한계는 각각 개선 방향을 가리킨다: 더 좋은 결합 광학, 창 고정 구조, 내화학성 재료, 섞임이 빠른 틈 구조(확인 필요).'],
+ q:'D₂O를 너무 많이 넣으면?',a:'HDO뿐 아니라 D₂O 자체 띠가 커지고, O–D 띠도 넘칠 수 있다. 기준 시료로 쓰려면 HDO가 묽은(H₂O 속 몇 %) 조건을 쓴다(대략).'}];
+const TABS=[{id:'fu',name:'FTIR · UV-Vis',sub:'선형 흡수 분광',desc:'샘플링과 경로 길이, 장비 구조, 창·셀 재질, 용매까지. 측정 전에 고를 것들을 정리했다.',steps:FU},{id:'fp',name:'In situ FTIR',sub:'광섬유 탐침',desc:'반응 용기 안에서 투과 스펙트럼을 재는 탐침의 원리. 속 빈 광섬유, 조절되는 틈, Beer–Lambert 점검, 반응 추적과 2D 상관 분석까지. 그림 값은 예시다.',steps:FP},{id:'ra',name:'Raman',sub:'자발 산란',desc:'Stokes와 anti-Stokes, IR과 다른 선택 규칙, 형광과 레이저 선택, 필터 배치.',steps:RA},{id:'ca',name:'CARS',sub:'χ⁽³⁾ 결맞음 Raman',desc:'네 빛의 에너지 그림, N² 결맞음, 위상 정합, 비공명 배경과 줄이는 법.',steps:CA},{id:'sf',name:'VSFG',sub:'χ⁽²⁾ 계면 진동 분광',desc:'IR과 Raman 둘 다 활성인 진동이 계면에서만 보이는 이유와 측정 배치.',steps:SF},{id:'ms',name:'DEMS · OEMS',sub:'전기화학 기체 분석',desc:'전극에서 나오는 기체를 질량 분석으로 나눠 보는 두 방법과 정량, 배터리 예.',steps:MS}];
 /* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
    노트 파일이 정의해야 하는 것:
      TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
