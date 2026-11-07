@@ -10,6 +10,7 @@ body{margin:0;background:#fff;color:var(--fg);font-family:var(--f-sans);font-siz
 .wrap{max-width:1080px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:20px}
 .hero{border-radius:12px;padding:24px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:6px}
 .hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
 .hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
 .hero p{margin:0;font-size:14px;max-width:70ch}
 h2{font-size:13px;font:500 13px var(--f-mono);color:var(--muted);letter-spacing:.06em;margin:4px 0 0}
@@ -17,6 +18,7 @@ h2{font-size:13px;font:500 13px var(--f-mono);color:var(--muted);letter-spacing:
 .card{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;color:inherit;background:#fff;transition:border-color .15s,box-shadow .15s}
 .card:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(13,22,48,.08)}
 .card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;margin-left:8px;letter-spacing:0;vertical-align:1px}
 .card .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
 .card h3{margin:0;font-size:18px;font-weight:600}
 .card p{margin:0;font-size:14px;color:var(--muted)}
@@ -29,50 +31,50 @@ footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);paddin
 
 <div class="wrap">
   <header class="hero">
-    <span class="eyebrow">ADVANCED SPECTROSCOPY LAB · 연구 노트</span>
+    <div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · 연구 노트</span><span class="status">검토 중</span></div>
     <h1>단계별로 넘겨 보는 연구 노트</h1>
-    <p>분광 원리, 측정 기법, 장비와 실험실 운영을 한 단계에 하나씩 정리한 인터랙티브 노트 모음이다. 왼쪽 그림이 원인, 오른쪽 그림이 결과이고, 같은 번호끼리 짝이다.</p>
+    <p>분광 원리, 측정 기법, 장비와 실험실 운영을 한 단계에 하나씩 정리한 인터랙티브 노트 모음이다. 왼쪽 그림이 원인, 오른쪽 그림이 결과이고, 같은 번호끼리 짝이다. 모든 노트는 전문가 검토 전 초안이며, 값에는 대략·예시·확인 필요 표시를 달았다.</p>
   </header>
 
   <h2>노트</h2>
   <div class="cards">
     <a class="card" href="notes/2d-spectroscopy.html">
-      <span class="k">분광 · 3개 탭 · 19단계</span>
+      <span class="k">분광 · 3개 탭 · 19단계<span class="status">검토 중</span></span>
       <h3>2D 분광 노트</h3>
       <p>에너지 그림과 2D 맵을 번호로 이어, 비조화성, coupling, 에너지 전달, 파속 운동이 피크를 만드는 과정을 본다.</p>
       <ul class="tabs"><li>2D IR<b>9</b></li><li>2DES<b>8</b></li><li>셋업<b>2</b></li></ul>
       <span class="go">노트 열기 →</span>
     </a>
     <a class="card" href="notes/lab-techniques.html">
-      <span class="k">측정 기법 · 5개 탭 · 27단계</span>
+      <span class="k">측정 기법 · 5개 탭 · 27단계<span class="status">검토 중</span></span>
       <h3>랩 측정 기법 노트</h3>
       <p>선형 흡수부터 비선형 분광, 기체 분석까지. 장비 구조와 측정 전에 고를 것들을 정리했다.</p>
       <ul class="tabs"><li>FTIR · UV-Vis<b>4</b></li><li>Raman<b>4</b></li><li>CARS<b>6</b></li><li>VSFG<b>6</b></li><li>DEMS · OEMS<b>7</b></li></ul>
       <span class="go">노트 열기 →</span>
     </a>
     <a class="card" href="notes/detection.html">
-      <span class="k">장비 · 2개 탭 · 15단계</span>
+      <span class="k">장비 · 2개 탭 · 15단계<span class="status">검토 중</span></span>
       <h3>검출과 분광기 노트</h3>
       <p>회절격자가 파장을 펼치고, 검출기가 광자를 전자로 바꾸기까지. 분해능, 냉각, 증폭, 잡음을 세어 본다.</p>
       <ul class="tabs"><li>모노크로메이터<b>8</b></li><li>검출기<b>7</b></li></ul>
       <span class="go">노트 열기 →</span>
     </a>
     <a class="card" href="notes/lasers.html">
-      <span class="k">장비 · 1개 탭 · 7단계</span>
+      <span class="k">장비 · 1개 탭 · 7단계<span class="status">검토 중</span></span>
       <h3>레이저 광원 노트</h3>
       <p>Yb 레이저의 준위 구조, 작은 양자 결손, 좁은 이득 띠와 펄스 폭, 반복률과 평균 출력.</p>
       <ul class="tabs"><li>Yb 레이저<b>7</b></li></ul>
       <span class="go">노트 열기 →</span>
     </a>
     <a class="card" href="notes/lab-ops.html">
-      <span class="k">실험실 · 1개 탭 · 7단계</span>
+      <span class="k">실험실 · 1개 탭 · 7단계<span class="status">검토 중</span></span>
       <h3>실험실 운영 노트</h3>
       <p>UPS 종류와 용량 계산, 무엇을 물릴지, 정전과 복전 때 순서. 일반 원리이고 실제 순서는 장비 설명서를 따른다.</p>
       <ul class="tabs"><li>UPS · 정전<b>7</b></li></ul>
       <span class="go">노트 열기 →</span>
     </a>
     <a class="card" href="notes/simulation.html">
-      <span class="k">계산 · 1개 탭 · 10단계</span>
+      <span class="k">계산 · 1개 탭 · 10단계<span class="status">검토 중</span></span>
       <h3>계산 방법 노트</h3>
       <p>DFT는 한 장면의 전자 구조, MD는 원자의 움직임. 에너지 곡면, 진동수, 궤적에서 스펙트럼까지.</p>
       <ul class="tabs"><li>DFT vs MD<b>10</b></li></ul>
