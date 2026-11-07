@@ -116,7 +116,7 @@ const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
 // @title 데이터 분석 노트
 // @eyebrow ADVANCED SPECTROSCOPY LAB · 데이터 분석
 // @status 검토 중
-/* 데이터 분석 노트: 속도론과 전역 피팅. 시간 분해 신호(pump-probe 등)를 모델로 맞출 때 알아 둘 것.
+/* 데이터 분석 노트: 속도론과 전역 피팅, 2D-COS(시간별 FTIR 상관 지도). 시간 분해 신호(pump-probe 등)를 모델로 맞출 때 알아 둘 것.
    모든 수치는 예시 계(가상의 흡수체)다. 특정 시료의 결과가 아니다. 헬퍼는 an 접두사. */
 const NOTE={key:'analysis'};
 
@@ -259,7 +259,132 @@ const KIN=[
  read:[`${c(1,'f')} 잡음 크기를 먼저 정한다. χ²가 이 값에 기대기 때문이다(8단계).`,`${c(2,'f')} IRF와 t₀를 정하고, 결맞음 잡신호 구간을 어디서 자를지 정한다. 자르는 위치를 바꿔도 결과가 버티는지 본다(2단계).`,`${c(3,'f')} 모델을 고르고 가정(처음 인구, 계수 관계)을 적는다(3·4·7단계).`,`${c(4,'f')} 모든 파수를 같은 τ로 함께 맞춘다(6단계).`,`${c(5,'f')} 잔차 구조와 χ²_ν, AIC/BIC를 본다(8단계).`,`${c(6,'f')} 같은 신호를 내는 다른 해가 있는지 확인한다(5단계).`,`${c(7,'f')} τ와 과정의 짝은 맞춤 밖 정보(부호에 대한 기대, 조건을 바꾼 실험)로 정한다. 정하지 못하면 그렇다고 쓴다.`],
  q:'"전역 피팅으로 τ₁ = 0.5 ps는 B 생성이다"라고 쓰려면 무엇이 더 필요한가?',a:'교환한 해(τ₁ = 3 ps가 B 생성)를 배제할 근거. 예를 들어 바꾼 해에서 c_B의 부호가 물리적으로 맞지 않는다는 독립 정보, 또는 B를 직접 보는 다른 파수·실험이 필요하다.'}];
 
-const TABS=[{id:'kin',name:'속도론 · 전역 피팅',sub:'시간 신호를 모델로',desc:'지수 감쇠와 IRF부터 순차 모델, 교환 대칭, 전역 피팅, 들뜸 통계, 잔차까지. 맞춤이 말해 주는 것과 말해 주지 않는 것.',steps:KIN}];
+/* ======================= 2D-COS (시간별 FTIR 상관 지도) =======================
+   예시 데이터: 반응 중 FTIR을 10 s 간격으로 121장(0–1200 s) 찍었다고 가정한 가상 스펙트럼.
+   Φ = ỹᵀỹ/(m−1), Ψ = ỹᵀ(Nỹ)/(m−1), N_jk = 1/(π(k−j)) (대각선 0). Ψ[a][b] = Ψ(ν₁ = NU[a], ν₂ = NU[b]).
+   부호 약속은 랩 측정 기법 노트 In situ FTIR 탭 7단계(fpCos)와 같다. 헬퍼는 cs 접두사. */
+const CS_NU=Array.from({length:41},(_,i)=>1760-5*i);   /* 1760 → 1560 cm⁻¹, 5 cm⁻¹ 간격 */
+const CS_T=Array.from({length:121},(_,i)=>i*10);        /* 0–1200 s */
+const csSig=x=>1/(1+Math.exp(-x/60));
+const csG=(x,x0,w)=>Math.exp(-(((x-x0)/w)**2)*2.77);
+/* 띠 하나의 세기와 위치: {nu, nu1(이동 끝, 선택), w, a0, a1, t0} */
+const csAmp=(b,t)=>b.a0+(b.a1-b.a0)*csSig(t-b.t0);
+const csSpec=(bands,t,nu)=>bands.reduce((s,b)=>{const f=csSig(t-b.t0);return s+(b.a0+(b.a1-b.a0)*f)*csG(nu,b.nu+((b.nu1??b.nu)-b.nu)*f,b.w)},0);
+function csCompute(bands){const Y=CS_T.map(t=>CS_NU.map(nu=>csSpec(bands,t,nu))),m=Y.length,n=CS_NU.length;
+ const mean=Array(n).fill(0);Y.forEach(r=>r.forEach((v,i)=>mean[i]+=v/m));const D=Y.map(r=>r.map((v,i)=>v-mean[i]));
+ const Z=D.map((_,j)=>{const z=Array(n).fill(0);for(let k=0;k<m;k++){if(k===j)continue;const h=1/(Math.PI*(k-j)),d=D[k];for(let i=0;i<n;i++)z[i]+=h*d[i]}return z});
+ const phi=Array.from({length:n},()=>Array(n).fill(0)),psi=Array.from({length:n},()=>Array(n).fill(0));
+ for(let j=0;j<m;j++){const d=D[j],z=Z[j];for(let a=0;a<n;a++){const da=d[a],pa=phi[a],qa=psi[a];for(let b=0;b<n;b++){pa[b]+=da*d[b];qa[b]+=da*z[b]}}}
+ let mx=0;for(let a=0;a<n;a++)for(let b=0;b<n;b++){phi[a][b]/=m-1;psi[a][b]/=m-1;mx=Math.max(mx,Math.abs(phi[a][b]))}
+ let mq=0;psi.forEach(r=>r.forEach(v=>mq=Math.max(mq,Math.abs(v))));
+ return{bands,Y,mean,D,phi,psi,mx,mq}}
+const csMemo={};
+const csGet=(key,bands)=>csMemo[key]??(csMemo[key]=csCompute(bands));
+/* 예시 데이터 세 가지 */
+const csMain=(dl=200)=>csGet('m'+dl,[{nu:1715,w:22,a0:1,a1:.2,t0:350},{nu:1650,w:22,a0:.1,a1:.8,t0:350+dl},{nu:1600,w:16,a0:.5,a1:.5,t0:0}]);
+const csOver=()=>csGet('o',[{nu:1690,w:28,a0:.9,a1:.3,t0:300},{nu:1668,w:28,a0:.8,a1:.2,t0:650}]);
+const csShift=on=>on?csGet('s1',[{nu:1700,nu1:1680,w:20,a0:.9,a1:.9,t0:500}]):csGet('s0',[{nu:1690,w:20,a0:.9,a1:.3,t0:500}]);
+const csIdx=nu=>Math.round((1760-nu)/5);
+/* 2D 지도: 가로 ν₁(왼쪽이 높은 파수), 세로 ν₂(아래가 높은 파수). 대각선 = 왼쪽 아래 → 오른쪽 위 */
+const CS_L=58,CS_B=256,CS_W=228,CS_CW=CS_W/41,CS_R=CS_L+CS_W;
+const csX=nu=>CS_L+((1760-nu)/5+.5)*CS_CW,csY=nu=>CS_B-((1760-nu)/5+.5)*CS_CW;
+function csMap(M,mx,o={}){let s=`<rect x="${CS_L}" y="${CS_B-CS_W}" width="${CS_W}" height="${CS_W}" style="fill:var(--panel);stroke:var(--line)"/>`;
+ for(let a=0;a<41;a++)for(let b=0;b<41;b++){const v=M[a][b]/mx,av=Math.abs(v);if(av<.03)continue;
+  s+=`<rect x="${(CS_L+a*CS_CW).toFixed(1)}" y="${(CS_B-(b+1)*CS_CW).toFixed(1)}" width="${(CS_CW+.4).toFixed(1)}" height="${(CS_CW+.4).toFixed(1)}" style="fill:${v>0?'var(--s1)':'var(--s2)'}" fill-opacity="${Math.min(1,Math.pow(av,.6)).toFixed(2)}"/>`}
+ s+=`<line x1="${CS_L}" y1="${CS_B}" x2="${CS_R}" y2="${CS_B-CS_W}" class="lvl2"/>`;
+ [1750,1700,1650,1600].forEach(v=>{s+=`<line x1="${csX(v)}" x2="${csX(v)}" y1="${CS_B}" y2="${CS_B+5}" class="ax"/>`+T(csX(v),CS_B+17,String(v),'sub','middle')+`<line x1="${CS_L-5}" x2="${CS_L}" y1="${csY(v)}" y2="${csY(v)}" class="ax"/>`+T(CS_L-8,csY(v)+4,String(v),'sub','end')});
+ s+=T((CS_L+CS_R)/2,CS_B+36,'wavenumber ν₁ (cm⁻¹)','lab','middle')+`<text x="14" y="${CS_B-CS_W/2}" class="lab" text-anchor="middle" transform="rotate(-90 14 ${CS_B-CS_W/2})">ν₂ (cm⁻¹)</text>`;
+ s+=`<rect x="${CS_R+8}" y="34" width="10" height="10" style="fill:var(--s1)"/>`+T(CS_R+22,43,'+','labn')+`<rect x="${CS_R+8}" y="52" width="10" height="10" style="fill:var(--s2)"/>`+T(CS_R+22,61,'−','labn');
+ (o.bands||[]).forEach(([nu,n,k])=>{s+=`<g data-n="${n}">${badge(csX(nu),CS_B-CS_W-12,n,COL[k])}${badge(CS_R+14,csY(nu),n,COL[k])}</g>`});
+ if(o.mark){const[x1,x2]=o.mark;s+=`<circle cx="${csX(x1)}" cy="${csY(x2)}" r="10" style="fill:none;stroke:var(--fg)" stroke-width="2"/>`}
+ return s}
+/* 1D 스펙트럼 축 (높은 파수가 왼쪽) */
+const csSpecAx=(y,o={})=>plot({x:[1760,1560],y,xt:[1750,1700,1650,1600].map(v=>({v,l:String(v)})),xl:'wavenumber (cm⁻¹)',T:30,B:256,...o});
+const csLine=(P,arr,col,o)=>PL(CS_NU.map((nu,i)=>[P.X(nu),P.Y(arr[i])]),col,o);
+const csTimeAx=(y,o={})=>plot({x:[0,1200],y,xt:[0,300,600,900,1200].map(v=>({v,l:String(v)})),xl:'시간 (s)',T:30,B:256,...o});
+const CS_K=['s4','s5','s6'];  /* ① C=O 1715, ② C=N 1650, ③ 용매 1600: 띠 구분용 색 (부호와 무관) */
+const csNotes='가로·세로 모두 같은 스펙트럼의 파수다. 2D 분광 노트의 pump ω₁ · probe ω₃ 축과는 뜻이 다르다.';
+
+const CS=[
+{t:'시간별 스펙트럼 묶음: 10초마다 한 장씩 쌓인다',ec:'반응 중 FTIR (예시, 10 s 간격 121장 · 회색 = 200 s마다, 검정 = 지금)',mc:'띠별 세기 vs 시간 (예시)',
+ slider:{min:0,max:1200,step:10,init:0,label:'시간',fmt:v=>Math.round(v)+' s',play:1},
+ e:v=>{const r=csMain(),P=csSpecAx([0,1.15],{yl:'흡광도 (예시)'});let s=P.s;
+  for(let t=0;t<=1200;t+=200)s+=csLine(P,CS_NU.map(nu=>csSpec(r.bands,t,nu)),'var(--line)',{w:1.2});
+  s+=csLine(P,CS_NU.map(nu=>csSpec(r.bands,v,nu)),'var(--fg)',{w:2});
+  [[1715,1],[1650,2],[1600,3]].forEach(([nu,n],i)=>{s+=`<g data-n="${n}">${badge(P.X(nu),P.T-10,n,COL[CS_K[i]])}</g>`});
+  return s},
+ m:v=>{const r=csMain(),P=csTimeAx([0,1.1],{yl:'띠 세기 (예시)'});
+  let s=P.s+r.bands.map((b,i)=>`<g data-n="${i+1}">${PL(CS_T.map(t=>[P.X(t),P.Y(csAmp(b,t))]),COL[CS_K[i]],{w:2,dash:i===2})}</g>`).join('');
+  s+=`<line x1="${P.X(v)}" x2="${P.X(v)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`;
+  return s+`<g data-n="1">${badge(P.X(60),P.Y(1)+16,1,COL.s4)}</g><g data-n="2">${badge(P.X(1140),P.Y(.8)-16,2,COL.s5)}</g><g data-n="3">${badge(P.X(1140),P.Y(.5)-16,3,COL.s6)}</g>`},
+ read:['반응을 FTIR로 따라가면 10초마다 스펙트럼이 한 장씩 쌓인다. 20분이면 121장이다(예시 데이터).',`예시 반응은 In situ FTIR 탭과 같은 케톤 + 아민 → 이민이다. ${c(1,'s4')} 1715 cm⁻¹(C=O)는 줄고, ${c(2,'s5')} 1650 cm⁻¹(C=N)는 늘고, ${c(3,'s6')} 1600 cm⁻¹(용매)는 그대로다. 파수와 시점은 예시다.`,'재생을 누르면 ①이 먼저 줄고, ②가 조금 늦게 는다.','띠가 몇 개뿐이면 오른쪽처럼 띠마다 시간 곡선을 그리면 된다. 띠가 많고 서로 겹치면 어렵다. 2D-COS는 모든 파수 쌍을 한 번에 비교하는 지도다.'],
+ q:'121장을 지도 한 장으로 줄이면 무엇을 잃나?',a:'시간축 자체(몇 초에 변했는지)를 잃는다. 지도에는 "같이 변하나, 누가 먼저냐"만 남는다. 그래서 시간 곡선도 같이 본다.'},
+{t:'평균을 뺀다: 변한 부분만 남긴다(동적 스펙트럼)',ec:'평균 스펙트럼과 지금 스펙트럼',mc:'동적 스펙트럼 ỹ = y − ȳ',
+ slider:{min:0,max:1200,step:10,init:100,label:'시간',fmt:v=>Math.round(v)+' s',play:1},
+ e:v=>{const r=csMain(),P=csSpecAx([0,1.15],{yl:'흡광도 (예시)'});
+  return P.s+csLine(P,r.mean,'var(--muted)',{w:2,dash:1})+csLine(P,CS_NU.map(nu=>csSpec(r.bands,v,nu)),'var(--fg)',{w:2})
+   +`<line x1="${P.R-120}" x2="${P.R-98}" y1="${P.T-12}" y2="${P.T-12}" style="stroke:var(--muted)" stroke-width="2" stroke-dasharray="4 3"/>`+T(P.R-92,P.T-8,'평균 ȳ','sub')+`<line x1="${P.R-50}" x2="${P.R-28}" y1="${P.T-12}" y2="${P.T-12}" style="stroke:var(--fg)" stroke-width="2"/>`+T(P.R-22,P.T-8,'y(t)','sub')},
+ m:v=>{const r=csMain(),j=Math.round(v/10),d=r.D[j],P=csSpecAx([-.5,.5],{yl:'ỹ (예시)',yt:[{v:-.4,l:'−0.4'},{v:0,l:'0'},{v:.4,l:'+0.4'}]});
+  let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`;const bw=(P.R-P.L)/41;
+  CS_NU.forEach((nu,i)=>{const y=d[i];if(Math.abs(y)<.004)return;s+=`<rect x="${(P.X(nu)-bw/2).toFixed(1)}" y="${P.Y(Math.max(y,0)).toFixed(1)}" width="${(bw+.3).toFixed(1)}" height="${Math.abs(P.Y(y)-P.Y(0)).toFixed(1)}" style="fill:${y>0?'var(--s1)':'var(--s2)'}" fill-opacity=".8"/>`});
+  return s+`<g data-n="1">${badge(P.X(1715),P.Y(.42),1,COL.s4)}</g><g data-n="2">${badge(P.X(1650),P.Y(.42),2,COL.s5)}</g><g data-n="3">${badge(P.X(1600),P.Y(.42),3,COL.s6)}</g>`+T(P.R,P.T-12,'빨강 = 평균보다 큼(+), 파랑 = 작음(−)','sub','end')},
+ read:['파수마다 121장의 평균 ȳ를 구해 각 스펙트럼에서 뺀다. 남은 ỹ = y − ȳ가 동적 스펙트럼이다.',`${c(3,'s6')} 용매 띠는 시간에 따라 변하지 않아서 평균을 빼면 0이 된다. 2D-COS는 변하는 것만 본다. 큰 용매 띠에 가려진 작은 변화도 그래서 드러난다.`,`초반에는 ${c(1,'s4')}이 평균보다 커(+) 빨강이고 ${c(2,'s5')}는 작아(−) 파랑이다. 후반에는 반대가 된다.`,'평균 대신 첫 스펙트럼을 기준으로 빼기도 한다. 기준에 따라 지도가 조금 달라지니 무엇을 썼는지 적어 둔다.'],
+ q:'모든 스펙트럼에 같은 기준선 오프셋이 더해져 있으면?',a:'평균을 빼면 같이 사라진다. 하지만 기준선이 시간에 따라 흐르면 사라지지 않고 가짜 상관을 만든다(8단계).'},
+{t:'동기 지도 Φ: 같이 변하는가',ec:'두 띠의 동적 변화 ỹ (평균 뺀 값)',mc:'동기 지도 Φ(ν₁, ν₂) (예시)',
+ e:()=>{const r=csMain(),P=csTimeAx([-.5,.5],{yl:'ỹ (예시)',yt:[{v:-.4,l:'−0.4'},{v:0,l:'0'},{v:.4,l:'+0.4'}]});
+  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`+`<g data-n="1">${PL(CS_T.map((t,j)=>[P.X(t),P.Y(r.D[j][csIdx(1715)])]),COL.s4,{w:2})}${badge(P.X(60),P.Y(r.D[6][csIdx(1715)])+18,1,COL.s4)}</g>`
+   +`<g data-n="2">${PL(CS_T.map((t,j)=>[P.X(t),P.Y(r.D[j][csIdx(1650)])]),COL.s5,{w:2})}${badge(P.X(60),P.Y(r.D[6][csIdx(1650)])-18,2,COL.s5)}</g>`+T(P.R,P.T-12,'① 은 + → −, ② 는 − → +','sub','end')},
+ m:()=>{const r=csMain();return csMap(r.phi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']]})+T(csX(1715),csY(1650)-22,'교차 피크 ①②','sub','middle')+T(csX(1712),csY(1716)+24,'autopeak','sub')},
+ read:['Φ(ν₁, ν₂) = (1/(m−1)) Σ ỹ(ν₁, t) · ỹ(ν₂, t). 두 파수의 변화를 시점마다 곱해 더한 값, 곧 공분산이다(m = 스펙트럼 수).',`대각선(ν₁ = ν₂) 위의 봉우리는 autopeak다. 그 파수가 얼마나 크게 변했는지를 뜻하고 항상 +다. ${c(3,'s6')} 용매는 변하지 않아 autopeak이 없다.`,`대각선 밖은 교차 피크다. ${c(1,'s4')} 1715와 ${c(2,'s5')} 1650은 한쪽이 줄 때 다른 쪽이 늘어서 파랑(−)이다. 같이 늘거나 같이 줄면 빨강(+)이다.`,'Φ는 대각선을 사이에 두고 대칭이다. 위쪽과 아래쪽 교차 피크가 같다.',csNotes+' 이름만 비슷한 다른 방법이다.'],
+ q:'Φ 교차 피크가 빨강(+)이면?',a:'두 파수가 같은 방향으로 변했다(같이 늘거나 같이 줄었다). 같은 물질의 두 띠일 가능성이 있다.'},
+{t:'세어 보기: Φ는 두 띠 변화를 곱해 더한 것이다',ec:'시점 5개의 ỹ 값 (예시)',mc:'시점별 곱과 합',
+ tg:[{k:'same',l:'② 도 같이 줄게 하기',on:false}],
+ e:(v,tg)=>{const a=[.4,.2,0,-.2,-.4],b=(tg.same?[.3,.15,0,-.15,-.3]:[-.3,-.15,0,.15,.3]),f=x=>(x>0?'+':x<0?'−':'')+Math.abs(x).toFixed(2);
+  let s=T(48,44,'시점','lab','middle')+`<g data-n="1">${T(118,44,'① ỹ','lab','middle')}</g><g data-n="2">${T(188,44,'② ỹ','lab','middle')}</g>`+T(262,44,'① × ②','lab','middle')+`<line x1="20" x2="300" y1="54" y2="54" style="stroke:var(--line)"/>`;
+  a.forEach((x,i)=>{const y=80+i*30,p=x*b[i];s+=T(48,y,'t'+(i+1),'sub','middle')+T(118,y,f(x),'sub','middle')+T(188,y,f(b[i]),'sub','middle')+T(262,y,f(p),'labn','middle',p>0?'var(--s1)':p<0?'var(--s2)':undefined)});
+  const sum=a.reduce((q,x,i)=>q+x*b[i],0);
+  return s+`<line x1="20" x2="300" y1="214" y2="214" style="stroke:var(--line)"/>`+T(160,238,'합 = '+f(sum),'labn','middle',sum>0?'var(--s1)':'var(--s2)')+T(160,262,'Φ = 합 / (5 − 1) = '+f(sum/4),'labn','middle',sum>0?'var(--s1)':'var(--s2)')+T(160,286,'평균을 뺐으므로 ① 열, ② 열의 합은 각각 0이다','sub','middle')},
+ m:(v,tg)=>{const a=[.4,.2,0,-.2,-.4],b=(tg.same?[.3,.15,0,-.15,-.3]:[-.3,-.15,0,.15,.3]),p=a.map((x,i)=>x*b[i]),sum=p.reduce((q,x)=>q+x,0);
+  const P=plot({x:[0,7],y:[-.35,.35],xt:[1,2,3,4,5].map(x=>({v:x,l:'t'+x})).concat([{v:6.2,l:'합'}]),yt:[{v:-.3,l:'−0.3'},{v:0,l:'0'},{v:.3,l:'+0.3'}],yl:'곱 (예시)',T:30,B:256});
+  let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`;
+  p.concat([sum]).forEach((x,i)=>{const cx=i<5?i+1:6.2,w=i<5?.5:.7;if(Math.abs(x)<1e-9)return;s+=`<rect x="${P.X(cx-w/2)}" y="${P.Y(Math.max(x,0))}" width="${P.X(cx+w/2)-P.X(cx-w/2)}" height="${Math.abs(P.Y(x)-P.Y(0))}" style="fill:${x>0?'var(--s1)':'var(--s2)'}" fill-opacity="${i<5?.6:1}"/>`});
+  return s+T(P.R,P.T-12,sum<0?'반대로 변함 → Φ < 0 (파랑)':'같이 변함 → Φ > 0 (빨강)','sub','end')},
+ read:['3단계 식을 숫자 다섯 개로 직접 계산한다. 평균을 뺀 ỹ 값이 시점 t1–t5에 있다(예시).',`시점마다 ${c(1,'s4')}과 ${c(2,'s5')}의 ỹ를 곱한다. 둘의 부호가 같으면 곱이 +, 다르면 −다.`,'곱을 모두 더해 (스펙트럼 수 − 1)로 나누면 Φ다. 여기서는 모든 곱이 − 쪽이라 Φ < 0, 지도에서 파랑 교차 피크가 된다.','체크박스로 ②도 같이 줄게 하면 곱이 모두 +가 되어 Φ > 0, 빨강이 된다.','변화가 큰 시점(t1, t5)의 곱이 Φ를 주로 정한다.'],
+ q:'①은 변하는데 ②가 내내 그대로면 Φ는?',a:'0이다. ②의 ỹ가 모두 0이라 곱이 모두 0이다.'},
+{t:'비동기 지도 Ψ: 변하는 시점이 다른가',ec:'두 띠의 변화 진행률 (② 시작 시점을 옮김)',mc:'비동기 지도 Ψ(ν₁, ν₂) (예시)',
+ slider:{min:-300,max:300,step:25,init:200,label:'② 의 늦음',fmt:v=>(v>0?'+':'')+Math.round(v)+' s'},
+ e:v=>{const r=csMain(v),P=csTimeAx([0,1.1],{yl:'변화 진행률',yt:[{v:0,l:'0'},{v:1,l:'1'}]});
+  let s=P.s+`<g data-n="1">${PL(CS_T.map(t=>[P.X(t),P.Y(csSig(t-350))]),COL.s4,{w:2})}</g><g data-n="2">${PL(CS_T.map(t=>[P.X(t),P.Y(csSig(t-350-v))]),COL.s5,{w:2,dash:1})}</g>`;
+  s+=`<line x1="${P.X(760)}" x2="${P.X(820)}" y1="${P.Y(.32)}" y2="${P.Y(.32)}" style="stroke:var(--s4)" stroke-width="2"/>`+T(P.X(830),P.Y(.32)+4,'① 1715 감소','sub')+`<line x1="${P.X(760)}" x2="${P.X(820)}" y1="${P.Y(.16)}" y2="${P.Y(.16)}" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="4 3"/>`+T(P.X(830),P.Y(.16)+4,'② 1650 증가','sub');
+  return s+T(P.L,P.T-12,`Ψ 최대 / Φ 최대 = ${(r.mq/r.mx).toFixed(2)}`,'labn')},
+ m:v=>{const r=csMain(v);return csMap(r.psi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']]})+(r.mq/r.mx<.03?T((CS_L+CS_R)/2,CS_B-CS_W/2+40,'Ψ ≈ 0: 같은 시점에 변한다','labn','middle'):'')},
+ read:['Ψ(ν₁, ν₂) = (1/(m−1)) Σⱼ ỹ(ν₁, tⱼ) · Σₖ Nⱼₖ ỹ(ν₂, tₖ). N은 Hilbert–Noda 행렬이다(Nⱼₖ = 1/(π(k−j)), 대각선은 0). ν₂ 쪽 변화를 시간축에서 90°(위상) 밀어 놓고 ν₁과 곱하는 셈이다.','슬라이더를 0에 두면 두 띠가 같은 시점에 변해 Ψ = 0이다. 지도가 빈다.','시점이 어긋날수록 교차 피크가 생기고 커진다. 앞뒤를 바꾸면(슬라이더 부호) 교차 피크 부호가 뒤집힌다.','Ψ는 대각선을 사이에 두고 반대칭이다. Ψ(ν₁, ν₂) = −Ψ(ν₂, ν₁)이고, 대각선 위는 항상 0이다.','Ψ는 Φ보다 작다. 지도 색은 두 지도 모두 Φ 최대값으로 나눈 값이라 크기를 비교할 수 있다.'],
+ q:'두 띠가 거의 같은 시점에 변하는데 잡음이 크면 Ψ는?',a:'잡음이 만든 작은 Ψ가 순서처럼 보일 수 있다. Ψ/Φ가 잡음 수준만큼 작으면 순서를 말하지 않는다.'},
+{t:'Noda 규칙: Φ와 Ψ 부호로 순서를 읽는다',ec:'동기 Φ (② 200 s 늦음, 예시)',mc:'비동기 Ψ (같은 데이터)',
+ e:()=>{const r=csMain(200),v=r.phi[csIdx(1715)][csIdx(1650)];return csMap(r.phi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']],mark:[1715,1650]})+T(csX(1715)+14,csY(1650)+4,'Φ '+(v<0?'< 0':'> 0'),'labn')},
+ m:()=>{const r=csMain(200),v=r.psi[csIdx(1715)][csIdx(1650)];return csMap(r.psi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']],mark:[1715,1650]})+T(csX(1715)+14,csY(1650)+4,'Ψ '+(v<0?'< 0':'> 0'),'labn')},
+ read:[`같은 자리 (ν₁, ν₂)에서 Φ와 Ψ의 부호를 읽는다. 여기서는 ν₁ = ${c(1,'s4')} 1715, ν₂ = ${c(2,'s5')} 1650 (검은 동그라미)이다.`,'Noda 규칙: Φ와 Ψ 부호가 같으면 ν₁ 쪽이 먼저 변한다. 다르면 ν₂ 쪽이 먼저 변한다. Ψ ≈ 0이면 같이 변한다. Φ ≈ 0인 자리에서는 규칙을 쓰지 않는다.','여기서는 Φ < 0, Ψ < 0으로 부호가 같다 → ① 1715(C=O 감소)가 먼저, ② 1650(C=N 증가)이 나중이다. 1단계 시간 곡선과 맞는다.','랩 측정 기법 노트 In situ FTIR 탭 7단계와 같은 식, 같은 부호 약속이다.','주의: 순서 ≠ 반응 메커니즘. "먼저 변했다"는 세기 변화의 시점일 뿐이다. 섞임, 띠 겹침, 흡광도 비선형, 기준선 흐름도 시점 차이를 만든다. 순서는 시간 곡선과 화학으로 다시 확인한다.','Ψ 부호 약속(어느 축을 ν₁로 두는지, N의 부호)은 책과 프로그램마다 다를 수 있다. 다른 프로그램 결과와 비교할 때 먼저 확인한다(확인 필요).'],
+ q:'Φ > 0, Ψ < 0이면 어느 쪽이 먼저인가?',a:'부호가 다르므로 ν₂ 쪽이 먼저 변한다.'},
+{t:'겹친 띠 나누기: 1D에서는 하나, 비동기 지도에서는 둘',ec:'겹친 띠 (예시: 1690 + 1668 cm⁻¹, 폭이 넓음)',mc:'비동기 지도 Ψ',
+ tg:[{k:'hid',l:'숨은 두 띠 보기',on:false}],
+ e:(v,tg)=>{const r=csOver(),P=csSpecAx([0,1.6],{yl:'흡광도 (예시)'});let s=P.s;
+  [0,300,600,900,1200].forEach(t=>{s+=csLine(P,CS_NU.map(nu=>csSpec(r.bands,t,nu)),t===0?'var(--fg)':'var(--muted)',{w:t===0?2:1.2})});
+  if(tg.hid)r.bands.forEach((b,i)=>{s+=`<g data-n="${i+1}">${csLine(P,CS_NU.map(nu=>b.a0*csG(nu,b.nu,b.w)),COL[CS_K[i]],{w:2,dash:1})}${badge(P.X(b.nu)+(i?14:-14),P.Y(b.a0)-30,i+1,COL[CS_K[i]])}</g>`});
+  return s+T(P.R,P.T-12,'검정 = 0 s, 회색 = 300 s마다','sub','end')},
+ m:()=>{const r=csOver();return csMap(r.psi,r.mx,{bands:[[1690,1,'s4'],[1668,2,'s5']]})},
+ read:['1690과 1668 cm⁻¹ 근처 두 띠가 폭이 넓어서 1D 스펙트럼에서는 봉우리 하나로 보인다(예시).',`${c(1,'s4')}이 먼저(300 s), ${c(2,'s5')}가 나중(650 s)에 준다. 시점이 다르니 Ψ 지도에 교차 피크 한 쌍이 생긴다. 봉우리 하나였던 자리가 두 파수로 갈라진다.`,'Φ 지도에서는 둘 다 같이 줄어 + 덩어리 하나로 보인다. 갈라 보이게 하는 건 Ψ다. 이것을 2D-COS의 분해능 향상이라 부른다.','체크박스로 숨은 두 띠를 켜면 실제 성분이 보인다. 교차 피크 좌표는 두 띠 파수와 대략 맞는다.','두 띠가 같은 시점에 변하면 Ψ로도 나누지 못한다.'],
+ q:'Ψ 교차 피크에서 두 띠의 파수를 어떻게 읽나?',a:'교차 피크의 가로 좌표(ν₁)와 세로 좌표(ν₂)가 각각 두 띠의 파수(대략)다.'},
+{t:'함정: 띠 이동, 기준선, 잡음이 만드는 가짜 피크',ec:'1D 스펙트럼 (예시)',mc:'동기 지도 Φ',
+ tg:[{k:'sh',l:'띠 이동 켬 (세기는 그대로)',on:true}],
+ e:(v,tg)=>{const r=csShift(tg.sh),P=csSpecAx([0,1.15],{yl:'흡광도 (예시)'});let s=P.s;
+  [0,300,600,900,1200].forEach(t=>{s+=csLine(P,CS_NU.map(nu=>csSpec(r.bands,t,nu)),t===0?'var(--fg)':'var(--muted)',{w:t===0?2:1.2})});
+  return s+T(P.R,P.T-12,tg.sh?'1700 → 1680 cm⁻¹로 이동만 한다':'1690 cm⁻¹ 세기만 준다','sub','end')},
+ m:(v,tg)=>{const r=csShift(tg.sh);return csMap(r.phi,r.mx)+(tg.sh?T(csX(1660),csY(1720)+4,'가짜 교차 피크','labn'):'')},
+ read:['띠 하나가 자리만 옮겨도(1700 → 1680 cm⁻¹, 세기 그대로) Φ 지도에 autopeak 두 개와 파랑(−) 교차 피크가 생긴다. 한 띠가 줄고 다른 띠가 느는 것처럼 보인다.','체크박스를 끄면(이동 없이 세기만 줄면) autopeak 하나뿐이다.','이동인지 두 띠인지는 1D 스펙트럼에서 봉우리 꼭대기 위치를 직접 따라가 확인한다. 이동은 Ψ 지도에도 나비 모양 패턴을 만든다(확인 필요).','기준선이 시간에 따라 흐르면 넓은 영역이 같이 변해 큰 + 덩어리가 생긴다. 지도를 만들기 전에 기준선을 맞춘다.','잡음은 Φ 대각선을 키우고 Ψ에 작은 얼룩을 만든다. 잡음 수준보다 작은 Ψ는 해석하지 않는다.','흡광도가 너무 커서 비선형이면 세기 변화의 시점이 어긋나 가짜 Ψ가 생긴다. In situ FTIR 탭 4단계의 "좋은 흡광도 범위"와 같은 이야기다.'],
+ q:'Φ 지도에 autopeak 두 개와 − 교차 피크가 있다. 두 띠가 서로 바뀌는 반응이라고 바로 말해도 되나?',a:'안 된다. 띠 하나가 이동해도 같은 모양이 나온다. 1D 스펙트럼에서 봉우리 위치를 따라가 확인한다.'}];
+
+const TABS=[{id:'kin',name:'속도론 · 전역 피팅',sub:'시간 신호를 모델로',desc:'지수 감쇠와 IRF부터 순차 모델, 교환 대칭, 전역 피팅, 들뜸 통계, 잔차까지. 맞춤이 말해 주는 것과 말해 주지 않는 것.',steps:KIN},
+ {id:'cos',name:'2D-COS',sub:'시간별 FTIR 상관 지도',desc:'반응 중 10초마다 찍은 FTIR에서 동기 Φ·비동기 Ψ 지도를 만든다. 무엇이 같이 변하고 누가 먼저 변하는지 읽는 법과 함정까지. 데이터는 모두 예시다.',ev:'0 0 320 300',mv:'0 0 320 300',steps:CS}];
 /* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
    노트 파일이 정의해야 하는 것:
      TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]

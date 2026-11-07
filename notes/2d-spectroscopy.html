@@ -388,6 +388,24 @@ function fdSpec(D,show){const P=plot({x:[2380,2560],y:[-2.4,2.4],xt:[{v:2400,l:'
   +`<g data-n="3">${badge(P.X(FD_W0-D)-16,P.Y(-2)+4,3,'var(--s2)')}</g>`+T(P.R,P.T-12,D===0?'조화(Δ = 0): 완전히 상쇄 → 신호 0':'실선 = 합, 점선 = 성분','sub','end')}
  s+=`<g data-n="1">${badge(P.X(FD_W0)-14,P.Y(2)-14,1,'var(--s1)')}</g><g data-n="2">${badge(P.X(FD_W0)+14,P.Y(2)-14,2,'var(--s1)')}</g>`;
  return s}
+/* 직접 그려 보기: 체크박스 조합 → 경로 판정.
+   상호작용 ①② = pump(+k 하나, −k 하나), ③ = probe(+k₃: ket 올림 또는 bra 내림), 그 뒤 ket 쪽에서 신호.
+   +k = ket 올림 또는 bra 내림, −k = ket 내림 또는 bra 올림 (오른쪽 화살표 = +k). ①은 바닥에서 시작하니 항상 올림. */
+const FD_LV=['g','e','f'];
+function fdBuild(tg){const it=[[tg.b1?'b':'k',1],[tg.b2?'b':'k',tg.d2?0:1],[tg.b3?'b':'k',tg.d3?0:1]];
+ let a=0,b=0;const rho=['|g⟩⟨g|'],kk=[];let err='';
+ const kSign=(sd,up)=>(sd==='k')===!!up?1:-1;
+ for(let i=0;i<3;i++){const[sd,up]=it[i];kk.push(kSign(sd,up));
+  if(sd==='k')a+=up?1:-1;else b+=up?1:-1;
+  if(a<0||b<0){err=`${'①②③'[i]}에서 g보다 아래로 내려간다. g 아래 준위는 없다.`;break}
+  if(a>2||b>2){err=`${'①②③'[i]}에서 f보다 위로 올라간다 (여기서는 g, e, f 세 준위만 둔다).`;break}
+  rho.push(`|${FD_LV[a]}⟩⟨${FD_LV[b]}|`);
+  if(i===1&&kk[0]===kk[1]){err=`pump 두 번이 모두 ${kk[0]>0?'+k':'−k'}다. ±2k 방향으로 나가 probe 방향 신호가 아니다 (지금 ${rho[2]}, 집단이 아님).`;break}
+  if(i===2&&kk[2]<0){err='③이 −k₃다(ket 내림이나 bra 올림). 신호가 probe 방향(+k₃)으로 나가지 않는다.';break}}
+ if(!err&&a!==b+1)err=`③ 뒤가 ${rho[3]}다. ket이 bra보다 한 칸 위인 결맞음이어야 ket 쪽에서 신호가 나온다.`;
+ const nb=it.filter(x=>x[0]==='b').length,name=err?'':(a===1&&b===0?(rho[2]==='|g⟩⟨g|'?'GSB':'SE'):'ESA');
+ return{it,rho,err,nb,kk,name,sign:nb%2?-1:1,reph:it[0][0]==='b',w:a===2?'ω_fe':'ω_eg'}}
+const FD_ALL=[['GSB','non-rephasing','k↑ k↓ k↑'],['GSB','rephasing','b↑ b↓ k↑'],['SE','non-rephasing','k↑ b↑ b↓'],['SE','rephasing','b↑ k↑ b↓'],['ESA','non-rephasing','k↑ b↑ k↑'],['ESA','rephasing','b↑ k↑ k↑']];
 const FD=[
 {t:'밀도 행렬: 집단과 결맞음',ec:'밀도 행렬 (두 준위 g, e)',mc:'시간에 따라 하는 일 (예시)',
  e:()=>{const C=(x,y,n,a,b,k)=>`<g data-n="${n}"><rect x="${x}" y="${y}" width="70" height="60" rx="4" style="fill:${COL[k]};fill-opacity:.15;stroke:${COL[k]}"/>`+T(x+35,y+26,a,'labn','middle')+T(x+35,y+44,b,'sub','middle')+'</g>';
@@ -450,7 +468,30 @@ const FD=[
   return P.s+crv(P,t=>S(t,2),0,10,'var(--s4)',{dash:1,w:1.3})+crv(P,t=>S(t,-1),0,10,'var(--s5)',{dash:1,w:1.3})+crv(P,iso,0,10,'var(--muted)',{dash:1,w:1})+crv(P,t=>S(t,f),0,10,'var(--fg)')
    +LN(P.R-110,P.T,P.R-90,P.T,'var(--s4)',{dash:1})+T(P.R-84,P.T+4,'평행 (0°)','sub')+LN(P.R-110,P.T+16,P.R-90,P.T+16,'var(--s5)',{dash:1})+T(P.R-84,P.T+20,'수직 (90°)','sub')+LN(P.R-110,P.T+32,P.R-90,P.T+32,'var(--fg)',{w:2})+T(P.R-84,P.T+36,'지금 θ','sub')},
  read:['pump는 편광 방향과 나란한 전이 쌍극자를 가진 분자를 더 많이 들뜨게 한다(광선택). 그래서 신호는 pump와 probe 편광 사이 각 θ에 따라 달라진다.','들뜬 분자가 회전하면 이 치우침이 풀리며 신호가 변한다. 이 효과가 이방성 r(T)이다. 평행(0°)은 크게, 수직(90°)은 작게 보인다.','3cos²θ − 1 = 0이 되는 θ ≈ 54.7°(magic angle)에서는 r 항이 사라진다. 그러면 분자 회전이 집단 감소처럼 보이는 일을 막을 수 있다.','슬라이더로 θ를 바꾸면 실선이 평행과 수직 사이를 오가고, 54.7°에서 점선(S_iso)과 겹친다. 수명 5 ps, 회전 3 ps, r(0) = 0.4는 예시 값이다.','반대로 평행과 수직을 둘 다 재면 r(T)를 따로 얻어 회전 동역학을 볼 수 있다. 이때 두 채널이 정말 서로 다른 편광인지 확인해야 한다.'],
- q:'평행과 수직 신호로 등방성 신호를 만드는 식은?',a:'S_iso = (S_∥ + 2S_⊥) / 3. 수직 방향이 두 개(공간의 나머지 두 축)라 2를 곱한다.'}];
+ q:'평행과 수직 신호로 등방성 신호를 만드는 식은?',a:'S_iso = (S_∥ + 2S_⊥) / 3. 수직 방향이 두 개(공간의 나머지 두 축)라 2를 곱한다.'},
+{t:'직접 그려 보기: 상호작용 세 번을 고르면 신호가 정해진다',ec:'내가 고른 다이어그램',mc:'판정: 이름, 부호, 자리',
+ tg:[{k:'b1',l:'①을 bra 쪽에',on:false},{k:'b2',l:'②를 bra 쪽에',on:false},{k:'d2',l:'② 내림',on:true},{k:'b3',l:'③(probe)을 bra 쪽에',on:false},{k:'d3',l:'③ 내림',on:false}],
+ e:(v,tg)=>{const R=fdBuild(tg),x=96,xb=x+FD_W,ys=[256,228,200,138,88,56];
+  const rho=R.rho.slice();while(rho.length<4)rho.push('?');
+  const a=FD_LV.indexOf(rho[3][1]),fin=R.err?'?':`|${FD_LV[a-1]}⟩⟨${rho[3][4]}|`;rho.push(fin);
+  let s=fdDiag(x,{it:R.it.map(([sd,up],i)=>[sd,up,i<2?'g':'s3']),rho,sig:R.err?'g':(R.sign>0?'b':'r')})+fdKey(20,20);
+  R.it.forEach(([sd],i)=>{const y=ys[i+1];s+=sd==='k'?T(x-34,y+4,'①②③'[i],'sub','end'):T(xb+32,y+4,'①②③'[i],'sub')});
+  s+=TM(214,110,[`bra 쪽 ${R.nb}번`,...R.kk.map((k,i)=>`${'①②③'[i]} ${k>0?'+k':'−k'}`)],'sub','start',16);
+  return s+T(14,290,'+k = ket 올림 또는 bra 내림 (오른쪽 화살표)','sub')},
+ m:(v,tg)=>{const R=fdBuild(tg);let s='';
+  if(R.err){const words=R.err.split(' '),lines=[];let cur='';words.forEach(w=>{if((cur+' '+w).length>26&&cur){lines.push(cur);cur=w}else cur=cur?cur+' '+w:w});lines.push(cur);
+   s+=T(14,34,'✗ 이 조합은 pump-probe 신호가 아니다','labn','start','var(--s6)')+TM(14,58,lines,'sub','start',15)}
+  else{const col=R.sign>0?'var(--s1)':'var(--s2)',w0=R.w==='ω_eg'?2500:2470;
+   const P=plot({x:[2420,2540],y:[-1.2,1.2],T:96,B:150,L:40,noy:1,xt:[{v:2470,l:'2470'},{v:2500,l:'2500'}],xl:'probe ω₃ (cm⁻¹)'});
+   s+=T(14,30,`${R.name} (${R.reph?'rephasing':'non-rephasing'})`,'labn','start',col)+T(14,50,`bra 쪽 ${R.nb}번 → (−1)^${R.nb} = ${R.sign>0?'+ (빨강)':'− (파랑)'}`,'sub','start',col)
+    +T(14,68,`신호 자리: ${R.w} = ${w0} cm⁻¹ (예시, Δ = 30)`,'sub')
+    +P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/><line x1="${P.X(w0)}" x2="${P.X(w0)}" y1="${P.Y(0)}" y2="${P.Y(R.sign)}" style="stroke:${col}" stroke-width="6"/>`}
+  s+=T(14,206,'가능한 조합은 6개뿐이다','lab');
+  FD_ALL.forEach(([n,r,code],i)=>{const y=224+i*13,on=!R.err&&n===R.name&&(r==='rephasing')===R.reph,col=n==='ESA'?'var(--s2)':'var(--s1)',cls=on?'labn':'sub';
+   s+=T(14,y,(on?'▶ ':'')+n,cls,'start',on?col:undefined)+T(64,y,r,cls,'start',on?col:undefined)+T(160,y,code,cls,'start',on?col:undefined)+T(236,y,n==='ESA'?'−':'+',cls,'start',col)});
+  return s},
+ read:['체크박스로 세 상호작용이 ket(왼쪽)인지 bra(오른쪽)인지, ②와 ③이 올림인지 내림인지 고르면 다이어그램과 판정이 바로 바뀐다. ①은 바닥 |g⟩⟨g|에서 시작하니 항상 올림이다.','규칙 1: pump 두 번(①②)은 +k 하나, −k 하나여야 한다. ket 올림과 bra 내림이 +k, ket 내림과 bra 올림이 −k다. 그래야 지연 T 동안 집단(대각선)에 머물고 신호가 probe 방향으로 나온다.','규칙 2: probe(③)는 +k₃(ket 올림 또는 bra 내림)이고, 그 뒤 ket이 bra보다 한 칸 위인 결맞음이어야 ket 쪽에서 신호가 나온다.','규칙 3: 부호 = (−1)^(bra 쪽 수). 이 규칙을 모두 지키는 조합은 오른쪽 표의 6개뿐이다. GSB와 SE는 +(빨강), ESA는 −(파랑)이다. rephasing 단계 점검 질문의 "6개"가 이것이다.','①을 bra 쪽에 두면 rephasing, ket 쪽에 두면 non-rephasing이다. pump-probe에서는 둘이 같은 방향으로 나와 합쳐진다.','✗가 나오면 오른쪽에 이유가 나온다. 대부분 "g 아래로 내려감"이거나 "pump 두 번이 같은 부호"다.'],
+ q:'①②를 모두 ket 올림으로 고르면 어떤 상태가 되고, 왜 pump-probe 신호가 아닌가?',a:'|f⟩⟨g|, 두 양자(2Q) 결맞음이다. +k가 두 번이라 신호가 2k_pump + k₃ 쪽으로 나가 probe 방향과 다르다. 이런 경로는 2Q 2D 분광에서 따로 잰다.'}];
 
 /* ---------- 탭 ---------- */
 const TABS=[
