@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Laser Source Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · laser sources</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../lasers.html" href="../lasers.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 레이저 광원 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 레이저 광원
+// @status 검토 중
+// @lang ko en
+// @title.en Laser Source Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · laser sources
+// @status.en Under review
+/* 레이저 광원 노트: Ti:Sapphire, Yb. Ti:S 탭이 먼저다 (Yb 탭이 Ti:S와 비교한다).
+   글은 TR('한국어','English')로 쓴다 (영어판 notes/en/lasers.html). */
+const NOTE={key:'lasers'};
+
+/* ---------- Ti:S 탭 전용 헬퍼 ---------- */
+const tsG=(x,x0,fw)=>Math.exp(-4*Math.LN2*((x-x0)/fw)**2);
+/* 공진기: 왼쪽 HR 거울(x=30), 오른쪽 출력 거울(x=290), 가운데 결정 */
+function tsCav(y,w,o={}){let s=`<rect x="24" y="${y-30}" width="6" height="60" style="fill:var(--fg)"/><rect x="290" y="${y-30}" width="5" height="60" style="fill:var(--fg)" fill-opacity=".55"/>`;
+ s+=`<rect x="${o.cx??130}" y="${y-16}" width="${o.cw??60}" height="32" rx="3" style="fill:var(--s5)" fill-opacity=".22" stroke="var(--s5)"/>`;
+ s+=`<rect x="30" y="${y-w/2}" width="260" height="${w}" style="fill:var(--s1)" fill-opacity=".28"/>`;
+ return s}
+const tsSpec=l=>l<700?'hsl(0,70%,46%)':'hsl(0,55%,36%)';
+const tsDt=dl=>0.441*(800e-9)**2/3e8/(dl*1e-9)*1e15;   /* 변환 한계 가우시안 (fs) ← Δλ (nm), 800 nm */
+const tsDl=dt=>0.441*(800e-9)**2/3e8/(dt*1e-15)*1e9;   /* Δλ (nm) ← Δt (fs) */
+/* 모드 잠금: N개 모드 합의 세기 (시간 t는 왕복 시간 단위 0..2) */
+const tsPh=Array.from({length:40},(_,i)=>((i*2.399963)%(2*Math.PI)));
+function tsSum(N,t,lock){let re=0,im=0;for(let n=0;n<N;n++){const ph=2*Math.PI*(n-(N-1)/2)*t+(lock?0:tsPh[n]);re+=Math.cos(ph);im+=Math.sin(ph)}return(re*re+im*im)/(N*N)}
+
+/* ======================= Ti:Sapphire ======================= */
+const TS=[
+{t:TR('레이저 = 이득 매질 + 공진기 + 펌프','Laser = gain medium + cavity + pump'),ec:TR('공진기 안에서 빛이 왕복하며 자란다 (단순화: 실제 펌프는 공진기 축을 따라 넣는다)','Light grows as it travels back and forth in the cavity (simplified: a real pump enters along the cavity axis)'),mc:TR('왕복할 때마다 세기 (예시)','Intensity after each round trip (example)'),
+ slider:{min:0,max:40,step:1,init:12,label:TR('왕복 횟수','Round trips'),fmt:v=>Math.round(v)+TR('번',''),play:1},
+ e:v=>{const I=1/(1+99*Math.exp(-.25*v)),w=4+26*I;let s=tsCav(150,w);
+  s+=`<g data-n="1">`+LN(160,250,160,170,'var(--s3)',{w:3,mk:'s3'})+badge(176,236,1,'var(--s3)')+'</g>'+T(190,240,TR('펌프 (초록)','pump (green)'),'sub');
+  s+=`<g data-n="2">${badge(160,106,2,'var(--s5)')}</g>`+T(176,110,TR('이득 매질 (Ti:S 결정)','gain medium (Ti:S)'),'sub');
+  s+=`<g data-n="3">${badge(27,98,3,'var(--fg)')}${badge(292,98,3,'var(--fg)')}</g>`+T(27,80,TR('반사 거울','high reflector'),'sub','start')+T(292,80,TR('출력 거울','output coupler'),'sub','end');
+  s+=LN(296,150,316,150,'var(--s1)',{w:Math.max(1,w/6),mk:'s1'});
+  return s+T(14,24,TR(`왕복 ${Math.round(v)}번: 세기 ${(I*100).toFixed(0)}% (포화 대비)`,`Round trip ${Math.round(v)}: intensity ${(I*100).toFixed(0)}% of saturation`),'lab')+T(14,42,TR('빨간 띠 굵기 = 공진기 안 빛의 세기','Red band width = intracavity intensity'),'sub')+T(14,268,TR('출력 거울은 빛의 일부만 내보낸다 → 출력 빔','The output coupler lets only part out → output beam'),'sub')},
+ m:v=>{const f=n=>1/(1+99*Math.exp(-.25*n));const P=plot({x:[0,40],y:[0,1.1],xt:[0,10,20,30,40].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:1,l:TR('포화','sat.')}],xl:TR('왕복 횟수','round trips'),yl:TR('공진기 안 세기','intracavity intensity'),T:30});
+  return P.s+crv(P,f,0,40,'var(--s1)')+`<circle cx="${P.X(v)}" cy="${P.Y(f(v))}" r="6" style="fill:var(--s1)"/>`+T(P.R,P.Y(.2),TR('처음: 이득 > 손실 → 자란다','early: gain > loss → grows'),'sub','end')+T(P.R,P.Y(.08),TR('나중: 이득 = 손실 → 일정','later: gain = loss → steady'),'sub','end')},
+ read:[TR(`레이저는 세 가지로 이루어진다. ${c(1,'s3')} 펌프가 에너지를 넣고, ${c(2,'s5')} 이득 매질이 빛을 키우고, ${c(3,'f')} 두 거울(공진기)이 빛을 여러 번 왕복시킨다.`,`A laser has three parts. ${c(1,'s3')} The pump supplies energy, ${c(2,'s5')} the gain medium amplifies the light, and ${c(3,'f')} two mirrors (the cavity) send the light back and forth many times.`),TR('빛은 결정을 지날 때마다 조금씩 커진다(유도 방출). 한 바퀴 이득이 손실(출력 거울로 나가는 몫 포함)보다 크면 자라고, 같아지면 일정해진다.','The light grows a little on every pass through the crystal (stimulated emission). When the round-trip gain exceeds the loss (including the share leaving through the output coupler), the light grows; when the two are equal, it stays constant.'),TR('오른쪽 곡선은 그 모양만 보여 주는 예시다. 실제로는 왕복 수천 번이 μs 안에 끝난다.','The curve on the right is an example that only shows the shape. In reality, thousands of round trips finish within μs.'),TR('Ti:Sapphire는 사파이어(Al₂O₃) 결정에 Ti³⁺ 이온을 조금 넣은 것이다. 이 탭은 Ti:S를 예로 이 세 부품이 펄스를 만드는 과정을 따라간다.','Ti:Sapphire is a sapphire (Al₂O₃) crystal doped with a small amount of Ti³⁺ ions. This tab uses Ti:S as the example and follows how these three parts make a pulse.')],
+ q:TR('출력 거울을 100% 반사로 바꾸면?','What if the output coupler is made 100% reflective?'),a:TR('공진기 안 빛은 커지지만 밖으로 나오는 빛이 없다. 출력 거울은 일부(예: 몇 %)를 일부러 통과시킨다.','The intracavity light grows, but no light comes out. The output coupler deliberately transmits a fraction (e.g., a few %).')},
+{t:TR('Ti:S는 초록을 먹고 근적외선을 낸다','Ti:S absorbs green and emits near-infrared'),ec:TR('Ti³⁺ 에너지 그림 (띠는 진동으로 넓어진 준위)','Ti³⁺ energy diagram (bands = levels broadened by vibration)'),mc:TR('흡수와 방출 스펙트럼 (모양은 대략)','Absorption and emission spectra (approx. shapes)'),
+ e:()=>{let s=`<rect x="40" y="200" width="150" height="46" style="fill:var(--s6)" fill-opacity=".18"/>`+L(40,190,246)+T(198,236,TR('바닥 상태 띠','ground-state band'),'sub')
+   +`<rect x="40" y="52" width="150" height="46" style="fill:var(--s5)" fill-opacity=".18"/>`+L(40,190,98)+T(198,80,TR('들뜬 상태 띠','excited-state band'),'sub');
+  s+=A(70,244,70,56,'s3',1,{dx:-14,t:TR('흡수 약 500 nm','absorb ~500 nm'),tx:6,ty:-30});
+  s+=`<path d="M78,58 C110,64 150,80 166,96" fill="none" style="stroke:var(--muted)" stroke-dasharray="3 3"/>`+T(100,46,TR('빠른 이완 (열)','fast relaxation (heat)'),'sub');
+  s+=A(170,98,170,202,'s1',2,{dx:-14,t:TR('방출 약 800 nm','emit ~800 nm'),tx:8,ty:8});
+  return s+T(14,24,TR('흡수 화살표가 방출 화살표보다 길다 = 에너지가 크다','Absorption arrow longer than emission = more energy'),'sub')+T(14,272,TR('간격은 보기 쉽게 그림, 실제 비례 아님','Spacing drawn for clarity, not to scale'),'sub')},
+ m:()=>{const P=plot({x:[400,1100],y:[0,1.15],xt:[400,500,600,700,800,900,1000,1100].map(x=>({v:x,l:String(x)})),xl:'wavelength (nm)',yl:TR('세기 (정규화)','intensity (norm.)'),T:30});
+  return P.s+`<g data-n="1">${crv(P,x=>tsG(x,490,120),400,650,'var(--s3)')}${badge(P.X(490),P.Y(1)-14,1,'var(--s3)')}</g>`
+   +`<g data-n="2">${crv(P,x=>x<780?tsG(x,780,160):tsG(x,780,280),560,1100,'var(--s1)')}${badge(P.X(780),P.Y(1)-14,2,'var(--s1)')}</g>`
+   +`<line x1="${P.X(532)}" x2="${P.X(532)}" y1="${P.T+20}" y2="${P.B}" class="lvl2"/>`+T(P.X(532)+4,P.Y(1.05),TR('532 nm 펌프','532 nm pump'),'sub')
+   +T(P.X(490)-14,P.Y(1)-10,TR('흡수','absorption'),'sub','end',COL.s3)+T(P.X(780)+14,P.Y(1)-10,TR('방출','emission'),'sub','start',COL.s1)},
+ read:[TR(`${c(1,'s3')} Ti³⁺는 대략 400–600 nm(초록 근처)를 흡수한다. 그래서 532 nm 초록 레이저로 펌핑한다.`,`${c(1,'s3')} Ti³⁺ absorbs approx. 400–600 nm (around green). It is therefore pumped with a 532 nm green laser.`),TR('우리 셋업은 두 군데서 초록을 쓴다: 발진기(Mai Tai) 안에서는 Nd:YVO₄ 1064 nm를 2배로 만든 532 nm 연속광, 증폭기에서는 Empower의 527 nm 펄스(1 kHz)다(논문 A.1.1).','Our setup uses green in two places: inside the oscillator (Mai Tai), 532 nm CW light from frequency-doubled Nd:YVO₄ 1064 nm; in the amplifier, 527 nm pulses (1 kHz) from the Empower (thesis A.1.1).'),TR(`${c(2,'s1')} 들뜬 이온은 진동으로 에너지를 조금 잃은 뒤 대략 650–1100 nm에서 빛을 낸다. 중심이 800 nm 근처다.`,`${c(2,'s1')} The excited ions lose a little energy to vibrations and then emit at approx. 650–1100 nm. The center is near 800 nm.`),TR('흡수와 방출이 다른 파장에 있어서, 펌프 빛과 레이저 빛을 거울과 필터로 쉽게 나눌 수 있다.','Absorption and emission lie at different wavelengths, so pump light and laser light are easy to separate with mirrors and filters.'),TR('스펙트럼 모양과 범위는 대략값이다(확인 필요).','The spectral shapes and ranges are approx. values (to be verified).')],
+ q:TR('펌프 광자 532 nm가 800 nm 광자가 될 때 남는 에너지는 어디로 가나?','When a 532 nm pump photon becomes an 800 nm photon, where does the leftover energy go?'),a:TR('결정의 열이 된다. 1 − 532/800 ≈ 34%. Yb 탭 3단계의 양자 결손과 같은 계산이다.','It becomes heat in the crystal. 1 − 532/800 ≈ 34%. This is the same calculation as the quantum defect in step 3 of the Yb tab.')},
+{t:TR('방출 띠가 넓다: 넓은 파장에서 발진할 수 있다','The emission band is broad: lasing is possible over a wide wavelength range'),ec:TR('두 퍼텐셜 곡선 (위치가 어긋남)','Two potential curves (displaced minima)'),mc:TR('이득 곡선과 발진 파장','Gain curve and lasing wavelength'),
+ slider:{min:700,max:1000,step:5,init:800,label:TR('고른 파장','Selected wavelength'),fmt:v=>Math.round(v)+' nm'},
+ e:v=>{const g=x=>250-.010*(x-150)**2,ex=x=>150-.008*(x-185)**2;let s=crv({X:x=>x,Y:y=>y},g,70,230,'var(--fg)')+crv({X:x=>x,Y:y=>y},ex,105,265,'var(--fg)');
+  s+=T(238,196,TR('바닥 상태','ground'),'sub')+T(242,92,TR('들뜬 상태','excited'),'sub');
+  s+=`<rect x="163" y="128" width="44" height="26" rx="4" style="fill:var(--s5)" fill-opacity=".12"/>`;
+  [[165,'hsl(270,45%,55%)'],[185,'var(--s1)'],[205,'hsl(0,55%,32%)']].forEach(([x,col])=>{s+=LN(x,ex(x),x,g(x)-6,col,{w:2})+`<path d="M${x-4},${g(x)-10} L${x},${g(x)-2} L${x+4},${g(x)-10} Z" style="fill:${col}"/>`});
+  s+=`<circle cx="185" cy="${ex(185)}" r="4" style="fill:var(--fg)"/>`+T(14,24,TR('들뜬 상태 바닥 근처(보라 상자)에서 내려와','From near the excited-state minimum (purple box),'),'sub')+T(14,40,TR('바닥 곡선의 여러 높이에 닿는다 → 광자 에너지가 여럿','arrows land at many heights → many photon energies'),'sub')
+   +T(14,56,TR('긴 화살표 = 짧은 파장, 짧은 화살표 = 긴 파장','long arrow = short λ, short arrow = long λ'),'sub')+T(14,268,TR('가로축 = 원자 위치(진동 좌표), 모양은 예시','x axis = atomic position (vibrational coord.), example'),'sub');
+  return s},
+ m:v=>{const gain=x=>tsG(x,800,230);const P=plot({x:[650,1100],y:[0,1.15],xt:[700,800,900,1000,1100].map(x=>({v:x,l:String(x)})),xl:'wavelength (nm)',yl:TR('이득 (상대)','gain (rel.)'),T:30});
+  return P.s+crv(P,gain,650,1100,'var(--s1)')+crv(P,x=>tsG(x,1030,18)*.95,990,1070,'var(--s3)',{dash:1})
+   +`<line x1="${P.X(v)}" x2="${P.X(v)}" y1="${P.Y(0)}" y2="${P.Y(gain(v))}" style="stroke:var(--fg)" stroke-width="3"/>`
+   +T(P.X(v),P.Y(1.08),Math.round(v)+' nm','sub','middle')+T(P.L+4,P.T-12,TR('Ti:S (실선)','Ti:S (solid)'),'sub','start',COL.s1)+T(P.R,P.T-12,TR('Yb (점선, 비교)','Yb (dashed, comparison)'),'sub','end',COL.s3)},
+ read:[TR('결정 속 Ti³⁺는 주변 원자와 함께 진동한다. 들뜬 상태와 바닥 상태의 안정 위치가 어긋나 있어서, 내려오는 화살표가 바닥 곡선의 여러 높이에 닿는다.','Ti³⁺ in the crystal vibrates together with the surrounding atoms. The equilibrium positions of the excited and ground states are displaced, so the downward arrows land at many heights on the ground-state curve.'),TR('그래서 방출이 한 파장이 아니라 넓은 띠가 된다. Ti:S 이득 띠는 대략 700–1000 nm, 폭이 수백 nm다(확인 필요).','The emission is therefore a broad band rather than a single wavelength. The Ti:S gain band is approx. 700–1000 nm, several hundred nm wide (to be verified).'),TR('공진기 안에 파장 고르는 소자를 두면 그 띠 안 어디서든 발진시킬 수 있다. 슬라이더가 그 고른 파장이다.','A wavelength-selecting element in the cavity allows lasing anywhere in that band. The slider sets the selected wavelength.'),TR('넓은 띠는 다음 단계들의 핵심이다. 짧은 펄스에는 넓은 스펙트럼이 필요하기 때문이다(6단계). 점선 Yb는 띠가 좁다(Yb 탭 4단계).','The broad band is the key to the following steps, because a short pulse needs a broad spectrum (step 6). The dashed Yb band is narrow (Yb tab, step 4).')],
+ q:TR('이득 띠 가장자리(예: 1000 nm)에서 발진시키면?','What happens when lasing at the edge of the gain band (e.g., 1000 nm)?'),a:TR('이득이 작아 출력이 약하고 불안정해진다. 보통 이득이 큰 가운데(약 800 nm 근처)에서 쓴다.','The gain is small, so the output is weak and unstable. The laser is usually run near the center, where the gain is large (around 800 nm).')},
+{t:TR('공진기 모드: 거울 사이 길이가 정하는 빗살','Cavity modes: a comb set by the mirror spacing'),ec:TR('거울 사이 정상파 (예: 마디 수가 다른 세 모드)','Standing waves between the mirrors (e.g., three modes with different node counts)'),mc:TR('모드 빗살 × 이득 곡선 (빗살 간격은 보기 쉽게 과장)','Mode comb × gain curve (comb spacing exaggerated for clarity)'),
+ slider:{min:.5,max:2,step:.05,init:1.9,label:TR('공진기 길이 L','Cavity length L'),fmt:v=>v.toFixed(2)+' m · '+Math.round(3e8/(2*v)/1e6)+' MHz'},
+ e:v=>{let s=`<rect x="24" y="40" width="6" height="200" style="fill:var(--fg)"/><rect x="290" y="40" width="6" height="200" style="fill:var(--fg)"/>`;
+  [[6,70,'s2'],[7,140,'s3'],[8,210,'s5']].forEach(([n,y,k],i)=>{let d='';for(let j=0;j<=120;j++){const x=30+260*j/120;d+=(j?' L':'M')+x.toFixed(1)+','+(y-22*Math.sin(n*Math.PI*j/120)).toFixed(1)}
+   s+=`<g data-n="${i+1}"><path d="${d}" fill="none" style="stroke:${COL[k]}" stroke-width="1.8"/>${badge(14,y,i+1,COL[k])}</g>`+T(160,y+34,TR(`반파장 ${n}개`,`${n} half-waves`),'sub','middle')});
+  return s+T(14,24,TR('양 끝(거울)이 마디가 되는 파장만 남는다','Only waves with nodes at both mirrors survive'),'sub')+T(14,268,TR('모드 사이 진동수 간격 = c / 2L','Frequency spacing between modes = c / 2L'),'sub')},
+ m:v=>{const P=plot({x:[-1,1],y:[0,1.15],xt:[],xl:TR('진동수 (상대)','frequency (rel.)'),yl:TR('세기 (상대)','intensity (rel.)'),T:30});const sp=.06*v/1.9*(1.9/v)**2,g=x=>tsG(x,0,1.1);
+  const step=.36/v;let s=P.s+crv(P,g,-1,1,'var(--s1)',{dash:1,w:1.5});let k=0;
+  for(let f=-Math.floor(1/step)*step;f<=1;f+=step,k++){s+=`<line x1="${P.X(f)}" x2="${P.X(f)}" y1="${P.B}" y2="${P.Y(g(f))}" style="stroke:var(--fg)" stroke-width="1.6"/>`}
+  [-1,0,1].forEach((i,j)=>{const f=i*step;s+=`<g data-n="${j+1}">${badge(P.X(f),P.Y(g(f))-14,j+1,COL[['s2','s3','s5'][j]])}</g>`});
+  return s+T(P.R,P.T-12,TR(`간격 = ${Math.round(3e8/(2*v)/1e6)} MHz`,`spacing = ${Math.round(3e8/(2*v)/1e6)} MHz`),'lab','end')+T(P.L+4,P.T-12,TR('점선 = 이득 곡선','dashed = gain curve'),'sub')},
+ read:[TR(`공진기 안에서는 왕복한 빛이 자기 자신과 겹친다. 거울 사이에 반파장이 정수 개 들어가는 빛만 살아남는다. ${c(1,'s2')}${c(2,'s3')}${c(3,'s5')}처럼 마디 수가 하나씩 다른 것들이 이웃 모드다.`,`In the cavity, light that completes a round trip overlaps with itself. Only light that fits an integer number of half-wavelengths between the mirrors survives. Modes that differ by one node, like ${c(1,'s2')}${c(2,'s3')}${c(3,'s5')}, are neighboring modes.`),TR('이웃 모드의 진동수 차이는 c / 2L이다. 빛이 공진기를 한 번 왕복하는 시간의 역수와 같다.','The frequency difference between neighboring modes is c / 2L. It equals the inverse of the time light takes for one cavity round trip.'),TR('세어 보기: L ≈ 1.9 m면 c / 2L ≈ 80 MHz다. 우리 발진기(Mai Tai)는 공칭 80 MHz다(모델에 따라 84 MHz, 확인 필요).','Counting: L ≈ 1.9 m gives c / 2L ≈ 80 MHz. Our oscillator (Mai Tai) is nominally 80 MHz (84 MHz depending on the model, to be verified).'),TR('이득 곡선 안에 든 모드는 모두 발진할 수 있다. 이득 폭이 대략 수십 THz라, 80 MHz 간격이면 모드가 대략 10⁵개다. 그림은 빗살 간격을 크게 과장했다.','Every mode inside the gain curve can lase. The gain width is approx. tens of THz, so at 80 MHz spacing there are approx. 10⁵ modes. The figure greatly exaggerates the comb spacing.')],
+ q:TR('공진기 길이를 절반으로 줄이면 모드 간격은?','What happens to the mode spacing when the cavity length is halved?'),a:TR('2배가 된다(c / 2L). 같은 이득 띠 안에 든 모드 수는 절반이 된다.','It doubles (c / 2L). The number of modes within the same gain band is halved.')},
+{t:TR('모드 잠금: 위상이 맞으면 짧은 펄스가 된다','Mode locking: modes in phase form a short pulse'),ec:TR('모드 N개 (처음 몇 개만 그림)','N modes (only the first few drawn)'),mc:TR('모드를 모두 더한 세기 (공진기 왕복 2번)','Intensity of all modes summed (two cavity round trips)'),
+ slider:{min:1,max:30,step:1,init:8,label:TR('모드 수 N','Number of modes N'),fmt:v=>Math.round(v)+TR('개','')},tg:[{k:'lk',l:TR('위상 맞춤 (모드 잠금)','Phases aligned (mode locking)'),on:true}],
+ e:(v,tg)=>{const N=Math.round(v),K=Math.min(N,5);let s='';
+  for(let i=0;i<K;i++){const n=i-(K-1)/2,y=50+i*40;let d='';for(let j=0;j<=160;j++){const t=2*j/160;d+=(j?' L':'M')+(30+260*j/160).toFixed(1)+','+(y-14*Math.cos(2*Math.PI*(6+n)*t+(tg.lk?0:tsPh[i]))).toFixed(1)}
+   s+=`<path d="${d}" fill="none" style="stroke:var(--s2)" stroke-width="1.2"/>`}
+  s+=`<line x1="30" x2="30" y1="30" y2="${50+(K-1)*40+18}" class="lvl2"/><line x1="160" x2="160" y1="30" y2="${50+(K-1)*40+18}" class="lvl2"/>`;
+  return s+T(14,20,tg.lk?TR('세로 점선에서 모든 모드가 동시에 꼭대기 → 더해진다','All modes peak together at the dashed lines → they add up'):TR('위상이 제각각 → 꼭대기가 어긋난다','Random phases → the peaks do not line up'),'sub')+T(14,268,TR(`N = ${N}${N>5?' (처음 5개만 그림)':''}, 반송파는 보기 쉽게 느리게`,`N = ${N}${N>5?' (first 5 drawn)':''}; carrier slowed for clarity`),'sub')},
+ m:(v,tg)=>{const N=Math.round(v);const P=plot({x:[0,2],y:[0,1.1],xt:[{v:0,l:'0'},{v:1,l:'T_rt'},{v:2,l:'2T_rt'}],yt:[{v:0,l:'0'},{v:1,l:'N²'}],xl:TR('시간 (T_rt = 왕복 시간)','time (T_rt = round-trip time)'),yl:TR('세기 (상대)','intensity (rel.)'),T:30});
+  return P.s+crv(P,t=>tsSum(N,t,tg.lk),0,2,tg.lk?'var(--s1)':'var(--s6)',{n:800,w:1.6})+T(P.R,P.T-12,tg.lk?TR(`펄스 폭 ≈ T_rt / N`,`pulse width ≈ T_rt / N`):TR('평균 세기 ≈ N (꼭대기의 1/N)','mean intensity ≈ N (1/N of the peak)'),'sub','end')},
+ read:[TR('모드마다 진동수가 조금씩 다른 빛이다. 위상이 제각각이면 더해도 그냥 흔들리는 연속광이 된다(체크박스 끔).','Each mode is light of a slightly different frequency. With random phases, the sum is just fluctuating continuous light (checkbox off).'),TR('모든 모드의 위상을 맞추면, 한 시점에서 모두 꼭대기가 겹쳐 아주 센 펄스가 되고 나머지 시간엔 서로 지운다. 이걸 모드 잠금이라 한다.','When all modes are in phase, their peaks coincide at one instant to form a very intense pulse, and they cancel each other at other times. This is called mode locking.'),TR('펄스는 왕복 시간 T_rt마다 한 번 나온다(80 MHz면 12.5 ns마다). 펄스 폭은 대략 T_rt / N이다. 모드가 많을수록 펄스가 짧다.','A pulse comes out once every round-trip time T_rt (every 12.5 ns at 80 MHz). The pulse width is approx. T_rt / N. More modes give a shorter pulse.'),TR('꼭대기 세기는 N²까지 커진다(평균은 N). 슬라이더로 N을 늘리면 펄스가 좁고 뾰족해진다.','The peak intensity grows up to N² (the mean is N). Increasing N with the slider makes the pulse narrower and sharper.'),TR('실제로는 모드 약 10⁵개가 잠겨 수십 fs 펄스가 된다. 4단계의 세어 보기와 이어진다.','In practice, about 10⁵ modes are locked, giving pulses of tens of fs. This connects to the count in step 4.')],
+ q:TR('모드 수가 같고 위상만 제각각이면 평균 출력은?','With the same number of modes but random phases, what is the average output?'),a:TR('같다(약 N). 위상 맞춤은 에너지를 시간상 한곳에 모을 뿐이다. 그래서 꼭대기 세기만 N배 커진다.','The same (about N). Phase locking only gathers the energy into one place in time. That is why only the peak intensity grows N-fold.')},
+{t:TR('펄스 폭과 스펙트럼 폭은 반비례한다','Pulse width and spectral width are inversely proportional'),ec:TR('시간에서 본 펄스의 전기장 (반송파는 보기 쉽게 느리게)','Electric field of the pulse in time (carrier slowed for clarity)'),mc:TR('같은 펄스의 스펙트럼','Spectrum of the same pulse'),
+ slider:{min:10,max:200,step:1,init:35,label:TR('펄스 폭 Δt','Pulse width Δt'),fmt:v=>Math.round(v)+' fs'},
+ e:v=>{const P=plot({x:[-200,200],y:[-1.1,1.1],xt:[-200,-100,0,100,200].map(x=>({v:x,l:String(x)})),xl:TR('시간 (fs)','time (fs)'),noy:1,T:30,L:20});
+  return P.s+crv(P,t=>tsG(t,0,v)**.5*Math.cos(2*Math.PI*t/14),-200,200,'var(--s1)',{n:800,w:1.2})+crv(P,t=>tsG(t,0,v)**.5,-200,200,'var(--fg)',{dash:1,w:1.2})
+   +`<g data-n="1">${LN(P.X(-v/2),P.Y(Math.SQRT1_2),P.X(v/2),P.Y(Math.SQRT1_2),'var(--fg)',{w:1.2})}${badge(P.X(v/2)+16,P.Y(Math.SQRT1_2),1,'var(--fg)')}</g>`+T(P.L+4,P.T-12,TR('Δt = 세기의 반치폭 (FWHM)','Δt = intensity full width at half maximum (FWHM)'),'sub')+T(P.L+4,P.T+4,TR('점선 = 전기장 포락선, 세기 절반 = 포락선 0.71','dashed = field envelope; half intensity = envelope 0.71'),'sub')},
+ m:v=>{const dl=tsDl(v);const P=plot({x:[650,950],y:[0,1.15],xt:[700,750,800,850,900].map(x=>({v:x,l:String(x)})),xl:'wavelength (nm)',yl:TR('세기 (정규화)','intensity (norm.)'),T:30});
+  return P.s+crv(P,l=>tsG(l,800,dl),650,950,'var(--s1)',{n:400})+`<g data-n="2">${LN(P.X(800-dl/2),P.Y(.5),P.X(800+dl/2),P.Y(.5),'var(--fg)',{w:1.2})}${badge(P.X(800+dl/2)+16,P.Y(.5),2,'var(--fg)')}</g>`
+   +T(P.R,P.T-12,TR(`Δλ ≈ ${dl.toFixed(dl<10?1:0)} nm (변환 한계 가우시안)`,`Δλ ≈ ${dl.toFixed(dl<10?1:0)} nm (transform-limited Gaussian)`),'lab','end')},
+ read:[TR(`${c(1,'f')} 펄스가 짧을수록 ${c(2,'f')} 스펙트럼이 넓어야 한다. 변환 한계 가우시안 펄스면 Δν · Δt ≈ 0.441이다.`,`The shorter ${c(1,'f')} the pulse, the broader ${c(2,'f')} the spectrum must be. For a transform-limited Gaussian pulse, Δν · Δt ≈ 0.441.`),TR('800 nm에서 같은 단위로 세어 보기: 35 fs → 약 27 nm, 100 fs → 약 9 nm, 10 fs → 약 94 nm.','Counting at 800 nm in the same units: 35 fs → about 27 nm, 100 fs → about 9 nm, 10 fs → about 94 nm.'),TR('우리 증폭기(Solstice Ace)는 제조사 사양으로 800 nm, 35 fs, 1 kHz다(논문 3.2). 그래서 스펙트럼 폭이 대략 수십 nm 필요하다.','Our amplifier (Solstice Ace) is specified by the manufacturer as 800 nm, 35 fs, 1 kHz (thesis 3.2). A spectral width of approx. tens of nm is therefore needed.'),TR('Ti:S는 이득 띠가 수백 nm라(3단계) 이런 짧은 펄스가 가능하다. Yb 탭 4단계는 같은 논리로 Yb 펄스가 더 긴 이유를 설명한다.','The Ti:S gain band is several hundred nm wide (step 3), which makes such short pulses possible. Step 4 of the Yb tab uses the same logic to explain why Yb pulses are longer.'),TR('"변환 한계"는 모든 파장 성분이 시간상 같은 순간에 모인 가장 짧은 경우다. 8단계의 처프가 있으면 같은 스펙트럼이라도 펄스가 길어진다.','"Transform-limited" is the shortest case, in which all wavelength components arrive at the same instant. With chirp (step 8), the same spectrum gives a longer pulse.')],
+ q:TR('스펙트럼 폭이 같은데 측정한 펄스가 계산보다 길면?','The spectral width is the same, but the measured pulse is longer than calculated. Why?'),a:TR('파장 성분이 시간상 퍼져 있다(처프). 분산을 보정하면(8단계) 변환 한계 쪽으로 줄일 수 있다.','The wavelength components are spread out in time (chirp). Correcting the dispersion (step 8) shortens the pulse toward the transform limit.')},
+{t:TR('펄스를 만드는 장치: Kerr 렌즈와 우리 발진기','What makes the pulse: the Kerr lens and our oscillator'),ec:TR('결정 속 빔 지름 (센 빛일수록 좁게 모인다)','Beam diameter in the crystal (stronger light focuses tighter)'),mc:TR('조리개 통과율 vs 세기 (예시)','Aperture transmission vs intensity (example)'),
+ slider:{min:0,max:1,step:.05,init:.3,label:TR('빛의 세기 (상대)','Light intensity (rel.)'),fmt:v=>Math.round(v*100)+'%'},
+ e:v=>{const w0=30,w=w0*(1-.6*v);let s=`<rect x="110" y="90" width="80" height="80" rx="3" style="fill:var(--s5)" fill-opacity=".2" stroke="var(--s5)"/>`+T(150,84,TR('Ti:S 결정','Ti:S crystal'),'sub','middle');
+  s+=`<path d="M20,${130-w0} L110,${130-w0} Q150,${130-w0} 190,${130-w} L250,${130-w} L250,${130+w} L190,${130+w} Q150,${130+w0} 110,${130+w0} L20,${130+w0} Z" style="fill:var(--s1)" fill-opacity=".25"/>`;
+  s+=`<g data-n="1"><rect x="256" y="60" width="8" height="${70-12}" style="fill:var(--fg)"/><rect x="256" y="${130+12}" width="8" height="${70-12}" style="fill:var(--fg)"/>${badge(260,48,1,'var(--fg)')}</g>`+T(TR(276,248),52,TR('조리개','aperture'),'sub',TR('start','end'));
+  {const wt=Math.min(w,12);s+=`<rect x="264" y="${130-wt}" width="42" height="${2*wt}" style="fill:var(--s1)" fill-opacity=".25"/>`}
+  return s+T(14,20,TR('n = n₀ + n₂ I: 센 빛일수록 굴절률이 커진다','n = n₀ + n₂ I: stronger light, higher refractive index'),'sub')+T(14,36,TR('→ 빔 가운데가 렌즈처럼 모인다','→ the beam center focuses as if by a lens'),'sub')+T(14,230,TR(`세기 ${Math.round(v*100)}% → 빔 반지름 ${Math.round(w)} (그림 단위)`,`Intensity ${Math.round(v*100)}% → beam radius ${Math.round(w)} (figure units)`),'lab')+T(14,250,TR('약한 연속광은 넓게 퍼져 조리개에 많이 잘린다','Weak CW light stays wide and is clipped more'),'sub')+T(14,266,TR('원리 설명용 단순화 (확인 필요)','Simplified to show the principle (to be verified)'),'sub')},
+ m:v=>{const tr=x=>{const w=30*(1-.6*x);return Math.min(1,12/w)};const P=plot({x:[0,1],y:[0,1.1],xt:[{v:0,l:'0'},{v:.5,l:'50%'},{v:1,l:'100%'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:TR('세기 (상대)','intensity (rel.)'),yl:TR('통과율','transmission'),T:30});
+  return P.s+crv(P,tr,0,1,'var(--fg)')+`<g data-n="1"><circle cx="${P.X(v)}" cy="${P.Y(tr(v))}" r="6" style="fill:var(--s1)"/></g>`+T(P.X(.05),P.Y(.95),TR('센 펄스일수록 손실이 적다','Stronger pulses lose less'),'sub')+T(P.X(.05),P.Y(.85),TR('→ 펄스가 연속광을 이긴다','→ pulses win over CW light'),'sub')},
+ read:[TR('5단계에서 모드의 위상을 맞추려면 "펄스일 때 유리한" 장치가 공진기 안에 있어야 한다.','Locking the mode phases of step 5 requires an element in the cavity that "favors pulses".'),TR(`Kerr 렌즈 모드 잠금(KLM): 결정의 굴절률이 빛의 세기에 따라 커진다(n = n₀ + n₂I). 센 펄스는 결정 안에서 스스로 좁게 모이고, ${c(1,'f')} 조리개를 손실 없이 지난다. 약한 연속광은 잘린다. 그래서 펄스 상태가 살아남는다. Ti:S 발진기에서 널리 쓰는 방법이다.`,`Kerr-lens mode locking (KLM): the refractive index of the crystal increases with light intensity (n = n₀ + n₂I). An intense pulse focuses itself tightly in the crystal and passes ${c(1,'f')} the aperture without loss. Weak CW light is clipped. The pulsed state therefore survives. This method is widely used in Ti:S oscillators.`),TR('우리 발진기(Mai Tai)는 매뉴얼상 다른 방식이다. 공진기의 왕복 맥놀이를 포토다이오드로 받아 음향광학 변조기(AOM)를 같은 박자로 구동해 펄스를 시작하고 안정화한다(regenerative 모드 잠금, 논문 A.1.1).','According to its manual, our oscillator (Mai Tai) uses a different scheme. A photodiode detects the cavity round-trip beat, and an acousto-optic modulator (AOM) driven at the same rate starts and stabilizes the pulses (regenerative mode locking, thesis A.1.1).'),TR('어느 방식이든 펄스 폭 자체는 결정 안의 자기 위상 변조(SPM)와 프리즘 쌍이 넣는 음의 분산이 균형을 이뤄 정한다(다음 단계).','In either scheme, the pulse width itself is set by a balance between self-phase modulation (SPM) in the crystal and the negative dispersion of a prism pair (next step).'),TR('Kerr 효과는 백색광 생성(OPA 씨앗, 10단계)에서도 쓰이는 같은 3차 비선형 효과다.','The Kerr effect is the same third-order nonlinear effect used in white-light generation (OPA seed, step 10).')],
+ q:TR('KLM 발진기가 가끔 펄스 없이 연속광으로 도는 이유는?','Why does a KLM oscillator sometimes run as CW, without pulses?'),a:TR('처음에는 펄스가 없어 Kerr 렌즈가 약하다. 작은 흔들림(예: 거울 살짝 치기)으로 펄스가 생겨야 스스로 유지된다. 그래서 시작 장치를 따로 둔다(대략, 확인 필요).','At first there is no pulse, so the Kerr lens is weak. A small disturbance (e.g., lightly tapping a mirror) must create a pulse before it can sustain itself. A separate starting mechanism is therefore included (approx., to be verified).')},
+{t:TR('분산: 색마다 속도가 달라 펄스가 늘어난다','Dispersion: each color travels at a different speed, so the pulse stretches'),ec:TR('프리즘 쌍, 위에서 본 그림 (각도는 보기 쉽게 과장)','Prism pair, top view (angles exaggerated for clarity)'),mc:TR('시간에서 본 펄스 (색 = 그 순간의 파장)','Pulse in time (color = instantaneous wavelength)'),
+ slider:{min:0,max:1.6,step:.05,init:0,label:TR('분산 보정량','Dispersion compensation'),fmt:v=>v.toFixed(2)+TR(' (1 = 딱 맞음)',' (1 = exact)')},
+ e:v=>{let s=`<polygon points="70,156 100,96 130,156" class="dev"/><polygon points="195,130 225,190 255,130" class="dev"/>`;
+  s+=LN(14,148,85,126,'var(--fg)',{w:2});
+  s+=PL([[85,126],[115,126],[207,155],[243,155],[306,135]],'var(--s1)',{w:1.8})+PL([[85,126],[116,128],[217,173],[233,173],[306,151]],'var(--s2)',{w:1.8});
+  s+=T(225,120,TR('빨강: 유리를 길게 지난다','red: longer path in glass'),'sub','middle',COL.s1)+T(225,208,TR('파랑: 꼭짓점 근처, 유리를 짧게','blue: near apex, less glass'),'sub','middle',COL.s2);
+  return s+T(14,24,TR('결정·렌즈(정상 분산): 빨강이 빨리 간다 → 빨강이 앞, 파랑이 뒤','Glass (normal dispersion): red is faster → red leads'),'sub')+T(14,40,TR('프리즘 쌍(음의 분산): 빨강의 광경로를 길게 해 늦춘다','Prism pair (negative): a longer path delays red'),'sub')+T(14,230,TR(`보정량 ${v.toFixed(2)}`,`Compensation ${v.toFixed(2)}`),'lab')+T(14,250,v<.9?TR('덜 보정: 빨강이 여전히 앞','Under-compensated: red still leads'):v>1.1?TR('과보정: 이번엔 파랑이 앞','Over-compensated: now blue leads'):TR('거의 딱 맞음: 펄스가 가장 짧다','Nearly exact: the pulse is shortest'),'sub')},
+ m:v=>{const k=3*(1-v),tw=35*Math.sqrt(1+k*k);const P=plot({x:[-300,300],y:[0,1.15],xt:[-300,-150,0,150,300].map(x=>({v:x,l:String(x)})),xl:TR('시간 (fs)','time (fs)'),noy:1,T:30,L:20});
+  let s=P.s;const n=60;for(let i=0;i<n;i++){const t=-300+600*(i+.5)/n,a=tsG(t,0,tw)*35/tw;if(a<.01)continue;const fr=Math.max(-1,Math.min(1,-k*t/(tw*1.2)));const col=fr>0?`hsl(0,70%,${60-fr*20}%)`:`hsl(215,70%,${60+fr*20}%)`;
+   s+=`<rect x="${P.X(t-300/n)}" y="${P.Y(a)}" width="${P.X(t+300/n)-P.X(t-300/n)}" height="${P.B-P.Y(a)}" style="fill:${col}" fill-opacity=".8"/>`}
+  return s+T(P.R,P.T-12,TR(`펄스 폭 ≈ ${Math.round(tw)} fs (35 fs 변환 한계 가정)`,`pulse width ≈ ${Math.round(tw)} fs (35 fs transform limit assumed)`),'lab','end')+T(P.L+4,P.T+4,TR('빨강 = 긴 파장, 파랑 = 짧은 파장','red = long wavelength, blue = short wavelength'),'sub')},
+ read:[TR('유리나 결정 속에서는 보통 긴 파장(빨강)이 짧은 파장(파랑)보다 빨리 간다(정상 분산). 그래서 짧은 펄스가 지나가면 빨강이 앞, 파랑이 뒤로 퍼진다. 이걸 처프라고 한다.','In glass or crystals, long wavelengths (red) usually travel faster than short wavelengths (blue) (normal dispersion). A short pulse passing through therefore spreads out with red in front and blue behind. This is called chirp.'),TR('펄스가 짧을수록 스펙트럼이 넓어(6단계) 이 효과가 크다. 35 fs 펄스는 렌즈 몇 개만 지나도 눈에 띄게 늘어난다(대략).','The shorter the pulse, the broader its spectrum (step 6) and the larger this effect. A 35 fs pulse stretches noticeably after only a few lenses (approx.).'),TR('프리즘 쌍은 반대로 작동한다. 첫 프리즘에서 파랑이 더 많이 꺾여(둘 다 밑변 쪽으로 꺾인다), 둘째 프리즘에서 파랑은 꼭짓점 근처를, 빨강은 유리를 더 길게 지난다. 그래서 빨강의 광경로가 길어져 늦어지고 파랑이 따라잡는다(음의 분산). 슬라이더로 보정량을 1에 맞추면 펄스가 가장 짧아진다.','A prism pair works the other way. At the first prism, blue is bent more (both bend toward the base), so at the second prism blue passes near the apex while red travels through more glass. The optical path of red becomes longer, red is delayed, and blue catches up (negative dispersion). At a compensation of 1 on the slider, the pulse is shortest.'),TR('우리 발진기 안에도 프리즘 쌍이 있다(논문 A.1.1). 공진기 밖에서는 격자 쌍이나 처프 거울(층마다 다른 파장을 다른 깊이에서 반사하는 거울)을 쓰기도 한다(확인 필요).','Our oscillator also contains a prism pair (thesis A.1.1). Outside the cavity, grating pairs or chirped mirrors (mirrors whose layers reflect different wavelengths at different depths) are also used (to be verified).'),TR('과보정하면 이번엔 파랑이 앞으로 간다. 그래서 보정량을 그날그날 맞추는 장치도 있다.','Over-compensation puts blue in front instead. Some setups therefore adjust the compensation day by day.')],
+ q:TR('샘플 앞에 CaF₂ 창 하나를 더 넣으면 펄스는?','What happens to the pulse if one more CaF₂ window is placed before the sample?'),a:TR('정상 분산이 더해져 조금 길어진다. 중적외선 pump-probe에서 장비 응답이 펄스 계산값보다 긴 이유 중 하나로 처프를 의심한다(pump-probe 노트).','Normal dispersion is added, so the pulse becomes slightly longer. In mid-IR pump-probe, chirp is one suspected reason why the instrument response is longer than the calculated pulse (pump-probe note).')},
+{t:TR('증폭: 늘리고, 키우고, 다시 줄인다 (CPA)','Amplification: stretch, amplify, compress again (CPA)'),ec:TR('우리 증폭기 안의 흐름 (Solstice Ace)','Flow inside our amplifier (Solstice Ace)'),mc:TR('각 단계의 꼭대기 출력 (log, 예시)','Peak power at each stage (log, example)'),
+ tg:[{k:'ns',l:TR('늘리지 않고 바로 증폭하면?','What if amplified without stretching?'),on:false}],
+ e:(v,tg)=>{const B=(x,y,w,h,a,b,n)=>`<g data-n="${n}">`+box(x,y,w,h,a,b)+badge(x+8,y-2,n,'var(--fg)')+'</g>';
+  let s=B(10,40,90,40,TR('발진기','oscillator'),TR('80 MHz, 약 10 nJ','80 MHz, ~10 nJ'),1)+B(116,40,90,40,TR('늘이기','stretcher'),TR('수백 ps (가정)','100s ps (assumed)'),2)+B(222,40,90,40,TR('재생 증폭','regen. amplifier'),TR('1 kHz만 골라','picks 1 kHz'),3)+B(116,150,90,40,TR('줄이기','compressor'),'35 fs',4);
+  s+=LN(100,60,114,60,'var(--fg)',{mk:'f'})+LN(206,60,220,60,'var(--fg)',{mk:'f'})+PL([[245,80],[245,170],[208,170]],'var(--fg)',{mk:'f'})+LN(116,170,40,170,'var(--s1)',{w:3,mk:'s1'})+T(14,192,TR('출력 800 nm','output 800 nm'),'sub');
+  s+=LN(290,136,290,82,'var(--s3)',{w:2,mk:'s3',dash:1})+T(290,152,TR('펌프','pump'),'sub','middle')+T(290,166,'527 nm','sub','middle');
+  if(tg.ns)s+=T(14,222,TR('늘리지 않으면 증폭기 안 꼭대기 출력이 너무 커서','Without stretching, the peak power is too high:'),'labn','start',COL.s1)+T(14,238,TR('결정·광학 부품이 망가지거나','crystals and optics can be damaged,'),'sub')+T(14,254,TR('원치 않는 비선형 효과가 생긴다','or unwanted nonlinear effects appear'),'sub');
+  else s+=T(14,222,TR('세어 보기: 80 MHz 중 1 kHz만 증폭','Counting: only 1 kHz of 80 MHz is amplified'),'lab')+T(14,238,TR('→ 펄스 80 000개 중 1개','→ 1 pulse out of 80 000'),'sub')+T(14,254,TR('Pockels 셀이 하나를 넣고, 커지면 꺼낸다','A Pockels cell lets one in and out once grown'),'sub');
+  return s+T(14,24,TR('발진기·늘이기·증폭·줄이기가 한 상자 안에 있다','Oscillator, stretcher, amplifier, compressor: one box'),'sub')+T(14,272,TR('증폭 후 펄스 에너지는 확인 필요 (그림은 1 mJ 가정)','Output pulse energy to be verified (1 mJ assumed)'),'sub')},
+ m:(v,tg)=>{const P=plot({x:[0,4.4],y:[1,1e12],logy:1,xt:[],yt:[{v:1,l:'1 W'},{v:1e3,l:'1 kW'},{v:1e6,l:'1 MW'},{v:1e9,l:'1 GW'},{v:1e12,l:'1 TW'}],yl:TR('꼭대기 출력','peak power'),L:62,T:30,B:226});
+  const st=[[1e-8/100e-15,TR('발진기','osc.'),1],[1e-8/200e-12,TR('늘림','stretch'),2],[1e-3/200e-12,TR('증폭','amplify'),3],[1e-3/35e-15,TR('줄임','compress'),4]];
+  let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(1e8)}" y2="${P.Y(1e8)}" style="stroke:var(--s1)" stroke-dasharray="6 3"/>`+T(P.L+4,P.Y(1e8)-6,TR('증폭기 안 한계 (예시)','amp. limit (example)'),'sub','start',COL.s1);
+  st.forEach(([p,l,n],i)=>{const x=P.X(i+.7),w=P.X(.5)-P.X(0),pp=tg.ns&&n===3?1e-3/35e-15:p;s+=`<g data-n="${n}"><rect x="${x-w/2}" y="${P.Y(pp)}" width="${w}" height="${P.B-P.Y(pp)}" style="fill:${tg.ns&&n===3?'var(--s1)':'var(--s5)'}" fill-opacity=".7"/></g>`+T(x,P.B+16,l,'sub','middle')});
+  return s+T(P.L+4,P.T-12,TR('꼭대기 출력 = 펄스 에너지 / 펄스 폭','peak power = pulse energy / pulse width'),'sub')},
+ read:[TR(`${c(1,'f')} 발진기 펄스는 80 MHz로 많지만 하나에 약 10 nJ뿐이다(논문 A.1.1). 중적외선 변환(10단계)에는 너무 약하다.`,`${c(1,'f')} The oscillator delivers many pulses at 80 MHz, but each has only about 10 nJ (thesis A.1.1). That is too weak for mid-IR conversion (step 10).`),TR(`${c(2,'f')} 먼저 펄스를 시간으로 길게 늘인다(처프, 8단계의 반대). 꼭대기 출력이 수천 배 낮아진다.`,`${c(2,'f')} First, the pulse is stretched in time (chirp, the reverse of step 8). The peak power drops by a factor of thousands.`),TR(`${c(3,'f')} 재생 증폭기: Pockels 셀이 1 ms마다 펄스 하나를 공진기에 넣고, Ti:S 결정을 여러 번 지나며 커지면 꺼낸다. 결정은 Empower(Nd:YLF 2배, 527 nm, 1 kHz 펄스)가 펌핑한다.`,`${c(3,'f')} Regenerative amplifier: a Pockels cell injects one pulse into the cavity every 1 ms and ejects it after it has grown over many passes through the Ti:S crystal. The crystal is pumped by the Empower (frequency-doubled Nd:YLF, 527 nm, 1 kHz pulses).`),TR(`${c(4,'f')} 마지막에 격자 압축기로 다시 35 fs로 줄인다. 이때 처음으로 꼭대기 출력이 GW급이 된다(1 mJ 가정, 펄스 에너지는 논문도 확인 필요).`,`${c(4,'f')} Finally, a grating compressor shortens the pulse back to 35 fs. Only then does the peak power reach the GW level (1 mJ assumed; the pulse energy is marked to be verified in the thesis too).`),TR('체크박스를 켜면 늘리지 않고 증폭할 때를 본다. 증폭기 안에서 한계를 넘는다. 늘리는 이유가 이것이다. 이 방법을 chirped-pulse amplification(CPA)이라 한다.','With the checkbox on, the figure shows amplification without stretching. The power exceeds the limit inside the amplifier. That is why the pulse is stretched. This method is called chirped-pulse amplification (CPA).'),TR('같은 타이밍 전자 장치가 검출 장비에 쓰는 1 kHz 트리거도 낸다(pump-probe 노트).','The same timing electronics also output the 1 kHz trigger used by the detection equipment (pump-probe note).')],
+ q:TR('증폭기 출력이 1 mJ, 1 kHz면 평균 출력은?','If the amplifier output is 1 mJ at 1 kHz, what is the average power?'),a:TR('1 mJ × 1000 /s = 1 W. 펄스 에너지는 우리 장비 값으로 확인 필요하다.','1 mJ × 1000 /s = 1 W. The pulse energy is to be verified against our instrument values.')},
+{t:TR('우리 실험에서: OPA와 차주파수로 중적외선 만들기','In our experiment: making mid-IR with an OPA and difference-frequency generation'),ec:TR('800 nm → OPA → nDFG → 중적외선 (단순화)','800 nm → OPA → nDFG → mid-IR (simplified)'),mc:TR('광자 에너지 세어 보기 (cm⁻¹)','Counting photon energies (cm⁻¹)'),
+ slider:{min:1650,max:3800,step:10,init:2200,label:TR('목표 중적외선','Target mid-IR'),fmt:v=>Math.round(v)+' cm⁻¹ · '+(1e4/v).toFixed(2)+' µm'},
+ e:v=>{const ws=(12500+v)/2,wi=(12500-v)/2;const B=(x,y,w,h,a,b)=>box(x,y,w,h,a,b);
+  let s=B(10,110,70,40,'Ti:S','800 nm')+B(110,110,70,40,'OPA','')+B(214,110,70,40,'nDFG','AgGaS₂');
+  s+=`<g data-n="1">${LN(80,130,108,130,'var(--s1)',{w:2,mk:'s1'})}${badge(94,112,1,'var(--s1)')}</g>`;
+  s+=`<g data-n="2">${LN(180,124,212,124,'var(--s5)',{w:2,mk:'s5'})}${badge(196,104,2,'var(--s5)')}</g><g data-n="3">${LN(180,140,212,140,'var(--s4)',{w:2,mk:'s4'})}${badge(196,160,3,'var(--s4)')}</g>`;
+  s+=`<g data-n="4">${LN(284,130,312,130,'var(--s2)',{w:2.5,mk:'s2'})}${badge(298,152,4,'var(--s2)')}</g>`;
+  s+=T(14,40,TR(`OPA: 펌프 ① 1개 → 신호 ② + 아이들러 ③`,`OPA: one pump ① → signal ② + idler ③`),'sub')+T(14,56,TR(`신호 ${Math.round(ws)} cm⁻¹ (${(1e4/ws).toFixed(2)} µm), 아이들러 ${Math.round(wi)} cm⁻¹ (${(1e4/wi).toFixed(2)} µm)`,`signal ${Math.round(ws)} cm⁻¹ (${(1e4/ws).toFixed(2)} µm), idler ${Math.round(wi)} cm⁻¹ (${(1e4/wi).toFixed(2)} µm)`),'sub')
+   +T(14,200,`nDFG: ② − ③ = ④ ${Math.round(v)} cm⁻¹`,'lab')+T(14,220,TR('pump용, probe용 체인이 따로 있어 두 빛을 따로 맞춘다','Separate pump and probe chains tune the two beams'),'sub')+T(14,252,TR('OPA 씨앗은 사파이어에서 만든 백색광','The OPA seed is white light generated in sapphire'),'sub')+T(14,268,TR('(7단계 Kerr 효과와 같은 3차 비선형, 논문 A.2.3)','(3rd-order, like the Kerr effect in step 7; thesis A.2.3)'),'sub');
+  return s},
+ m:v=>{const ws=(12500+v)/2,wi=(12500-v)/2;const P=plot({x:[0,4.4],y:[0,13500],xt:[],yt:[0,4000,8000,12000].map(y=>({v:y,l:String(y)})),yl:'wavenumber (cm⁻¹)',L:58,T:30,B:236});
+  const bars=[[12500,TR('펌프','pump'),'s1',1],[ws,TR('신호','signal'),'s5',2],[wi,TR('아이들러','idler'),'s4',3],[v,TR('중적외선','mid-IR'),'s2',4]];
+  let s=P.s;bars.forEach(([h,l,k,n],i)=>{const x=P.X(i+.6),w=P.X(.6)-P.X(0);s+=`<g data-n="${n}"><rect x="${x-w/2}" y="${P.Y(h)}" width="${w}" height="${P.B-P.Y(h)}" style="fill:${COL[k]}" fill-opacity=".7"/></g>`+T(x,P.Y(h)-6,String(Math.round(h)),'sub','middle')+T(x,P.B+16,l,'sub','middle')});
+  return s+T(P.R,P.T-12,'① = ② + ③,  ④ = ② − ③','lab','end')},
+ read:[TR('800 nm(12 500 cm⁻¹) 펄스를 중적외선으로 바꾸는 데 2차 비선형 단계가 둘 들어간다(논문 A.2).','Converting 800 nm (12 500 cm⁻¹) pulses to the mid-IR takes two second-order nonlinear stages (thesis A.2).'),TR(`OPA: ${c(1,'s1')} 펌프 광자 하나가 ${c(2,'s5')} 신호와 ${c(3,'s4')} 아이들러 둘로 나뉜다(에너지 보존 ① = ② + ③). 결정 각도와 씨앗 지연을 바꿔 파장을 연속으로 맞춘다.`,`OPA: ${c(1,'s1')} one pump photon splits into two, ${c(2,'s5')} a signal and ${c(3,'s4')} an idler (energy conservation ① = ② + ③). The wavelength is tuned continuously by changing the crystal angle and the seed delay.`),TR(`nDFG(AgGaS₂ 결정): ${c(2,'s5')}와 ${c(3,'s4')}의 차이로 ${c(4,'s2')} 중적외선이 나온다(④ = ② − ③). 펌프가 고정이라 중적외선은 신호 파장 하나로 정해진다.`,`nDFG (AgGaS₂ crystal): the difference between ${c(2,'s5')} and ${c(3,'s4')} gives ${c(4,'s2')} the mid-IR (④ = ② − ③). Because the pump is fixed, the mid-IR is set by the signal wavelength alone.`),TR('세어 보기: 2500 cm⁻¹를 만들려면 신호 7500 cm⁻¹(1.33 µm), 아이들러 5000 cm⁻¹(2.00 µm)이다. 슬라이더로 직접 바꿔 볼 수 있다.','Counting: making 2500 cm⁻¹ requires a signal at 7500 cm⁻¹ (1.33 µm) and an idler at 5000 cm⁻¹ (2.00 µm). The slider changes the target directly.'),TR('우리 셋업은 증폭기 출력을 둘로 나눠 OPA–nDFG 체인 두 개를 돌린다(OPA 모델은 Light Conversion TOPAS 계열, 확인 필요). 실제로 쓰는 범위는 대략 1650–3800 cm⁻¹이고, nDFG 결정 각도는 매일 다시 맞춘다(논문 3.2, A.2.2).','Our setup splits the amplifier output in two and runs two OPA–nDFG chains (OPA model: Light Conversion TOPAS series, to be verified). The range used in practice is approx. 1650–3800 cm⁻¹, and the nDFG crystal angle is realigned every day (thesis 3.2, A.2.2).'),TR('스펙트럼 폭은 pump 약 170 cm⁻¹, probe 약 290 cm⁻¹(확인 필요)라 변환 한계 펄스면 86 fs, 51 fs다. 이 펄스들이 <a href="pumpprobe.html">IR pump-probe 노트</a>와 <a href="2d-spectroscopy.html">2D 분광 노트</a> 셋업 탭으로 이어진다.','The spectral widths are about 170 cm⁻¹ for the pump and about 290 cm⁻¹ for the probe (to be verified), which gives 86 fs and 51 fs for transform-limited pulses. These pulses lead into the <a href="pumpprobe.html">IR pump-probe note</a> and the setup tab of the <a href="2d-spectroscopy.html">2D spectroscopy note</a>.')],
+ q:TR('2200 cm⁻¹ 중적외선(pump 빛)을 만들 때 OPA 신호와 아이들러는?','For 2200 cm⁻¹ mid-IR (the pump beam), what are the OPA signal and idler?'),a:TR('신호 (12 500 + 2200)/2 = 7350 cm⁻¹(1.36 µm), 아이들러 (12 500 − 2200)/2 = 5150 cm⁻¹(1.94 µm).','Signal (12 500 + 2200)/2 = 7350 cm⁻¹ (1.36 µm), idler (12 500 − 2200)/2 = 5150 cm⁻¹ (1.94 µm).')}];
+
+/* ---------- Yb 노트 전용 헬퍼 ---------- */
+const ybG=(x,x0,fw)=>Math.exp(-4*Math.LN2*((x-x0)/fw)**2);       // FWHM = fw 인 가우시안
+const ybSub=[0,200,400,600];                                       // 바닥 다발 하위 준위 (cm⁻¹, 가정)
+const ybBolt=Tk=>{const w=ybSub.map(e=>Math.exp(-e/(0.695*Tk))),z=w.reduce((a,b)=>a+b,0);return w.map(x=>x/z)};
+const ybFmtF=v=>{const f=10**v;return f>=1e6?(f/1e6).toFixed(1)+' MHz':(f>=1e4?Math.round(f/1e3):(f/1e3).toFixed(1))+' kHz'};
+const ybFmtE=E=>E>=1e-3?(E*1e3).toFixed(E>=1e-2?0:1)+' mJ':(E*1e6).toFixed(E>=1e-5?0:1)+' µJ';
+const ybDt=dl=>0.441*(1030e-9)**2/3e8/(dl*1e-9)*1e15;              // 변환 한계 가우시안 펄스 폭 (fs)
+const ybMini=(x0,w,y0,h,fw,col,dash)=>{let d='';for(let i=0;i<=60;i++){const x=x0+w*i/60;d+=(i?' L':'M')+x.toFixed(1)+','+(y0-h*ybG(i/60,.5,fw)).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="2"${dash?' stroke-dasharray="5 4"':''}/>`};
+const ybLeg=(x,y,col,lab,dash)=>`<line x1="${x}" x2="${x+20}" y1="${y}" y2="${y}" style="stroke:${col}" stroke-width="2"${dash?' stroke-dasharray="5 4"':''}/>`+T(x+26,y+4,lab,'sub');
+/* 오른쪽 정리 그림 한 줄: 로그(또는 선형) 축 위 Ti:S·Yb 범위 막대 */
+function ybRow(y,n,lab,ax,ti,yb){const X0=60,X1=296,tf=v=>ax.log?Math.log10(v):v,X=v=>X0+(tf(v)-tf(ax.a))/(tf(ax.b)-tf(ax.a))*(X1-X0);
+ const bar=(r,dy,col)=>`<rect x="${X(r[0])}" y="${y+dy}" width="${Math.max(3,X(r[1])-X(r[0]))}" height="9" rx="2" style="fill:${col}" fill-opacity=".8"/>`;
+ return `<g data-n="${n}">${badge(14,y-22,n,'var(--fg)')}</g>`+T(28,y-18,lab,'lab')+T(X0-6,y+8,'Ti:S','sub','end')+T(X0-6,y+22,'Yb','sub','end')+bar(ti,0,'var(--s5)')+bar(yb,14,'var(--s3)')
+  +`<line x1="${X0}" x2="${X1}" y1="${y+28}" y2="${y+28}" class="ax"/>`+ax.t.map(([v,l])=>`<line x1="${X(v)}" x2="${X(v)}" y1="${y+28}" y2="${y+32}" class="ax"/>`+T(X(v),y+43,l,'sub','middle')).join('')}
+
+/* ======================= Yb ======================= */
+const YB=[
+{t:TR('Yb³⁺는 준위가 단순하다: 준3준위','Yb³⁺ has simple levels: a quasi-three-level system'),ec:TR('Yb³⁺ 에너지 그림 (간격은 보기 쉽게 과장)','Yb³⁺ energy diagram (spacing exaggerated for clarity)'),mc:TR('바닥 다발 하위 준위에 있는 원자 비율','Fraction of atoms in each ground-manifold sublevel'),
+ slider:{min:80,max:400,step:10,init:300,label:TR('결정 온도','Crystal temperature'),fmt:v=>Math.round(v)+' K'},
+ e:v=>{const p=ybBolt(v),n=Math.round(p[3]*100);let s=[250,242,234].map(y=>L(30,186,y)).join('')+L(30,186,226)+[78,70,62].map(y=>L(30,186,y)).join('');
+  s+=T(214,240,'²F₇/₂','lab')+T(214,256,TR('바닥 다발','ground manifold'),'sub')+T(214,68,'²F₅/₂','lab')+T(214,84,TR('들뜬 다발','excited manifold'),'sub');
+  s+=A(64,249,64,64,'s5',1,{t:TR('펌프','pump'),tx:6,ty:-8})+A(132,79,132,224,'s3',2,{dx:14,t:TR('레이저','laser'),tx:26,ty:-8});
+  s+=`<path d="M70,62 C95,64 110,70 128,77" fill="none" style="stroke:var(--muted)" stroke-dasharray="3 3"/>`+T(76,54,TR('빠른 이완','fast relaxation'),'sub');
+  s+=`<g data-n="3">${badge(18,226,3,'var(--s4)')}</g>`;
+  for(let i=0;i<n;i++)s+=`<circle cx="${152+i*6}" cy="221" r="2.6" style="fill:var(--s4)"/>`;
+  return s+T(14,22,TR('● (노랑) = 이미 ③에 있는 원자, 100개 중 '+n+'개','● (yellow) = atoms already in ③: '+n+' of 100'),'sub')+T(14,38,TR('ΔE ≈ 600 cm⁻¹ 가정 (실제는 결정마다 다름)','ΔE ≈ 600 cm⁻¹ assumed (varies by crystal)'),'sub')},
+ m:v=>{const p=ybBolt(v);const P=plot({x:[0,4],y:[0,100],xt:[{v:.5,l:'0'},{v:1.5,l:'200'},{v:2.5,l:'400'},{v:3.5,l:'600'}],yt:[{v:0,l:'0'},{v:50,l:'50'},{v:100,l:'100'}],xl:TR('하위 준위 에너지 (cm⁻¹, 가정)','sublevel energy (cm⁻¹, assumed)'),yl:TR('원자 비율 (%)','fraction of atoms (%)'),T:30});
+  return P.s+p.map((f,i)=>{const x0=P.X(i+.2),w=P.X(i+.8)-x0,k=i===3?'s4':'s6',top=P.Y(f*100);
+   return `<rect x="${x0}" y="${top}" width="${w}" height="${P.B-top}" style="fill:${COL[k]}" fill-opacity="${i===3?.85:.45}"/>`+T(x0+w/2,top-6,(f*100).toFixed(1)+'%','sub','middle')
+    +(i===3?`<g data-n="3">${badge(x0+w/2,top-26,3,'var(--s4)')}</g>`:'')}).join('')+T(P.R,16,TR('Boltzmann 분포, T = ','Boltzmann distribution, T = ')+Math.round(v)+' K','sub','end')},
+ read:[TR(`Yb³⁺의 4f 전자 준위는 바닥 다발과 들뜬 다발 두 개뿐이다. 그래서 들뜬 상태 흡수(ESA) 같은 손실 경로가 적다.`,`The 4f electronic levels of Yb³⁺ form only two manifolds, ground and excited. Loss channels such as excited-state absorption (ESA) are therefore few.`),
+  TR(`각 다발은 결정장 때문에 몇 개의 하위 준위로 갈라진다. ${c(1,'s5')} 펌프는 바닥에서 들뜬 다발 위쪽까지 올린다. 원자는 빠르게 들뜬 다발 맨 아래로 내려가고, ${c(2,'s3')} 레이저는 거기서 바닥 다발의 위쪽 하위 준위 ${c(3,'s4')}로 내려온다. 그래서 펌프 화살표가 레이저 화살표보다 길다(3단계 양자 결손).`,`The crystal field splits each manifold into several sublevels. ${c(1,'s5')} The pump lifts atoms from the ground level to the upper part of the excited manifold. The atoms quickly relax to the bottom of the excited manifold, and ${c(2,'s3')} the laser transition goes from there down to an upper sublevel ${c(3,'s4')} of the ground manifold. The pump arrow is therefore longer than the laser arrow (quantum defect, step 3).`),
+  TR(`${c(3,'s4')}는 바닥과 대략 수백 cm⁻¹밖에 차이 나지 않는다(확인 필요). 실온의 열에너지 kT ≈ 208 cm⁻¹와 비슷한 크기라, 실온에서도 일부 원자가 이미 그 자리에 있다. 이걸 준3준위라고 부른다.`,`${c(3,'s4')} lies only approx. a few hundred cm⁻¹ above the ground level (to be verified). This is comparable to the room-temperature thermal energy kT ≈ 208 cm⁻¹, so some atoms already sit there at room temperature. This is called a quasi-three-level system.`),
+  TR('오른쪽은 하위 준위 간격을 200 cm⁻¹씩으로 가정하고 센 예시다. 300 K면 100개 중 약 3–4개가 ③에 있다. 온도를 내리면 거의 0이 된다.','The right panel is an example count that assumes 200 cm⁻¹ between sublevels. At 300 K, about 3–4 of 100 atoms are in ③. Lowering the temperature brings this close to 0.'),
+  TR('결과: 레이저 빛을 매질이 일부 다시 흡수한다. 그래서 펌프를 세게 넣거나 결정을 식힌다.','Result: the medium reabsorbs part of the laser light. The pump is therefore made strong, or the crystal is cooled.')],
+ q:TR('왜 "준"3준위인가?','Why "quasi"-three-level?'),a:TR('레이저 아래 준위가 바닥이 아니지만 바닥과 너무 가까워 열적으로 차 있다. 그래서 3준위 레이저처럼 재흡수가 생긴다.','The lower laser level is not the ground level, but it is so close to it that it is thermally populated. Reabsorption therefore occurs, as in a three-level laser.')},
+
+{t:TR('흡수는 약 980 nm, 방출은 약 1030 nm: 다이오드로 바로 펌핑한다','Absorption near 980 nm, emission near 1030 nm: direct diode pumping'),ec:TR('펌핑 경로 비교','Pumping paths compared'),mc:TR('흡수·방출 스펙트럼 (모양 예시)','Absorption and emission spectra (example shapes)'),
+ e:()=>T(8,32,TR('Yb: 다이오드로 바로 펌핑','Yb: pumped directly by a diode'),'lab')+box(8,46,62,36,TR('다이오드','diode'),TR('약 980 nm','~980 nm'))+LN(70,64,96,64,'var(--s5)',{mk:'s5'})+`<g data-n="1">${badge(83,94,1,'var(--s5)')}</g>`
+  +box(98,46,62,36,TR('Yb 결정','Yb crystal'),TR('또는 파이버','or fiber'))+LN(160,64,206,64,'var(--s3)',{mk:'s3'})+`<g data-n="2">${badge(183,94,2,'var(--s3)')}</g>`+T(212,68,TR('약 1030 nm','~1030 nm'),'sub')
+  +T(8,140,TR('Ti:S: 한 단계를 더 거친다','Ti:S: one extra stage'),'lab')+box(8,154,64,36,TR('다이오드','diode'),TR('약 808 nm','~808 nm'))+LN(72,172,82,172,'var(--pump)',{mk:'g'})
+  +box(84,154,64,36,TR('Nd 레이저','Nd laser'),'1064 nm')+LN(148,172,158,172,'var(--pump)',{mk:'g'})+box(160,154,64,36,TR('2배 주파수','doubler'),'532 nm')+LN(224,172,234,172,'var(--pump)',{mk:'g'})
+  +box(236,154,64,36,'Ti:S',TR('약 800 nm','~800 nm'))+TM(8,222,[TR('초록 다이오드는 출력이 약하다(대략).','Green diodes have low output (approx.).'),TR('그래서 Nd 레이저의 2배 주파수(532 nm)를 펌프로 쓴다.','So frequency-doubled Nd light (532 nm) is the pump.')],'sub'),
+ m:()=>{const P=plot({x:[900,1080],y:[0,1.15],xt:[{v:900,l:'900'},{v:950,l:'950'},{v:1000,l:'1000'},{v:1050,l:'1050'}],xl:'wavelength (nm)',yl:TR('흡수·방출 세기 (상대)','intensity (rel.)'),noy:1,L:40,T:34});
+  const ab=x=>.55*ybG(x,940,22)+ybG(x,969,5),em=x=>ybG(x,1030,9)+.3*ybG(x,1050,14)+.2*ybG(x,969,5);
+  return P.s+crv(P,ab,900,1080,'var(--s5)',{n:400})+crv(P,em,900,1080,'var(--s3)',{n:400,dash:1})
+   +`<g data-n="1">${badge(P.X(969)-16,P.Y(.95),1,'var(--s5)')}</g>`+`<g data-n="2">${badge(P.X(1030)+18,P.Y(.95),2,'var(--s3)')}</g>`
+   +ybLeg(P.L,14,'var(--s5)',TR('흡수','absorb'))+ybLeg(P.L+64,14,'var(--s3)',TR('방출','emit'),1)+T(P.R,18,TR('Yb:YAG 비슷한 모양 (예시)','Yb:YAG-like shape (example)'),'sub','end')},
+ read:[TR(`${c(1,'s5')} Yb는 대략 940 nm 또는 980 nm 근처를 흡수하고, ${c(2,'s3')} 대략 1030 nm에서 방출한다. 정확한 값은 결정(Yb:YAG, Yb:KGW, Yb 파이버)마다 조금씩 다르다(확인 필요).`,`${c(1,'s5')} Yb absorbs near approx. 940 nm or 980 nm and ${c(2,'s3')} emits at approx. 1030 nm. The exact values differ slightly by host (Yb:YAG, Yb:KGW, Yb fiber) (to be verified).`),
+  TR('이 흡수 파장대에는 고출력 레이저 다이오드가 흔하다. 그래서 다이오드 빛을 결정이나 파이버에 바로 넣는다.','High-power laser diodes are common in this absorption range. The diode light is therefore sent directly into the crystal or fiber.'),
+  TR('Ti:S는 초록(대략 532 nm)을 흡수한다. 초록 다이오드는 출력이 약해서, Nd 레이저를 2배 주파수로 바꾼 펌프 레이저를 한 단계 더 거친다.','Ti:S absorbs green (approx. 532 nm). Green diodes have low output, so one extra stage is used: a pump laser that frequency-doubles an Nd laser.'),
+  TR('단계가 하나 줄면 장치가 단순해지고, 단계마다 생기는 손실도 준다.','One fewer stage makes the system simpler and removes the loss that each stage adds.')],
+ q:TR('흡수 피크와 방출 피크가 가까우면(약 970 nm와 1030 nm) 생기는 문제는?','What problem arises when the absorption and emission peaks are close (about 970 nm and 1030 nm)?'),a:TR('방출한 빛의 일부를 매질이 다시 흡수한다(1단계의 준3준위와 같은 이야기). 그래서 결정 길이, 도핑 농도, 온도를 맞춘다.','The medium reabsorbs part of the emitted light (the same story as the quasi-three-level system in step 1). Crystal length, doping concentration, and temperature are therefore optimized.')},
+
+{t:TR('양자 결손이 작다 → 열이 적다 (세어 보기)','Small quantum defect → less heat (counting)'),ec:TR('광자 하나의 에너지: 레이저로 나가는 몫과 열','Energy of one photon: share leaving as laser light and heat'),mc:TR('펌프 광자 100개 세어 보기','Counting 100 pump photons'),
+ slider:{min:900,max:1010,step:5,init:980,label:TR('Yb 펌프 파장','Yb pump wavelength'),fmt:v=>Math.round(v)+' nm'},
+ e:v=>{const P=plot({x:[0,4],y:[0,2.6],yt:[{v:0,l:'0'},{v:1,l:'1'},{v:2,l:'2'}],xt:[{v:1,l:'Yb'},{v:3,l:'Ti:S'}],yl:TR('광자 에너지 (eV)','photon energy (eV)'),T:30});
+  const st=(xc,lp,ll,n,side)=>{const Ep=1239.84/lp,El=1239.84/ll,x0=P.X(xc-.45),w=P.X(xc+.45)-x0,pct=Math.round((1-lp/ll)*100),ym=P.Y((Ep+El)/2);
+   return `<rect x="${x0}" y="${P.Y(El)}" width="${w}" height="${P.B-P.Y(El)}" style="fill:var(--s3)" fill-opacity=".55"/><rect x="${x0}" y="${P.Y(Ep)}" width="${w}" height="${P.Y(El)-P.Y(Ep)}" style="fill:var(--s4)" fill-opacity=".9"/>`
+    +T(x0+w/2,P.Y(El/2),TR('레이저','laser'),'sub','middle')+T(x0+w/2,P.Y(Ep)-8,TR('펌프 ','pump ')+Math.round(lp)+' nm','sub','middle')
+    +(side>0?`<g data-n="${n}">${badge(x0+w+TR(20,18),ym,n,'var(--s4)')}</g>`+T(x0+w+TR(34,30),ym+4,TR('열 ','heat ')+pct+'%','sub'):`<g data-n="${n}">${badge(x0-TR(20,18),ym,n,'var(--s4)')}</g>`+T(x0-TR(34,30),ym+4,TR('열 ','heat ')+pct+'%','sub','end'))};
+  return P.s+st(1,v,1030,1,1)+st(3,532,800,2,-1)},
+ m:v=>{const ny=Math.round((1-v/1030)*100),nt=Math.round((1-532/800)*100);
+  const grid=(x0,n)=>{let s='';for(let i=0;i<100;i++){const hot=i<n;s+=`<circle cx="${x0+(i%10)*11}" cy="${66+Math.floor(i/10)*11}" r="4" style="fill:${hot?'var(--s4)':'var(--s3)'}" fill-opacity="${hot?1:.4}"/>`}return s};
+  return `<g data-n="1">${badge(26,38,1,'var(--s4)')}</g>`+T(40,42,TR('Yb: 열 약 '+ny+'개분','Yb: ~'+ny+' as heat'),'lab')+`<g data-n="2">${badge(176,38,2,'var(--s4)')}</g>`+T(190,42,TR('Ti:S: 열 약 '+nt+'개분','Ti:S: ~'+nt+' as heat'),'lab')
+   +grid(26,ny)+grid(176,nt)
+   +`<circle cx="22" cy="208" r="4" style="fill:var(--s4)"/>`+T(32,212,TR('열로 남는 몫','heat'),'sub')+`<circle cx="132" cy="208" r="4" style="fill:var(--s3)" fill-opacity=".4"/>`+T(142,212,TR('레이저 광자로 나가는 몫','leaves as laser photons'),'sub')
+   +TM(14,240,[TR('펌프 광자 100개가 모두 레이저 광자로 바뀐다고 가정.','Assumed: all 100 pump photons → laser photons.'),TR('점 하나 = 펌프 광자 하나의 에너지.','One dot = the energy of one pump photon.')],'sub')},
+ read:[TR('양자 결손 = 펌프 광자 에너지 중 레이저 광자로 못 나가고 열이 되는 비율 = 1 − λ_pump / λ_laser.','Quantum defect = the fraction of the pump photon energy that does not leave as a laser photon but becomes heat = 1 − λ_pump / λ_laser.'),
+  TR(`${c(1,'s4')} Yb: 1 − 980/1030 ≈ 5%. ${c(2,'s4')} Ti:S: 1 − 532/800 ≈ 34%. 같은 단위(%)로 대략 6–7배 차이다.`,`${c(1,'s4')} Yb: 1 − 980/1030 ≈ 5%. ${c(2,'s4')} Ti:S: 1 − 532/800 ≈ 34%. In the same unit (%), the difference is approx. 6–7×.`),
+  TR('펌프 광자 100개가 모두 레이저 광자로 바뀐다고 가정하면, 열로 남는 에너지가 Yb는 펌프 광자 약 5개분, Ti:S는 약 34개분이다.','Assuming all 100 pump photons become laser photons, the energy left as heat equals about 5 pump photons for Yb and about 34 for Ti:S.'),
+  TR('슬라이더로 Yb 펌프 파장을 바꿔 보면, 940 nm로 펌핑할 때는 약 9%로 늘어난다. 펌프와 레이저 파장이 가까울수록 열이 적다.','Changing the Yb pump wavelength with the slider shows that pumping at 940 nm raises the defect to about 9%. The closer the pump and laser wavelengths, the less heat.'),
+  TR('열이 적으면 결정이 덜 휘고(열 렌즈), 평균 출력을 크게 올리기 쉽다.','Less heat means less distortion of the crystal (thermal lensing), which makes it easier to scale up the average power.')],
+ q:TR('양자 결손이 0이 될 수 없는 이유는?','Why can the quantum defect not be zero?'),a:TR('펌프 광자가 레이저 광자보다 에너지가 커야 위 준위로 올리고, 아래 준위를 비울 수 있다. 그 차이가 열로 남는다.','The pump photon must carry more energy than the laser photon to lift atoms to the upper level and to keep the lower level empty. That difference remains as heat.')},
+
+{t:TR('이득 띠가 좁다 → 펄스가 더 길다','Narrow gain band → longer pulses'),ec:TR('이득 띠와 펄스 스펙트럼','Gain band and pulse spectrum'),mc:TR('시간축 펄스 (변환 한계)','Pulse in time (transform-limited)'),
+ slider:{min:3,max:60,step:1,init:6,label:TR('스펙트럼 폭 Δλ','Spectral width Δλ'),fmt:v=>Math.round(v)+' nm'},
+ e:v=>{const P=plot({x:[680,1100],y:[0,1.15],xt:[{v:700,l:'700'},{v:800,l:'800'},{v:900,l:'900'},{v:1000,l:'1000'},{v:1100,l:'1100'}],xl:'wavelength (nm)',noy:1,L:30,T:34});
+  let s=P.s+`<rect x="${P.X(700)}" y="${P.Y(1.12)}" width="${P.X(1000)-P.X(700)}" height="${P.B-P.Y(1.12)}" style="fill:var(--s5)" fill-opacity=".1"/>`
+   +`<rect x="${P.X(1020)}" y="${P.Y(1.12)}" width="${P.X(1045)-P.X(1020)}" height="${P.B-P.Y(1.12)}" style="fill:var(--s3)" fill-opacity=".18"/>`
+   +T(P.X(850),P.Y(1.02),TR('Ti:S 이득 띠 (대략 700–1000 nm)','Ti:S gain band (approx. 700–1000 nm)'),'sub','middle')+T(P.R,16,TR('초록 띠 = Yb 이득 띠 (대략 1020–1045 nm, 확인 필요)','green = Yb gain band, approx. 1020–1045 nm (to be verified)'),'sub','end')
+   +crv(P,x=>ybG(x,1030,v),680,1100,'var(--s3)',{n:400})+`<g data-n="1">${badge(P.X(1030-v/2)-14,P.Y(.5),1,'var(--s3)')}</g>`;
+  if(v>25)s+=T(P.L+6,P.Y(.6),TR('Yb 이득 띠보다 넓다 → 이 폭은 못 낸다','Wider than Yb gain → impossible'),'sub','start','var(--s1)');
+  return s},
+ m:v=>{const dt=ybDt(v);const P=plot({x:[-700,700],y:[0,1.15],xt:[{v:-500,l:'−500'},{v:0,l:'0'},{v:500,l:'500'}],xl:'time (fs)',noy:1,L:30,T:44});
+  return P.s+crv(P,x=>ybG(x,0,35),-700,700,'var(--s5)',{n:500,dash:1})+crv(P,x=>ybG(x,0,dt),-700,700,'var(--s3)',{n:500})
+   +`<g data-n="2">${badge(P.X(dt/2)+16,P.Y(.5),2,'var(--s3)')}</g>`
+   +T(P.R,16,'Yb Δt ≈ '+Math.round(dt)+TR(' fs (가우시안 가정)',' fs (Gaussian assumed)'),'lab','end')+ybLeg(P.L,30,'var(--s5)',TR('Ti:S 약 35 fs (비교)','Ti:S ~35 fs (comparison)'),1)},
+ read:[TR(`펄스 폭과 스펙트럼 폭은 반비례한다. 가우시안 펄스면 Δt · Δν ≥ 0.441이다. 짧은 펄스 = 넓은 스펙트럼이 필요하다.`,`Pulse width and spectral width are inversely proportional. For a Gaussian pulse, Δt · Δν ≥ 0.441. A short pulse needs a broad spectrum.`),
+  TR(`${c(1,'s3')} 스펙트럼 폭 Δλ를 슬라이더로 바꾸면 ${c(2,'s3')} 시간축 펄스 폭이 반대로 움직인다. 1030 nm에서 Δλ = 6 nm면 Δt ≈ 260 fs다.`,`When the slider changes ${c(1,'s3')} the spectral width Δλ, ${c(2,'s3')} the pulse width in time moves the opposite way. At 1030 nm, Δλ = 6 nm gives Δt ≈ 260 fs.`),
+  TR('Ti:S 이득 띠는 대략 700–1000 nm로 폭이 수백 nm다. Yb 이득 띠는 대략 수–수십 nm다(확인 필요). Δλ를 25 nm 넘게 올리면 Yb 이득 띠 밖으로 나간다.','The Ti:S gain band is approx. 700–1000 nm, several hundred nm wide. The Yb gain band is approx. a few to tens of nm (to be verified). Raising Δλ above 25 nm goes beyond the Yb gain band.'),
+  TR('그래서 Yb 증폭기 출력은 보통 대략 200–400 fs다(확인 필요). Ti:S 증폭기는 대략 25–50 fs다.','Yb amplifier output is therefore typically approx. 200–400 fs (to be verified). Ti:S amplifiers give approx. 25–50 fs.'),
+  TR('같은 단위로: Ti:S 약 35 fs vs Yb 약 300 fs → 대략 10배 차이.','In the same units: Ti:S about 35 fs vs Yb about 300 fs → approx. a 10× difference.')],
+ q:TR('Yb 펄스를 Ti:S만큼 짧게 하려면?','How can Yb pulses be made as short as Ti:S pulses?'),a:TR('스펙트럼을 넓혀야 한다. 이득 띠는 바꿀 수 없으니, 증폭이 끝난 뒤 비선형 효과로 스펙트럼을 넓히고 다시 압축한다(6단계).','The spectrum must be broadened. The gain band cannot be changed, so after amplification the spectrum is broadened by a nonlinear effect and the pulse is recompressed (step 6).')},
+
+{t:TR('반복률과 평균 출력: 같은 1 W라도 펄스 에너지는 다르다','Repetition rate and average power: the same 1 W can mean different pulse energies'),ec:TR('펄스 하나 뒤 샘플 신호와 다음 펄스','Sample signal after one pulse, and the next pulse'),mc:TR('펄스 에너지 vs 반복률 (log-log)','Pulse energy vs repetition rate (log-log)'),
+ slider:{min:3,max:6,step:.1,init:3,label:TR('반복률','Repetition rate'),fmt:ybFmtF},
+ e:v=>{const f=10**v,dt=1e6/f,P=plot({x:[0,20],y:[0,1.1],xt:[0,5,10,15,20].map(t=>({v:t,l:String(t)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:TR('펄스 뒤 시간 (µs)','time after pulse (µs)'),yl:TR('샘플 신호 (상대)','sample signal (rel.)'),T:44});
+  let s=P.s+crv(P,t=>Math.exp(-t/3),0,20,'var(--s5)')+LN(P.X(0)+1,P.B,P.X(0)+1,P.Y(1.1),'var(--s3)',{w:3})+T(P.R,16,TR('느린 성분 수명 3 µs 가정 (예시)','slow-component lifetime 3 µs assumed (example)'),'sub','end');
+  const left=Math.exp(-dt/3)*100;
+  if(dt<=20)s+=`<g data-n="1">${LN(P.X(dt),P.B,P.X(dt),P.Y(1.1),'var(--s3)',{w:3})}${badge(P.X(dt)+14,P.Y(1),1,'var(--s3)')}</g>`+T(P.L,32,TR('간격 '+(dt<10?dt.toFixed(1):Math.round(dt))+' µs → 다음 펄스 때 남은 신호 '+(left<1?left.toFixed(1):Math.round(left))+'%','spacing '+(dt<10?dt.toFixed(1):Math.round(dt))+' µs → '+(left<1?left.toFixed(1):Math.round(left))+'% left at next pulse'),'lab');
+  else s+=`<g data-n="1">${LN(P.X(15),P.Y(.55),P.X(20),P.Y(.55),'var(--s3)',{w:2,mk:'s3'})}${badge(P.X(13.5),P.Y(.55),1,'var(--s3)')}</g>`+T(P.X(20),P.Y(.55)-10,TR('다음 펄스는 축 밖','next pulse is off the axis'),'sub','end')+T(P.L,32,TR('간격 '+Math.round(dt)+' µs → 샘플이 다 회복한다','spacing '+Math.round(dt)+' µs → sample fully recovers'),'lab');
+  return s},
+ m:v=>{const f=10**v,E=1/f,P=plot({x:[1e3,1e6],y:[1e-6,1e-2],logx:1,logy:1,xt:[{v:1e3,l:'1 kHz'},{v:1e4,l:'10 kHz'},{v:1e5,l:'100 kHz'},{v:1e6,l:'1 MHz'}],yt:[{v:1e-6,l:'1 µJ'},{v:1e-5,l:'10 µJ'},{v:1e-4,l:'100 µJ'},{v:1e-3,l:'1 mJ'},{v:1e-2,l:'10 mJ'}],xl:TR('반복률 (Hz)','repetition rate (Hz)'),yl:TR('펄스 에너지 (J)','pulse energy (J)'),ylx:12,L:74,R:300,T:30});
+  const reg=(f0,f1,e0,e1,col)=>`<rect x="${P.X(f0)}" y="${P.Y(e1)}" width="${P.X(f1)-P.X(f0)}" height="${P.Y(e0)-P.Y(e1)}" style="fill:${col}" fill-opacity=".14"/>`;
+  return P.s+reg(1e3,1e4,1e-3,1e-2,'var(--s5)')+reg(1e4,1e6,1e-5,1e-3,'var(--s3)')
+   +LN(P.X(1e3),P.Y(1e-3),P.X(1e6),P.Y(1e-6),'var(--s6)',{dash:1})+LN(P.X(1e3),P.Y(1e-2),P.X(1e6),P.Y(1e-5),'var(--s6)',{dash:1})
+   +T(P.X(3e3),P.Y(1/3e3)+18,'1 W','sub','end')+T(P.X(2e4),P.Y(10/2e4)-6,'10 W','sub')
+   +T(P.X(3e3),P.Y(7e-3),'Ti:S','sub','start','var(--s5)')+T(P.X(2.6e5),P.Y(4e-4),'Yb','sub','start','var(--s3)')
+   +`<g data-n="2"><circle cx="${P.X(f)}" cy="${P.Y(E)}" r="5" style="fill:var(--s4)"/>${badge(P.X(f)+6,P.Y(E)-22,2,'var(--s4)')}</g>`
+   +T(P.R,16,TR('1 W 가정: 펄스 에너지 ','1 W assumed: pulse energy ')+ybFmtE(E),'lab','end')+T(TR(P.L,10),P.B+48,TR('점선 = 같은 평균 출력, 칠한 곳 = 흔한 영역 (예시)','dashed: same avg. power; shaded: typical (example)'),'sub')},
+ ev:'0 0 320 280',mv:'0 0 320 290',
+ read:[TR('위 준위 수명이 길어(대략 ms 단위, 확인 필요) 에너지를 오래 저장할 수 있다. 열도 적어서 kHz–MHz 반복률에서 평균 출력 수–수백 W도 가능하다(확인 필요).','The upper-level lifetime is long (approx. ms scale, to be verified), so energy can be stored for a long time. With little heat, average powers of a few to hundreds of W are possible at kHz–MHz repetition rates (to be verified).'),
+  TR(`평균 출력 = 펄스 에너지 × 반복률. 1 mJ × 1 kHz = 1 W, 10 µJ × 100 kHz = 1 W. ${c(2,'s4')} 같은 평균 출력이라도 펄스 에너지는 100배 다르다.`,`Average power = pulse energy × repetition rate. 1 mJ × 1 kHz = 1 W, 10 µJ × 100 kHz = 1 W. ${c(2,'s4')} At the same average power, the pulse energy differs by 100×.`),
+  TR('pump-probe에서 반복률이 높으면 같은 시간에 평균을 더 많이 낸다. 신호 잡음비가 좋아진다.','In pump-probe, a higher repetition rate gives more averages in the same time. The signal-to-noise ratio improves.'),
+  TR(`대신 ${c(1,'s3')} 펄스 사이 간격이 짧아진다. 왼쪽은 느린 성분 수명을 3 µs로 가정한 예시다. 100 kHz(간격 10 µs)면 다음 펄스 때 약 4%가 남고, 1 MHz(간격 1 µs)면 약 72%가 남는다.`,`In exchange, ${c(1,'s3')} the spacing between pulses becomes shorter. The left panel is an example that assumes a slow-component lifetime of 3 µs. At 100 kHz (10 µs spacing), about 4% remains at the next pulse; at 1 MHz (1 µs spacing), about 72% remains.`),
+  TR('남은 신호는 다음 측정의 배경이 된다. 샘플을 흘리거나 돌려서 매 펄스가 새 자리를 보게 하기도 한다.','The remaining signal becomes a background for the next measurement. The sample is sometimes flowed or rotated so that each pulse sees a fresh spot.')],
+ q:TR('반복률 100 kHz면 펄스 사이 간격은?','What is the spacing between pulses at a 100 kHz repetition rate?'),a:TR('10 µs. 샘플의 느린 성분(예: 열, 긴 수명 상태)이 그 안에 다 사라지는지 확인해야 한다.','10 µs. Slow components of the sample (e.g., heat, long-lived states) need to be checked to decay fully within that time.')},
+
+{t:TR('짧은 펄스가 필요하면: 넓히고 다시 압축하거나, OPA 펌프로 쓴다','When short pulses are needed: broaden and recompress, or pump an OPA'),ec:TR('두 가지 길 (작은 곡선: 앞 둘은 스펙트럼, 마지막은 시간축 펄스)','Two routes (small curves: the first two are spectra, the last is the pulse in time)'),mc:TR('스펙트럼과 펄스: 압축 전후 (예시)','Spectrum and pulse: before and after compression (example)'),
+ e:()=>T(8,22,TR('비선형 압축 (확인 필요)','Nonlinear compression (to be verified)'),'lab')+box(8,36,64,36,TR('Yb 증폭기','Yb amp'),TR('약 300 fs','~300 fs'))+LN(72,54,86,54,'var(--s3)',{mk:'s3'})+box(88,36,76,36,TR('기체 관 /','gas tube /'),TR('다중 통과 셀','multipass cell'))+LN(164,54,176,54,'var(--s3)',{mk:'s3'})
+  +box(178,36,64,36,'chirped','mirror')+LN(242,54,262,54,'var(--s3)',{mk:'s3'})+T(266,58,TR('짧은 펄스','short'),'sub')
+  +`<g data-n="1">${badge(126,88,1,'var(--s3)')}</g><g data-n="2">${badge(210,88,2,'var(--s3)')}</g>`
+  +ybMini(10,60,146,40,.12,'var(--s6)',1)+ybMini(92,68,146,40,.45,'var(--s3)')+ybMini(180,60,146,40,.08,'var(--s3)')
+  +T(40,164,TR('좁은 스펙트럼','narrow'),'sub','middle')+T(126,164,TR('넓어진 스펙트럼','broadened'),'sub','middle')+T(210,164,TR('짧아진 펄스','short pulse'),'sub','middle')
+  +T(8,202,TR('OPA 펌프로 쓰기 (확인 필요)','As an OPA pump (to be verified)'),'lab')+box(8,216,64,34,TR('Yb 증폭기','Yb amp'))+LN(72,233,86,233,'var(--pump)',{mk:'g'})+box(88,216,76,34,TR('2배·3배','2× · 3×'),TR('주파수','frequency'))+LN(164,233,176,233,'var(--pump)',{mk:'g'})
+  +box(178,216,64,34,'OPA')+LN(242,233,262,233,'var(--pump)',{mk:'g'})+T(266,237,TR('다른 파장','new λ'),'sub'),
+ m:()=>{const P1=plot({x:[960,1100],y:[0,1.15],T:30,B:104,L:30,noy:1,xt:[{v:980,l:'980'},{v:1030,l:'1030'},{v:1080,l:'1080'}]});
+  const P2=plot({x:[-600,600],y:[0,1.15],T:164,B:236,L:30,noy:1,xt:[{v:-500,l:'−500'},{v:0,l:'0'},{v:500,l:'500'}],xl:'time (fs)'});
+  return P1.s+P2.s+T(P1.R,P1.B+33,'wavelength (nm)','lab','end')+ybLeg(30,14,'var(--s6)',TR('압축 전','before'),1)+ybLeg(116,14,'var(--s3)',TR('넓힌 뒤 · 압축 후','broadened · compressed'))
+   +crv(P1,x=>ybG(x,1030,6),960,1100,'var(--s6)',{n:400,dash:1})+crv(P1,x=>ybG(x,1030,55),960,1100,'var(--s3)',{n:400})+`<g data-n="1">${badge(P1.X(1003)-12,P1.Y(.5),1,'var(--s3)')}</g>`
+   +crv(P2,x=>ybG(x,0,300),-600,600,'var(--s6)',{n:400,dash:1})+crv(P2,x=>ybG(x,0,40),-600,600,'var(--s3)',{n:400})+`<g data-n="2">${badge(P2.X(150),P2.Y(1),2,'var(--s3)')}</g>`
+   +T(P2.L,P2.T-12,TR('약 300 fs → 약 40 fs (예시)','~300 fs → ~40 fs (example)'),'sub')},
+ read:[TR(`비선형 압축: 기체를 채운 관이나 다중 통과 셀에서 ${c(1,'s3')} 자기 위상 변조로 스펙트럼을 넓힌다(확인 필요).`,`Nonlinear compression: in a gas-filled tube or a multipass cell, ${c(1,'s3')} self-phase modulation broadens the spectrum (to be verified).`),
+  TR(`넓어진 스펙트럼은 아직 색마다 도착 시간이 다르다(처프). ${c(2,'s3')} chirped mirror 같은 압축기로 시간을 맞추면 펄스가 짧아진다.`,`In the broadened spectrum, each color still arrives at a different time (chirp). ${c(2,'s3')} A compressor such as chirped mirrors aligns the timing, and the pulse becomes shorter.`),
+  TR('4단계와 같은 논리다. 스펙트럼이 넓어져야 펄스가 짧아질 수 있다. 오른쪽 숫자(300 fs → 40 fs)는 예시다.','This is the same logic as step 4. The spectrum must broaden before the pulse can shorten. The numbers on the right (300 fs → 40 fs) are an example.'),
+  TR('OPA 펌프로 쓰기: Yb 출력(또는 2배, 3배 주파수)으로 OPA를 펌핑해 파장을 바꾸고, 이 과정에서 더 짧은 펄스를 만들기도 한다(확인 필요). 우리 실험의 mid-IR도 OPA로 만든다.','As an OPA pump: the Yb output (or its second or third harmonic) pumps an OPA to change the wavelength, and shorter pulses are sometimes produced in the process (to be verified). The mid-IR in our experiment is also made with an OPA.')],
+ q:TR('스펙트럼만 넓히고 압축기를 빼면 펄스는 짧아지나?','If the spectrum is broadened but the compressor is left out, does the pulse get shorter?'),a:TR('아니다. 색마다 도착 시간이 달라 펄스는 오히려 길어질 수 있다. 넓은 스펙트럼은 짧은 펄스의 필요조건이고, 위상을 맞춰야 실제로 짧아진다.','No. Each color arrives at a different time, so the pulse may even get longer. A broad spectrum is a necessary condition for a short pulse; the phases must be aligned for the pulse to actually shorten.')},
+
+{t:TR('정리: Ti:S vs Yb (수치는 대략)','Summary: Ti:S vs Yb (values approx.)'),ec:TR('비교 표','Comparison table'),mc:TR('같은 단위로 비교 (막대 = 흔한 범위, 대략)','Compared in the same units (bars = typical ranges, approx.)'),
+ e:()=>{const rows=[[TR('중심 파장','center λ'),TR('약 800 nm','~800 nm'),TR('약 1030 nm','~1030 nm'),0],[TR('펄스 폭','pulse width'),TR('약 25–50 fs','~25–50 fs'),TR('약 200–400 fs*','~200–400 fs*'),1],[TR('반복률','rep. rate'),TR('보통 1–10 kHz','typ. 1–10 kHz'),'1 kHz – MHz*',2],[TR('펌프','pump'),TR('초록 펌프 레이저','green pump laser'),TR('다이오드 직접','direct diode'),0],[TR('양자 결손','q. defect'),TR('약 34%','~34%'),TR('약 5%','~5%'),3]];
+  return T(8,30,TR('항목','item'),'lab')+T(108,30,TR('Ti:S 증폭기','Ti:S amplifier'),'lab','start','var(--s5)')+T(212,30,TR('Yb 증폭기','Yb amplifier'),'lab','start','var(--s3)')+`<line x1="8" x2="312" y1="40" y2="40" class="ax"/>`
+   +rows.map(([a,b,d,n],i)=>{const y=66+i*34;return (n?`<g data-n="${n}">${badge(14,y-4,n,'var(--fg)')}</g>`+T(28,y,a,'sub'):T(8,y,a,'sub'))+T(108,y,b,'sub')+T(212,y,d,'sub')+`<line x1="8" x2="312" y1="${y+14}" y2="${y+14}" class="lvl2"/>`}).join('')
+   +T(8,250,TR('* 확인 필요. 우리 장비 값이 아니라 흔한 범위다.','* To be verified; typical ranges, not our values.'),'sub')},
+ m:()=>ybRow(48,1,TR('펄스 폭 (fs)','pulse width (fs)'),{log:1,a:10,b:1000,t:[[10,'10'],[100,'100'],[1000,'1000']]},[25,50],[200,400])
+  +ybRow(132,2,TR('반복률 (kHz)','repetition rate (kHz)'),{log:1,a:.5,b:2000,t:[[1,'1'],[10,'10'],[100,'100'],[1000,'1000']]},[1,10],[1,1000])
+  +ybRow(216,3,TR('양자 결손 (%)','quantum defect (%)'),{a:0,b:40,t:[[0,'0'],[10,'10'],[20,'20'],[30,'30'],[40,'40']]},[0,34],[0,5]),
+ read:[TR('Ti:S는 짧은 펄스(대략 25–50 fs)와 넓은 파장 조절이 강점이다. 녹색 펌프 레이저를 한 단계 더 거친다.','Ti:S excels at short pulses (approx. 25–50 fs) and wide wavelength tuning. It needs one extra stage, a green pump laser.'),TR('Yb는 다이오드로 바로 펌핑하고 열이 적어 높은 반복률·높은 평균 출력이 강점이다. 펄스는 대략 10배 길다.','Yb is pumped directly by diodes and produces little heat, so high repetition rates and high average power are its strengths. Its pulses are approx. 10× longer.'),
+  TR('번호는 왼쪽 표의 행과 오른쪽 막대를 잇는다. 막대는 흔한 범위이고 우리 장비 값이 아니다.','The numbers link rows of the left table to bars on the right. The bars are typical ranges, not our instrument values.'),TR('짧은 펄스가 꼭 필요하면 Yb 뒤에 압축이나 OPA를 붙인다(6단계).','When short pulses are essential, compression or an OPA is added after the Yb laser (step 6).')],
+ q:TR('pump-probe에서 평균을 많이 내야 하고 샘플 회복이 빠르면 어느 쪽이 유리한가?','In pump-probe that needs many averages, with a sample that recovers quickly, which is better?'),a:TR('Yb처럼 반복률이 높은 쪽. 같은 시간에 샷 수가 많다. 단, 필요한 시간 분해능이 수십 fs라면 압축이나 OPA가 필요하다.','The one with the higher repetition rate, such as Yb. It gives more shots in the same time. However, if a time resolution of tens of fs is required, compression or an OPA is needed.')}];
+
+const TABS=[{id:'ts',name:'Ti:Sapphire',sub:TR('fs 펄스의 출발점','where fs pulses start'),desc:TR('이득 매질·공진기·펌프에서 시작해 모드 잠금, 펄스 폭과 스펙트럼, 분산, 증폭(CPA), 그리고 우리 셋업의 OPA로 중적외선을 만드는 데까지.','From gain medium, cavity, and pump to mode locking, pulse width and spectrum, dispersion, amplification (CPA), and making mid-IR with the OPAs in our setup.'),steps:TS},{id:'yb',name:TR('Yb 레이저','Yb lasers'),sub:TR('다이오드 펌핑 고반복','diode-pumped, high repetition rate'),desc:TR('준위 구조, 다이오드 펌핑, 작은 양자 결손, 좁은 이득 띠와 펄스 폭, 반복률. Ti:S와 같은 단위로 비교한다.','Level structure, diode pumping, small quantum defect, narrow gain band and pulse width, repetition rate. Compared with Ti:S in the same units.'),steps:YB}];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>

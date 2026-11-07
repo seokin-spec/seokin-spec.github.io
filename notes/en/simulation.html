@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Computational Methods Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · computational methods</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../simulation.html" href="../simulation.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 계산 방법 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 계산 방법
+// @status 검토 중
+// @lang ko en
+// @title.en Computational Methods Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · computational methods
+// @status.en Under review
+/* 계산 방법 노트: DFT vs MD. 틀만 만든 상태이며 전문가 검토가 필요하다 (REVIEW.md).
+   글은 TR('한국어','English')로 쓴다 (영어판 notes/en/simulation.html). */
+const NOTE={key:'simulation'};
+
+/* ---------- 노트 전용 헬퍼 (dm 접두어) ---------- */
+const dmAtom=(x,y,r,l,col)=>`<circle cx="${x}" cy="${y}" r="${r}" style="fill:${col}" fill-opacity=".85"/>`+(l?T(x,y+4,l,'num','middle','#fff'):'');
+function dmWater(x,y,s,d=0){const h1=[x-24*s+d,y+18*s],h2=[x+24*s-d,y+18*s],lb=s>=1.2;
+ return LN(x,y,h1[0],h1[1],'var(--fg)',{w:2})+LN(x,y,h2[0],h2[1],'var(--fg)',{w:2})+dmAtom(x,y,11*s,lb?'O':'','var(--s1)')+dmAtom(h1[0],h1[1],7*s,lb?'H':'','var(--s6)')+dmAtom(h2[0],h2[1],7*s,lb?'H':'','var(--s6)')}
+function dmSpring(x1,x2,y,n=8,a=6){const p=[[x1,y]];for(let i=1;i<n;i++)p.push([x1+(x2-x1)*i/n,y+(i%2?-a:a)]);p.push([x2,y]);return PL(p,'var(--muted)',{w:1.4})}
+const dmCloud=(cx,cy,list)=>list.map(([rx,ry,o])=>`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" style="fill:var(--s2)" fill-opacity="${o}"/>`).join('');
+const dmG=(n,s)=>n?`<g data-n="${n}">${s}</g>`:s;
+const dmLor=(x,x0,g)=>g*g/((x-x0)**2+g*g);
+/* Morse 예시 (O–H 비슷한 값 가정): D_e 4.6 eV, r_e 0.96 Å, a 2.2 Å⁻¹ */
+const dmM=r=>4.6*(1-Math.exp(-2.2*(r-.96)))**2;
+/* velocity Verlet, 조화 진동 (주기 10 fs, 처음 변위 0.1 Å) */
+function dmVV(dt,tmax){const w=2*Math.PI/10;let x=.1,v=0;const out=[[0,x]];
+ for(let i=1;i*dt<=tmax+1e-9;i++){const a=-w*w*x;x=x+v*dt+.5*a*dt*dt;v=v+.5*(a-w*w*x)*dt;out.push([i*dt,x])}return out}
+const dmClip=(v,a,b)=>Math.max(a,Math.min(b,v));
+/* 주파수 요동 예시: 상관 시간 1 ps, 폭 10 cm⁻¹인 OU 과정 (고정 씨앗) */
+const dmOU=(()=>{let sd=7;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647};const gs=()=>{let u=0;for(let i=0;i<6;i++)u+=rnd();return (u-3)*Math.SQRT2};
+ const out=[],dt=.02,a=Math.exp(-dt);let w=0;for(let i=0;i<=300;i++){out.push([i*dt,w]);w=w*a+10*Math.sqrt(1-a*a)*gs()}return out})();
+const dmMu=(t,k)=>{const b=Math.cos(2*Math.PI*t/20.2)*Math.exp(-t/180),s=.7*Math.cos(2*Math.PI*t/9.81)*Math.exp(-t/45);return k===1?b:k===2?s:b+s};
+
+const DM=[
+/* 1 */
+{t:TR('두 방법은 답하는 질문이 다르다','The two methods answer different questions'),ec:TR('한 장면 vs 동영상','One snapshot vs a movie'),mc:TR('무엇을 내놓나','What each one returns'),
+ e:()=>dmG(1,badge(20,18,1,'var(--s1)'))+T(36,22,TR('DFT: 한 장면 (원자는 멈춰 있다)','DFT: one snapshot (atoms frozen)'),'lab')
+  +dmCloud(160,92,[[78,40,.08],[60,30,.12],[42,22,.16]])+dmWater(160,82,1.4)+T(244,72,TR('전자 밀도','electron'),'sub')+T(244,88,TR('ρ(r)','density ρ(r)'),'sub')
+  +dmG(2,badge(20,158,2,'var(--s3)'))+T(36,162,TR('MD: 동영상 (원자가 움직인다)','MD: a movie (atoms move)'),'lab')
+  +[[70,-4,'t = 0'],[160,2,TR('1 fs 뒤','1 fs later')],[250,6,TR('2 fs 뒤','2 fs later')]].map(([x,d,l])=>dmWater(x,204,1,d)+T(x,250,l,'sub','middle')).join('')
+  +[70,160].map(x=>LN(x+36,212,x+54,212,'var(--muted)',{mk:'g'})).join('')+T(160,272,TR('걸음마다 힘을 구해 다음 위치로 간다','Each step: compute the forces, move to the next position'),'sub','middle'),
+ m:()=>{let s=dmG(1,badge(20,18,1,'var(--s1)'))+T(36,22,TR('출력: 이 배치의 에너지와 전자 상태','Output: energy and electrons of this geometry'),'lab')
+   +TM(36,46,TR(['에너지 E (숫자 하나)','전자 밀도, 오비탈 (HOMO, LUMO)','원자마다 걸린 힘','→ 구조 최적화, 진동수 계산에 쓴다'],['energy E (a single number)','electron density, orbitals (HOMO, LUMO)','force on each atom','→ used for geometry optimization, frequencies']),'sub','start',18);
+  const P=plot({x:[0,100],y:[.9,1.04],L:58,T:188,B:240,xt:[0,25,50,75,100].map(v=>({v,l:String(v)})),yt:[{v:.92,l:'0.92'},{v:1.02,l:'1.02'}],xl:TR('시간 (fs)','time (fs)')});
+  return s+dmG(2,badge(20,158,2,'var(--s3)'))+T(36,162,TR('출력: 원자 좌표의 시간 변화','Output: atomic coordinates over time'),'lab')+T(P.R,178,TR('세로: O–H 길이 (Å), 예시','vertical: O–H length (Å), example'),'sub','end')
+   +P.s+crv(P,t=>.97+.035*Math.sin(2*Math.PI*t/10)+.012*Math.sin(2*Math.PI*t/47+1),0,100,'var(--s3)',{n:400,w:1.6})},
+ read:[TR(`${c(1,'s1')} DFT는 "이 원자 배치에서 전자는 어떻게 있고, 에너지는 얼마인가?"에 답한다. 원자를 멈춘 한 장면의 계산이다.`,`${c(1,'s1')} DFT answers "for this arrangement of atoms, where are the electrons and what is the energy?" It is a calculation on one snapshot with the atoms frozen.`),
+  TR(`${c(2,'s3')} MD는 "원자들이 시간에 따라 어떻게 움직이나?"에 답한다. 장면을 이어 붙인 동영상이다.`,`${c(2,'s3')} MD answers "how do the atoms move in time?" It is a movie made of many snapshots in sequence.`),
+  TR('DFT가 구한 힘을 MD가 쓰기도 한다(6단계 AIMD). 두 방법은 경쟁 관계가 아니라 역할이 다르다.','MD can also use forces computed by DFT (step 6, AIMD). The two methods are not competitors; they play different roles.'),
+  TR('오른쪽 아래 궤적은 모양만 보여 주는 예시다. 실제 계산값이 아니다.','The trajectory at lower right is an example that only shows the shape. It is not a real calculation.')],
+ q:TR('O–H 결합 길이가 시간에 따라 얼마나 흔들리는지 알고 싶다. 어느 쪽이 답하나?','The question is how much the O–H bond length fluctuates in time. Which method answers it?'),a:TR('MD. 흔들림은 시간에 따른 움직임이라 한 장면 계산인 DFT로는 나오지 않는다. 평형 길이 하나만 필요하면 DFT 구조 최적화로 충분하다.','MD. A fluctuation is motion in time, so a single-snapshot DFT calculation cannot give it. If only the equilibrium length is needed, a DFT geometry optimization is enough.')},
+/* 2 */
+{t:TR('DFT: 전자 밀도 하나로 에너지를 구한다','DFT: the energy from the electron density alone'),ec:TR('전자 밀도 (예: CO)','Electron density (e.g. CO)'),mc:TR('Kohn-Sham 계산 순서','Kohn-Sham procedure'),
+ e:()=>T(14,22,TR('밀도 ρ(r): 공간의 점마다 숫자 하나','density ρ(r): one number at each point in space'),'lab')
+  +dmCloud(160,130,[[120,66,.07],[96,50,.1],[72,36,.14]])+[110,210].map(x=>`<circle cx="${x}" cy="130" r="24" style="fill:var(--s2)" fill-opacity=".18"/>`).join('')
+  +LN(110,130,210,130,'var(--fg)',{w:2})+dmAtom(110,130,13,'C','var(--s6)')+dmAtom(210,130,12,'O','var(--s1)')
+  +TM(160,224,TR(['전자 N개의 파동함수: 변수 3N개','전자 밀도: 변수 3개 (x, y, z)','→ 밀도로 바닥 상태 에너지를 정할 수 있다'],['wavefunction of N electrons: 3N variables','electron density: 3 variables (x, y, z)','→ the density fixes the ground-state energy']),'sub','middle',17),
+ m:()=>{const ar=(y1,y2)=>LN(140,y1,140,y2,'var(--muted)',{mk:'g'});
+  return box(40,12,200,28,TR('ρ 추측 (처음엔 원자 밀도의 합)','guess ρ (start: sum of atomic densities)'))+ar(40,54)
+   +box(40,56,200,36,TR('Kohn-Sham 퍼텐셜 만들기','build the Kohn-Sham potential'),TR('교환-상관 부분은 범함수로 근사','XC term approximated by a functional'))+ar(92,106)
+   +box(40,108,200,36,TR('Kohn-Sham 방정식 풀기','solve the Kohn-Sham equations'),TR('→ 오비탈 → 새 밀도 ρ′','→ orbitals → new density ρ′'))+ar(144,158)
+   +box(40,160,200,36,TR('ρ′와 ρ가 같은가?','is ρ′ equal to ρ?'),TR('(자기 일관성, SCF)','(self-consistency, SCF)'))+ar(196,224)+T(148,214,TR('같으면','yes'),'sub')
+   +box(40,226,200,28,TR('에너지 E, 힘, 밀도 출력','output energy E, forces, density'))
+   +PL([[240,178],[276,178],[276,74],[244,74]],'var(--s1)',{mk:'s1'})+TM(282,114,TR(['다르면','ρ′로','다시'],['no:','repeat','with ρ′']),'sub','start',16)},
+ read:[TR('전자 N개의 파동함수는 변수가 3N개다. 전자 밀도 ρ(r)는 변수가 3개(x, y, z)뿐이다.','The wavefunction of N electrons has 3N variables. The electron density ρ(r) has only 3 (x, y, z).'),
+  TR('Hohenberg–Kohn 정리: 바닥 상태 에너지는 전자 밀도로 정해진다. DFT는 여기서 출발한다.','Hohenberg–Kohn theorem: the ground-state energy is determined by the electron density. DFT starts from here.'),
+  TR('실제 계산은 Kohn-Sham 방식이다. 밀도를 추측하고, 퍼텐셜을 만들고, 방정식을 풀어 새 밀도를 얻는다. 밀도가 더 바뀌지 않을 때까지 되풀이한다(자기 일관성, SCF).','Practical calculations use the Kohn-Sham scheme. A density is guessed, the potential is built, and solving the equations gives a new density. This repeats until the density stops changing (self-consistent field, SCF).'),
+  TR('정확한 식을 모르는 부분(교환-상관)은 범함수로 근사한다. 예: B3LYP, PBE.','The part whose exact form is unknown (exchange-correlation) is approximated by a functional. Examples: B3LYP, PBE.'),
+  TR('그래서 결과는 범함수와 기저 함수에 따라 달라진다. 계산 결과에는 "B3LYP/6-31G(d)"처럼 조건을 꼭 같이 적는다.','The results therefore depend on the functional and the basis set. A computed result is always reported with its level of theory, e.g. "B3LYP/6-31G(d)".')],
+ q:TR('같은 분자를 두 사람이 DFT로 계산했는데 진동수가 다르다. 먼저 확인할 것은?','Two DFT calculations of the same molecule give different frequencies. What is checked first?'),a:TR('범함수와 기저 함수가 같은지. 계산 조건이 다르면 같은 분자라도 값이 달라진다.','Whether the functional and basis set are the same. With a different level of theory, even the same molecule gives different values.')},
+/* 3 */
+{t:TR('퍼텐셜 에너지 곡선: 거리를 바꾸며 에너지를 찍는다','Potential energy curve: the energy at each distance'),ec:TR('결합 길이 바꾸기','Changing the bond length'),mc:TR('에너지 곡선 E(r)','Energy curve E(r)'),
+ slider:{min:.6,max:2.6,step:.02,init:.96,label:TR('결합 길이 r','Bond length r'),fmt:v=>v.toFixed(2)+' Å',play:1},
+ e:r=>{const hx=60+r*90,E=dmM(r);
+  const msg=r<.86?TR(['너무 가깝다 → 반발로 에너지가 급히 오른다'],['too close → repulsion, energy rises steeply']):r<1.12?TR(['가장 낮은 곳 근처 = 안정 구조','구조 최적화가 찾는 점이다'],['near the minimum = stable structure','the point geometry optimization finds']):r<1.8?TR(['늘어나는 중 → 에너지가 오른다'],['stretching → energy rises']):TR(['거의 끊어짐 → E가 D_e에 다가간다'],['almost broken → E approaches D_e']);
+  return T(14,22,TR('거리마다 DFT를 한 번씩 돌린다','one DFT run at each distance'),'lab')+dmSpring(76,hx-10,120)+dmAtom(60,120,16,'O','var(--s1)')
+   +dmG(1,dmAtom(hx,120,10,'H','var(--s6)')+badge(hx,92,1,'var(--s1)'))
+   +LN(60,152,hx,152,'var(--muted)',{w:1})+LN(60,146,60,158,'var(--muted)',{w:1})+LN(hx,146,hx,158,'var(--muted)',{w:1})
+   +T(14,178,'r = '+r.toFixed(2)+' Å','sub')+T(14,204,'E = '+E.toFixed(2)+TR(' eV (예시)',' eV (example)'),'lab')+TM(14,228,msg,'sub','start',17)},
+ m:r=>{const P=plot({x:[.6,2.6],y:[0,7],xt:[1,1.5,2,2.5].map(v=>({v,l:v.toFixed(1)})),yt:[0,2,4,6].map(v=>({v,l:String(v)})),xl:TR('결합 길이 r (Å)','bond length r (Å)'),yl:TR('에너지 E (eV)','energy E (eV)')});
+  const E=Math.min(dmM(r),7);
+  return P.s+T(P.R,14,TR('O–H 비슷한 Morse 곡선 (값은 예시)','O–H-like Morse curve (example values)'),'sub','end')+LN(P.L,P.Y(4.6),P.R,P.Y(4.6),'var(--muted)',{w:1,dash:1})+T(P.R,P.Y(4.6)-6,TR('D_e (끊어진 상태)','D_e (dissociated)'),'sub','end')
+   +crv(P,dmM,.6,2.6,'var(--fg)',{clip:[0,7]})+`<circle cx="${P.X(.96)}" cy="${P.Y(0)}" r="4" style="fill:none;stroke:var(--fg)"/>`
+   +TM(P.X(1.45),P.Y(1.0),TR(['바닥 = 안정 구조','r_e ≈ 0.96 Å'],['minimum = stable structure','r_e ≈ 0.96 Å']),'sub')
+   +dmG(1,`<circle cx="${P.X(r)}" cy="${P.Y(E)}" r="6" style="fill:var(--s1)"/>`)},
+ read:[TR('원자 사이 거리 r을 바꾸며 DFT를 한 번씩 돌리면 r마다 에너지 하나가 나온다. 이 점들을 이으면 퍼텐셜 에너지 곡선이 된다.','Running DFT once for each interatomic distance r gives one energy per r. Connecting these points gives the potential energy curve.'),
+  TR(`${c(1,'s1')} 슬라이더로 r을 움직이면 오른쪽 점이 곡선을 따라간다. 곡선은 O–H와 비슷한 값을 가정한 Morse 함수 예시다.`,`${c(1,'s1')} Moving r with the slider moves the dot on the right along the curve. The curve is an example Morse function with assumed O–H-like values.`),
+  TR('가장 낮은 점이 안정 구조다. 구조 최적화는 이 점을 찾는 계산이다.','The lowest point is the stable structure. Geometry optimization is the calculation that finds this point.'),
+  TR('원자가 많으면 좌표가 여럿이라 곡선이 아니라 곡면이 된다(퍼텐셜 에너지 곡면, PES).','With many atoms there are many coordinates, so the curve becomes a surface (potential energy surface, PES).'),
+  TR('<a href="2d-spectroscopy.html">2D 분광 노트</a>의 Morse 곡선(비조화성)과 같은 그림이다.','It is the same picture as the Morse curve (anharmonicity) in the <a href="2d-spectroscopy.html">2D spectroscopy notes</a>.')],
+ q:TR('r을 아주 크게 하면 에너지는?','What happens to the energy at very large r?'),a:TR('원자 둘이 떨어진 상태의 에너지 D_e에 다가간다. 바닥과의 차이가 결합을 끊는 데 드는 에너지다.','It approaches D_e, the energy of the two separated atoms. The difference from the minimum is the energy needed to break the bond.')},
+/* 4 */
+{t:TR('진동수는 바닥의 곡률에서 나온다','Frequencies come from the curvature at the minimum'),ec:TR('바닥 근처 곡률','Curvature near the minimum'),mc:TR('계산 IR 스펙트럼 (물, 예시)','Computed IR spectrum (water, example)'),
+ tg:[{k:'sc',l:TR('보정 인자 0.96 곱하기 (예시)','Multiply by scaling factor 0.96 (example)'),on:false}],
+ e:()=>{const P=plot({x:[-1,1],y:[0,1.1],xt:[{v:-1,l:'−'},{v:0,l:'0'},{v:1,l:'+'}],xl:TR('변위 (정규 좌표, 상대)','displacement (normal coord., relative)'),yl:TR('E (상대)','E (relative)'),T:62});
+  const lg=(x,y,col,n,txt,dash)=>dmG(n||0,LN(x,y-4,x+22,y-4,col,{w:2,dash})+(n?badge(x+34,y-4,n,col)+T(x+48,y,txt,'sub'):T(x+28,y,txt,'sub')));
+  return T(14,16,TR('ω = √(k/μ),  k = 바닥의 곡률 d²E/dx²','ω = √(k/μ),  k = curvature d²E/dx² at the minimum'),'sub')+lg(14,36,'var(--s1)',1,TR('신축: 곡률 큼','stretch: steep'))+lg(166,36,'var(--s3)',2,TR('굽힘: 곡률 작음','bend: shallow'))+lg(14,54,'var(--s1)',0,TR('실제 곡선 (비조화, 예시)','real curve (anharmonic, example)'),1)
+   +P.s+dmG(1,crv(P,x=>x*x,-1,1,'var(--s1)',{clip:[0,1.1]}))+crv(P,x=>(1-Math.exp(-1.2*x))**2/1.44,-.67,1,'var(--s1)',{dash:1,w:1.4})+dmG(2,crv(P,x=>.18*x*x,-1,1,'var(--s3)'))},
+ m:(v,tg)=>{const sc=tg.sc?.96:1,P=plot({x:[4200,1200],y:[0,1.15],xt:[4000,3000,2000].map(v=>({v,l:String(v)})),xl:'wavenumber (cm⁻¹)',noy:1,T:40});
+  const st=(w,h,col,n)=>dmG(n,`<line x1="${P.X(w*sc)}" x2="${P.X(w*sc)}" y1="${P.Y(0)}" y2="${P.Y(h)}" style="stroke:${col}" stroke-width="4"/>`);
+  const tri=w=>`<path d="M${P.X(w)},${P.B+2} l4,8 h-8 z" style="fill:var(--fg)"/>`;
+  return P.s+T(TR(P.L,8),14,TR('막대 = 계산 (조화, 예시) · ▲ = 실험 (기체, 대략)','bars: calc. (harmonic, example) · ▲: gas expt. (approx.)'),'sub')+T(P.R,30,tg.sc?TR('×0.96: 실험에 가까워진다','×0.96: closer to experiment'):TR('조화 근사: 실험보다 대체로 높다','harmonic: usually above experiment'),'sub','end')
+   +st(3910,.65,'var(--s1)',1)+st(3810,.08,'var(--s1)',1)+st(1640,.9,'var(--s3)',2)+[3756,3657,1595].map(tri).join('')
+   +dmG(1,badge(P.X(3860*sc),P.Y(.65)-14,1,'var(--s1)'))+dmG(2,badge(P.X(1640*sc)+16,P.Y(.9),2,'var(--s3)'))},
+ read:[TR('바닥 근처를 포물선으로 보면 곡률(휨 정도)이 용수철 상수 k다. 진동수 ω = √(k/μ), μ는 환산 질량이다.','Treating the region near the minimum as a parabola, its curvature is the spring constant k. The frequency is ω = √(k/μ), where μ is the reduced mass.'),
+  TR(`${c(1,'s1')} O–H 신축은 곡률이 커서 진동수가 높다(대략 3700–3900 cm⁻¹). ${c(2,'s3')} 굽힘은 곡률이 작아 낮다(대략 1600 cm⁻¹).`,`${c(1,'s1')} The O–H stretch has a large curvature, so its frequency is high (approx. 3700–3900 cm⁻¹). ${c(2,'s3')} The bend has a small curvature, so it is low (approx. 1600 cm⁻¹).`),
+  TR('실제 곡선(점선)은 늘어나는 쪽이 더 완만하다(비조화). 조화 근사는 이를 무시하므로 계산 진동수가 대체로 실험보다 높다.','The real curve (dashed) is softer on the stretched side (anharmonic). The harmonic approximation ignores this, so computed frequencies are usually higher than experiment.'),
+  TR('그래서 보정 인자(대략 0.95–0.97, 범함수마다 다름, 확인 필요)를 곱하기도 한다. 체크박스를 켜면 0.96을 곱한 막대가 실험값(▲)에 다가간다.','A scaling factor (approx. 0.95–0.97, depends on the functional, to be verified) is therefore often applied. With the checkbox on, the bars scaled by 0.96 move toward the experimental values (▲).'),
+  TR('막대 높이는 진동할 때 쌍극자가 얼마나 변하는지로 정해진다. 물은 굽힘이 가장 세고, 대칭 신축(약한 쪽 빨간 막대)은 아주 약하다. 값은 대략이다.','The bar height is set by how much the dipole changes during the vibration. In water the bend is the strongest and the symmetric stretch (the weak red bar) is very weak. The values are approximate.')],
+ q:TR('계산 진동수 3800 cm⁻¹에 0.96을 곱하면?','What is a computed frequency of 3800 cm⁻¹ multiplied by 0.96?'),a:TR('약 3650 cm⁻¹. 보정 인자는 범함수와 기저 함수 조합마다 따로 정해진 값을 쓴다.','About 3650 cm⁻¹. Each combination of functional and basis set has its own scaling factor.')},
+/* 5 */
+{t:TR('MD: 힘을 구해 한 걸음씩 간다','MD: compute the force, take one step at a time'),ec:TR('힘과 한 걸음','The force and one step'),mc:TR('궤적 (O–H 신축 예시)','Trajectory (O–H stretch example)'),
+ slider:{min:0,max:60,step:1,init:0,label:TR('시간 t','Time t'),fmt:v=>Math.round(v)+' fs',play:1},
+ tg:[{k:'dt5',l:TR('걸음 Δt를 5 fs로 키우기','Increase the step Δt to 5 fs'),on:false}],
+ e:(t,tg)=>{const dt=tg.dt5?5:1,tr=dmVV(dt,60),n=Math.min(tr.length-1,Math.floor(t/dt+1e-9)),x=dmClip(tr[n][1],-.25,.25),hx=200+x*300,len=dmClip(-x*400,-80,80);
+  return T(14,22,TR('걸음 n = ','step n = ')+n+',  t = '+n*dt+' fs  (Δt = '+dt+' fs)','lab')
+   +LN(200,100,200,142,'var(--muted)',{w:1,dash:1})+T(200,158,TR('평형 위치','equilibrium'),'sub','middle')
+   +dmSpring(86,hx-10,120)+dmAtom(70,120,16,'O','var(--s1)')
+   +(Math.abs(len)>3?LN(hx,88,hx+len,88,'var(--s1)',{w:2.5,mk:'s1'}):'')+T(hx,72,'F = −dE/dx','sub','middle')
+   +dmG(1,dmAtom(hx,120,10,'H','var(--s6)'))
+   +TM(14,190,TR(['1. 지금 위치에서 힘을 구한다','2. 힘으로 Δt 뒤의 위치와 속도를 구한다','3. 다시 1로. 이것을 수백만 번 되풀이한다'],['1. compute the force at the current position','2. use it to get position and velocity after Δt','3. back to 1, repeated millions of times']),'sub','start',18)
+   +(Math.abs(tr[n][1])>.25?T(14,46,TR('발산: 실제 위치는 그림 밖이다','diverged: the real position is off the figure'),'sub','start','var(--s2)'):'')+T(14,268,TR('O는 무거워 고정 가정 · 움직임은 보기 쉽게 과장','O assumed fixed (heavy) · motion exaggerated for clarity'),'sub')},
+ m:(t,tg)=>{const dt=tg.dt5?5:1,tr=dmVV(dt,60),n=Math.min(tr.length-1,Math.floor(t/dt+1e-9)),w=2*Math.PI/10;
+  const P=plot({x:[0,60],y:[-.25,.25],xt:[0,10,20,30,40,50,60].map(v=>({v,l:String(v)})),yt:[{v:-.2,l:'−0.2'},{v:0,l:'0'},{v:.2,l:'+0.2'}],xl:TR('시간 (fs)','time (fs)'),yl:TR('변위 x (Å)','displacement x (Å)'),T:40});
+  const esc=tr.findIndex(p=>Math.abs(p[1])>.25),bad=esc>=0&&n>=esc,k=bad?esc:n;
+  const pts=tr.slice(0,k+1).map(([a,b])=>[P.X(a),P.Y(dmClip(b,-.25,.25))]),cur=pts[pts.length-1],dots=bad?pts.slice(0,-1):pts;
+  return P.s+T(P.R,14,TR('점선 = 정확한 답 · 점 = MD 한 걸음','dashed = exact answer · dot = one MD step'),'sub','end')+(bad?TM(P.R,30,TR(['발산: Δt가 주기(약 10 fs)에 비해 너무 크다','첫 걸음에 그림 밖, 걸음마다 약 8배로 커진다'],['diverged: Δt too large vs the period (about 10 fs)','off the figure at step 1, about 8× larger each step']),'sub','end',15):'')
+   +crv(P,x=>.1*Math.cos(w*x),0,60,'var(--muted)',{dash:1,w:1.2,n:300})+PL(pts,'var(--s2)',bad?{mk:'s2'}:{})+dots.map(([a,b])=>`<circle cx="${a}" cy="${b}" r="1.8" style="fill:var(--s2)"/>`).join('')
+   +dmG(1,`<circle cx="${cur[0]}" cy="${cur[1]}" r="5" style="fill:var(--s1)"/>`)},
+ read:[TR('힘은 에너지 곡면의 기울기다: F = −dE/dx. 3단계 곡선에서 기울기가 가파를수록 힘이 크다.','The force is the slope of the energy surface: F = −dE/dx. On the curve of step 3, the steeper the slope, the larger the force.'),
+  TR(`뉴턴 방정식으로 아주 짧은 시간 Δt 뒤의 위치와 속도를 구한다. 거기서 다시 힘을 구하고, 되풀이한다. 오른쪽 점 하나가 한 걸음이다. ${c(1,'s1')}이 지금 걸음이다.`,`Newton's equations give the position and velocity after a very short time Δt. The force is computed again there, and the cycle repeats. Each dot on the right is one step. ${c(1,'s1')} is the current step.`),
+  TR('Δt는 대략 1 fs다(확인 필요). 가장 빠른 진동(O–H, C–H 신축, 주기 약 10 fs)보다 충분히 짧아야 한다.','Δt is approx. 1 fs (to be verified). It must be much shorter than the fastest vibration (O–H, C–H stretch, period about 10 fs).'),
+  TR('체크박스로 Δt를 5 fs로 키우면 한 주기에 점이 두 개뿐이다. 첫 걸음부터 정확한 답(점선)을 벗어나고, 진폭이 걸음마다 약 8배로 커져 발산한다(그림 밖으로 나간다).','With Δt raised to 5 fs by the checkbox, there are only two dots per period. The first step already leaves the exact answer (dashed), and the amplitude grows about 8× per step and diverges (it leaves the figure).'),
+  TR('세어 보기: 1 ns를 보려면 1 fs 걸음으로 10⁶번 계산한다.','Counting it out: 1 ns with 1 fs steps takes 10⁶ calculations.')],
+ q:TR('1 fs 걸음으로 100 ps를 계산하면 몇 걸음인가?','How many steps does 100 ps take with 1 fs steps?'),a:TR('10⁵ 걸음. 100 ps = 100 000 fs.','10⁵ steps. 100 ps = 100 000 fs.')},
+/* 6 */
+{t:TR('힘을 어디서 얻나: 힘장 vs AIMD','Where the forces come from: force field vs AIMD'),ec:TR('두 가지 힘 계산','Two ways to compute forces'),mc:TR('비용과 정확도 (정성적)','Cost and accuracy (qualitative)'),
+ e:()=>dmG(1,badge(20,18,1,'var(--s3)'))+T(36,22,TR('힘장: 정해진 함수 (용수철 + 비결합)','force field: fixed functions (springs + nonbonded)'),'lab')
+  +dmSpring(80,122,74,6,5)+dmSpring(138,180,74,6,5)+dmAtom(70,74,10,'','var(--s6)')+dmAtom(130,74,12,'','var(--s1)')+dmAtom(190,74,10,'','var(--s6)')
+  +`<path d="M118,86 A16,16 0 0,0 142,86" fill="none" style="stroke:var(--s3)" stroke-width="1.5"/>`+T(130,108,TR('각도','angle'),'sub','middle')+T(101,58,TR('결합','bond'),'sub','middle')
+  +LN(200,74,254,74,'var(--s3)',{w:1.2,dash:1})+dmAtom(266,74,10,'','var(--s6)')+T(227,58,TR('LJ + 전하','LJ + charge'),'sub','middle')
+  +T(36,134,TR('E = Σ 결합 + Σ 각도 + Σ 비틀림 + 비결합','E = Σ bond + Σ angle + Σ torsion + nonbonded'),'sub')
+  +dmG(2,badge(20,168,2,'var(--s2)'))+T(36,172,TR('AIMD: 걸음마다 DFT로 힘을 구한다','AIMD: forces from DFT at every step'),'lab')
+  +dmCloud(130,222,[[84,30,.08],[62,22,.13]])+LN(80,222,180,222,'var(--fg)',{w:2})+dmAtom(80,222,10,'','var(--s6)')+dmAtom(130,222,12,'','var(--s1)')+dmAtom(180,222,10,'','var(--s6)')
+  +T(36,270,TR('E, F = DFT 계산 (전자 밀도에서)','E, F = DFT calculation (from electron density)'),'sub'),
+ m:()=>{const P=plot({x:[0,1],y:[0,1],xl:TR('한 걸음 계산 비용 (상대) →','cost per step (relative) →'),yl:TR('정확도 (상대) →','accuracy (relative) →')});
+  const pt=(x,y,col,n)=>dmG(n,`<circle cx="${P.X(x)}" cy="${P.Y(y)}" r="7" style="fill:${col}"/>`);
+  return P.s+T(P.R,14,TR('정성적 그림 (예시)','qualitative sketch (example)'),'sub','end')
+   +pt(.12,.3,'var(--s3)',1)+T(P.X(.12)+12,P.Y(.3)+4,TR('힘장 MD','force-field MD'),'labn')+TM(P.X(.12)+12,P.Y(.3)+22,TR(['빠르다, 결합 끊어짐 ✗','(반응형 힘장은 예외, 확인 필요)'],['fast; bond breaking ✗','(except reactive FFs, to be verified)']),'sub','start',16)
+   +`<circle cx="${P.X(.45)}" cy="${P.Y(.66)}" r="7" stroke-dasharray="3 2" style="fill:none;stroke:var(--s5);stroke-width:1.5"/>`+T(P.X(.45)+12,P.Y(.66)+4,TR('ML 힘장','ML force field'),'labn')+T(P.X(.45),P.Y(.66)+24,TR('DFT 데이터로 학습 (확인 필요)','trained on DFT data (to be verified)'),'sub','middle')
+   +pt(.88,.88,'var(--s2)',2)+T(P.X(.88)-12,P.Y(.88)+4,'AIMD','labn','end')+T(P.X(.88)-12,P.Y(.88)+22,TR('DFT 수준, 아주 느리다','DFT quality, very slow'),'sub','end')},
+ read:[TR(`${c(1,'s3')} 힘장(고전 MD): 결합과 각도는 용수철, 떨어진 원자 사이는 정해진 함수(Lennard-Jones + 전하)로 둔다. 계산이 빠르다.`,`${c(1,'s3')} Force field (classical MD): bonds and angles are springs, and non-bonded atoms interact through fixed functions (Lennard-Jones + charges). The calculation is fast.`),
+  TR('대신 결합이 끊어지거나 새로 생기는 반응은 다루지 못한다. 반응형 힘장은 예외다(확인 필요).','In exchange, reactions in which bonds break or form cannot be handled. Reactive force fields are the exception (to be verified).'),
+  TR(`${c(2,'s2')} ab initio MD(AIMD): 걸음마다 DFT로 힘을 구한다. 정확하지만 아주 느리다.`,`${c(2,'s2')} Ab initio MD (AIMD): the forces come from DFT at every step. It is accurate but very slow.`),
+  TR('요즘은 DFT 계산 결과로 학습한 머신러닝(ML) 힘장도 쓴다. 두 방법 사이에 놓인다(확인 필요).','Machine-learning (ML) force fields trained on DFT results are also used now. They sit between the two methods (to be verified).'),
+  TR('오른쪽 그림은 정성적 예시다. 실제 비용과 정확도는 계와 방법마다 다르다.','The figure on the right is a qualitative example. Real cost and accuracy depend on the system and the method.')],
+ q:TR('물 속 양성자 이동(O–H 결합이 끊어지고 새로 생김)을 보려면?','Which method shows proton transfer in water (O–H bonds breaking and forming)?'),a:TR('AIMD(또는 반응을 다루는 힘장). 보통 힘장은 결합이 고정이라 양성자가 옮겨 가지 못한다.','AIMD (or a force field that handles reactions). In an ordinary force field the bonds are fixed, so the proton cannot move over.')},
+/* 7 */
+{t:TR('크기와 시간 세어 보기','Counting size and time'),ec:TR('걸음 수 = 시간 ÷ Δt','Number of steps = time ÷ Δt'),mc:TR('방법별 범위 (예시)','Range of each method (example)'),
+ e:()=>{const P=plot({x:[1,1e10],logx:1,xt:[{v:1,l:'1'},{v:1e3,l:'10³'},{v:1e6,l:'10⁶'},{v:1e9,l:'10⁹'}],xl:TR('걸음 수 (Δt = 1 fs 가정)','number of steps (Δt = 1 fs assumed)'),L:70,noy:1,T:30});
+  return T(14,16,TR('보고 싶은 시간 ÷ Δt = 걸음 수','target time ÷ Δt = number of steps'),'sub')+[['1 ps',1e3,'10³'],['1 ns',1e6,'10⁶'],['1 µs',1e9,'10⁹']].map(([l,N,s],i)=>{const y=70+i*55;
+   return T(P.L-8,y+4,l,'labn','end')+`<rect x="${P.L}" y="${y-9}" width="${P.X(N)-P.L}" height="18" rx="2" style="fill:var(--s2)" fill-opacity=".35"/>`+T(P.X(N)-6,y+4,s+TR(' 걸음',' steps'),'sub','end')}).join('')+P.s},
+ m:()=>{const P=plot({x:[1,1e7],y:[1,1e10],logx:1,logy:1,xt:[{v:1,l:'1'},{v:1e2,l:'10²'},{v:1e4,l:'10⁴'},{v:1e6,l:'10⁶'}],yt:[{v:1,l:'1 fs'},{v:1e3,l:'1 ps'},{v:1e6,l:'1 ns'},{v:1e9,l:'1 µs'}],xl:TR('원자 수','number of atoms'),yl:TR('시뮬레이션 시간','simulated time'),T:30});
+  const rg=(x0,x1,y0,y1,col,n,lab)=>{const xa=P.X(x0),xb=P.X(x1),ya=P.Y(y1),yb=P.Y(y0);return dmG(n,`<rect x="${xa}" y="${ya}" width="${xb-xa}" height="${yb-ya}" rx="3" style="fill:${col};stroke:${col}" fill-opacity=".22"/>`+(lab?badge(xa,ya,n,col)+T((xa+xb)/2,(ya+yb)/2+4,lab,'labn','middle'):''))};
+  return P.s+T(P.R,14,TR('예시 · 대략, 계산 자원에 따라 크게 다름','example · approx., varies with computing resources'),'sub','end')
+   +rg(10,1000,1,3,'var(--s1)',1)+dmG(1,badge(P.X(10)+4,210,1,'var(--s1)')+T(P.X(10)+18,214,TR('DFT: 시간 없음 (정적)','DFT: no time (static)'),'sub'))
+   +rg(10,1000,1e3,1e5,'var(--s2)',2,'AIMD')+rg(1e4,1e7,1e6,1e9,'var(--s3)',3,TR('힘장 MD','FF MD'))},
+ read:[TR('걸음 수 = 보고 싶은 시간 ÷ Δt. Δt = 1 fs로 가정하면 1 ps는 10³, 1 ns는 10⁶, 1 µs는 10⁹ 걸음이다.','Number of steps = target time ÷ Δt. Assuming Δt = 1 fs, 1 ps is 10³ steps, 1 ns is 10⁶ and 1 µs is 10⁹.'),
+  TR(`${c(1,'s1')} DFT 한 번 계산은 시간이 없다(정적). 원자 수십–수백 개가 보통이다.`,`${c(1,'s1')} A single DFT calculation has no time axis (static). Tens to hundreds of atoms are typical.`),
+  TR(`${c(2,'s2')} AIMD는 걸음마다 DFT를 한 번 돌린다. 그래서 대략 원자 수십–수백 개, 수–수십 ps가 보통 범위다.`,`${c(2,'s2')} AIMD runs one DFT calculation per step. The typical range is therefore approx. tens to hundreds of atoms and a few to tens of ps.`),
+  TR(`${c(3,'s3')} 힘장 MD는 한 걸음이 싸서 원자 수만–수백만 개, ns–µs까지 간다.`,`${c(3,'s3')} Force-field MD has cheap steps, so it reaches tens of thousands to millions of atoms and ns–µs.`),
+  TR('오른쪽 영역은 대략값 예시다. 계산 자원에 따라 크게 달라진다(확인 필요).','The regions on the right are an approximate example. They vary widely with computing resources (to be verified).')],
+ q:TR('단백질 하나가 물 속에서 접히는 과정(µs 이상)을 보려면?','Which method follows a protein folding in water (µs or longer)?'),a:TR('힘장 MD. AIMD는 그 시간과 크기에 닿지 못한다.','Force-field MD. AIMD cannot reach that time and size.')},
+/* 8 */
+{t:TR('MD 궤적에서 IR 스펙트럼 얻기','An IR spectrum from an MD trajectory'),ec:TR('쌍극자 시계열 μ(t) (예시)','Dipole time series μ(t) (example)'),mc:TR('푸리에 변환 결과 (예시)','After Fourier transform (example)'),
+ tg:[{k:'sep',l:TR('성분 나눠 보기','Show the components separately'),on:false}],
+ e:(v,tg)=>{const P=plot({x:[0,200],y:[-1.9,1.9],xt:[0,50,100,150,200].map(v=>({v,l:String(v)})),xl:TR('시간 (fs)','time (fs)'),yl:TR('쌍극자 μ(t)','dipole μ(t)'),T:46});
+  return T(14,16,TR('걸음마다 계 전체의 쌍극자를 기록한다','the total dipole is recorded at every step'),'sub')
+   +dmG(1,badge(22,30,1,'var(--s3)')+T(36,34,TR('주기 약 20 fs','period about 20 fs'),'sub'))+dmG(2,badge(168,30,2,'var(--s1)')+T(182,34,TR('주기 약 10 fs','period about 10 fs'),'sub'))+P.s
+   +(tg.sep?dmG(1,crv(P,t=>dmMu(t,1),0,200,'var(--s3)',{n:800,w:1.5}))+dmG(2,crv(P,t=>dmMu(t,2),0,200,'var(--s1)',{n:800,w:1.5})):crv(P,t=>dmMu(t),0,200,'var(--fg)',{n:800,w:1.5}))},
+ m:()=>{const P=plot({x:[4000,1000],y:[0,1.15],xt:[4000,3000,2000,1000].map(v=>({v,l:String(v)})),xl:'wavenumber (cm⁻¹)',noy:1,T:46});
+  return P.s+T(14,16,TR('μ(t) 자기상관 → 푸리에 변환','μ(t) autocorrelation → Fourier transform'),'sub')+T(14,34,TR('20 fs ↔ 약 1650 cm⁻¹ · 10 fs ↔ 약 3400 cm⁻¹','20 fs ↔ about 1650 cm⁻¹ · 10 fs ↔ about 3400 cm⁻¹'),'sub')
+   +crv(P,x=>.6*dmLor(x,1650,30)+dmLor(x,3400,120),4000,1000,'var(--fg)',{n:600})
+   +dmG(2,badge(P.X(3400)+20,P.Y(1)-6,2,'var(--s1)'))+dmG(1,badge(P.X(1650)+18,P.Y(.6)-6,1,'var(--s3)'))},
+ read:[TR('MD 궤적의 걸음마다 계 전체의 쌍극자 모멘트 μ(t)를 기록한다.','At every step of the MD trajectory, the total dipole moment μ(t) of the system is recorded.'),
+  TR(`μ(t)는 여러 진동이 겹친 신호다. 체크박스로 나눠 보면 ${c(1,'s3')} 약 20 fs 주기와 ${c(2,'s1')} 약 10 fs 주기 성분이 보인다.`,`μ(t) is a superposition of several vibrations. Split with the checkbox, it shows ${c(1,'s3')} a component with a period of about 20 fs and ${c(2,'s1')} one with about 10 fs.`),
+  TR('μ(t)의 자기상관 함수를 푸리에 변환하면 IR 스펙트럼 모양이 나온다. 주기 20 fs는 약 1650 cm⁻¹, 10 fs는 약 3400 cm⁻¹다(ν̃ = 1 / (c × 주기)).','The Fourier transform of the autocorrelation function of μ(t) gives the shape of the IR spectrum. A period of 20 fs is about 1650 cm⁻¹, and 10 fs is about 3400 cm⁻¹ (ν̃ = 1 / (c × period)).'),
+  TR('고전 MD 결과에는 양자 보정 인자를 곱해야 세기가 맞는다(확인 필요).','Classical MD results need a quantum correction factor for the intensities to come out right (to be verified).'),
+  TR('시간 신호 → 주파수라는 점에서 2D 노트의 t₁ → ω₁ 푸리에 변환과 같은 논리다.','Going from a time signal to frequency is the same logic as the t₁ → ω₁ Fourier transform in the 2D notes.'),
+  TR(`피크 폭은 진동이 얼마나 빨리 흐트러지는지(감쇠)로 정해진다. ${c(2,'s1')}은 빨리 사라져 피크가 넓고, ${c(1,'s3')}은 오래 남아 피크가 좁다. 그림은 예시다.`,`The peak width is set by how fast the vibration loses coherence (damping). ${c(2,'s1')} dies out quickly, so its peak is broad; ${c(1,'s3')} lasts long, so its peak is narrow. The figure is an example.`)],
+ q:TR('주기 약 33 fs인 진동은 몇 cm⁻¹인가?','What wavenumber corresponds to a vibration with a period of about 33 fs?'),a:TR('약 1000 cm⁻¹. 1 / (3×10¹⁰ cm/s × 33×10⁻¹⁵ s) ≈ 1010 cm⁻¹.','About 1000 cm⁻¹. 1 / (3×10¹⁰ cm/s × 33×10⁻¹⁵ s) ≈ 1010 cm⁻¹.')},
+/* 9 */
+{t:TR('같이 쓰는 법: 2D IR 계산','Using both: computing 2D IR'),ec:TR('진동수 흔들림 δω(t) (예시)','Frequency fluctuation δω(t) (example)'),mc:TR('상관 함수와 2D 피크 모양','Correlation function and 2D peak shape'),
+ slider:{min:0,max:3,step:.05,init:0,label:'T',fmt:v=>v.toFixed(2)+' ps',play:1},
+ e:Tw=>{const P=plot({x:[0,6],y:[-35,35],xt:[0,2,4,6].map(v=>({v,l:String(v)})),yt:[{v:-30,l:'−30'},{v:0,l:'0'},{v:30,l:'+30'}],xl:TR('시간 (ps)','time (ps)'),yl:'δω (cm⁻¹)',T:50});
+  const pts=dmOU.map(([t,w])=>[P.X(t),P.Y(dmClip(w,-35,35))]);
+  return T(14,16,TR('점 = MD 장면 · 장면마다 진동수를 구한다','dot = MD snapshot · a frequency for each snapshot'),'sub')+P.s+PL(pts,'var(--s3)',{w:1.2})
+   +dmOU.filter((p,i)=>i%25===0).map(([t,w])=>`<circle cx="${P.X(t)}" cy="${P.Y(dmClip(w,-35,35))}" r="3" style="fill:var(--s2)"/>`).join('')
+   +(Tw>0.02?LN(P.X(1),38,P.X(1+Tw),38,'var(--s1)',{w:1.5,mk:'s1'}):'')+LN(P.X(1),32,P.X(1),44,'var(--s1)',{w:1.5})+T(P.X(1+Tw)+8,42,'T','sub','start','var(--s1)')},
+ m:Tw=>{const C=Math.exp(-Tw),P=plot({x:[0,3],y:[0,1.05],T:44,B:116,xt:[0,1,2,3].map(v=>({v,l:String(v)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'waiting time T (ps)'});
+  const ry=38*(1-.85*C)+2;
+  return T(P.R,14,TR('가정: C(T) = exp(−T/τ), τ = 1 ps','assumed: C(T) = exp(−T/τ), τ = 1 ps'),'sub','end')+T(P.L,32,TR('상관 C(T) = ⟨δω(0)δω(T)⟩ / ⟨δω²⟩','correlation C(T) = ⟨δω(0)δω(T)⟩ / ⟨δω²⟩'),'sub')+P.s+crv(P,x=>Math.exp(-x),0,3,'var(--s2)')
+   +`<circle cx="${P.X(Tw)}" cy="${P.Y(C)}" r="5" style="fill:var(--s1)"/>`
+   +`<rect x="118" y="166" width="90" height="90" style="fill:none;stroke:var(--line)"/><line x1="118" y1="256" x2="208" y2="166" class="lvl2"/>`
+   +`<ellipse cx="163" cy="211" rx="38" ry="${ry.toFixed(1)}" transform="rotate(-45 163 211)" style="fill:var(--s1)" fill-opacity=".5"/>`
+   +T(163,272,'ω₁ (pump)','sub','middle')+T(112,215,'ω₃ (probe)','sub','end')
+   +TM(216,186,[TR('2D 피크 (예시)','2D peak (example)'),'C = '+C.toFixed(2),C>.6?TR('길쭉함 (기억함)','elongated (memory)'):C>.25?TR('둥글어지는 중','rounding'):TR('둥긂 (잊음)','round (forgotten)')],'sub','start',17)},
+ read:[TR('1. MD로 용매 속 분자의 장면을 많이 만든다.','1. MD generates many snapshots of the molecule in solvent.'),
+  TR('2. 장면마다 그 순간의 진동수를 구한다. DFT를 직접 돌리거나, DFT로 미리 만든 "진동수 지도"(주변 전기장 → 진동수)를 쓴다(확인 필요).','2. For each snapshot the instantaneous frequency is computed, either by running DFT directly or with a "frequency map" built beforehand from DFT (local electric field → frequency) (to be verified).'),
+  TR('3. 용매가 움직여 진동수가 흔들린다(왼쪽 δω(t)). 흔들림을 얼마나 오래 기억하는지가 주파수 요동 상관 함수 C(T)다.','3. Solvent motion makes the frequency fluctuate (δω(t) on the left). How long the fluctuation is remembered is the frequency-fluctuation correlation function C(T).'),
+  TR('슬라이더로 T를 늘리면 C(T)가 줄고, 2D 피크가 대각선으로 길쭉한 모양에서 둥근 모양으로 바뀐다. 2D 노트 IR 탭의 "T가 지나면" 단계와 같은 내용이다.','As T increases on the slider, C(T) drops and the 2D peak changes from elongated along the diagonal to round. This is the same content as the "after T" step in the IR tab of the 2D notes.'),
+  TR('여기서는 C(T) = exp(−T/τ), τ = 1 ps로 가정했다. 왼쪽 δω(t)도 이 가정으로 만든 예시다.','Here C(T) = exp(−T/τ) with τ = 1 ps is assumed. The δω(t) on the left is also an example built on this assumption.'),
+  TR('2D 피크 색은 ΔT/T 규약(빨강 = +)에 따른 GSB/SE 예시다.','The 2D peak colour is a GSB/SE example in the ΔT/T convention (red = +, blue = −, opposite in sign to ΔA).')],
+ q:TR('C(T)가 T = 3 ps에서도 0.5로 남아 있으면 2D 피크는?','If C(T) is still 0.5 at T = 3 ps, what does the 2D peak look like?'),a:TR('아직 대각선으로 길쭉하다. 용매가 진동수를 천천히 바꾸는(기억이 긴) 환경이다.','Still elongated along the diagonal. The solvent changes the frequency slowly (long memory).')},
+/* 10 */
+{t:TR('정리: 언제 무엇을 쓰나','Summary: which method when'),ec:TR('알고 싶은 것 → 방법','Question → method'),mc:TR('크기·시간·결과 (대략)','Size · time · output (approx.)'),
+ e:()=>{const row=(y,lines,meth,col,n)=>dmG(n,badge(22,y,n,col))+TM(38,y-2,lines,'sub','start',15)+LN(186,y+4,212,y+4,'var(--muted)',{mk:'g'})
+   +dmG(n,`<rect x="218" y="${y-12}" width="94" height="30" rx="4" style="fill:${col};stroke:${col}" fill-opacity=".12"/>`+T(265,y+7,meth,'labn','middle'));
+  return T(14,22,TR('알고 싶은 것 → 쓸 방법','question → method to use'),'lab')+row(64,TR(['분자 하나의 구조,','진동수, 전자 상태'],['structure, frequencies,','electronic states']),'DFT','var(--s1)',1)
+   +row(130,TR(['결합이 끊어지거나 생김,','반응, 짧은 시간'],['bonds breaking/forming,','reactions, short times']),'AIMD','var(--s2)',2)+row(196,TR(['용매 속 움직임,','큰 계, 긴 시간'],['motion in solvent,','large systems, long times']),TR('힘장 MD','FF MD'),'var(--s3)',3)
+   +T(14,256,TR('스펙트럼 해석 → 보통 둘 다 (DFT 진동수 + MD 움직임)','spectra → usually both (DFT frequencies + MD motion)'),'sub')},
+ m:()=>{const cx=[106,190,274],cols=[['DFT','var(--s1)'],['AIMD','var(--s2)'],[TR('힘장 MD','FF MD'),'var(--s3)']];
+  const rows=[[TR('원자 수','atoms'),70,[[TR('수십~수백','10–100s')],[TR('수십~수백','10–100s')],[TR('수만~수백만','10⁴–10⁶')]]],[TR('시간','time'),110,[[TR('없음 (정적)','none (static)')],[TR('수~수십 ps','1–10s of ps')],[TR('ns~µs','ns–µs')]]],[TR('주 결과','output'),150,[TR(['구조, 에너지,','진동수'],['structure,','energy,','frequencies']),TR(['짧은 동역학,','반응'],['short','dynamics,','reactions']),TR(['용매화, 확산,','배치 변화'],['solvation,','diffusion,','conformations'])]]];
+  let s=[44,88,128,196].map(y=>`<line x1="8" x2="316" y1="${y}" y2="${y}" class="ax"/>`).join('');
+  s+=cols.map(([n,col],i)=>dmG(i+1,badge(cx[i]-38,26,i+1,col)+T(cx[i]+4,30,n,'labn','middle',col))).join('');
+  s+=rows.map(([l,y,cells])=>T(8,y+4,l,'labn')+cells.map((ls,i)=>dmG(i+1,TM(cx[i],y+4,ls,'sub','middle',16))).join('')).join('');
+  return s+T(8,226,TR('값은 대략, 계산 자원에 따라 크게 다르다 (확인 필요)','approx. values, vary with computing resources (to be verified)'),'sub')+T(8,246,TR('DFT 데이터로 학습한 ML 힘장도 쓴다 (확인 필요)','ML force fields trained on DFT data also exist (to be verified)'),'sub')},
+ read:[TR(`${c(1,'s1')} 분자 하나의 구조·진동수·전자 상태 → DFT.`,`${c(1,'s1')} Structure, frequencies and electronic states of one molecule → DFT.`),
+  TR(`${c(2,'s2')} 반응, 결합 변화, 짧은 시간 → AIMD.`,`${c(2,'s2')} Reactions, bond changes, short times → AIMD.`),
+  TR(`${c(3,'s3')} 용매 속 움직임, 큰 계, 긴 시간 → 힘장 MD.`,`${c(3,'s3')} Motion in solvent, large systems, long times → force-field MD.`),
+  TR('스펙트럼 해석에는 보통 둘 다 쓴다: DFT로 진동수와 세기, MD로 환경의 움직임.','Interpreting spectra usually takes both: DFT for frequencies and intensities, MD for the motion of the environment.'),
+  TR('이 노트는 틀이다. 값과 설명은 계산 전문가의 검토가 필요하다.','This note is a framework. Its values and explanations need review by a computational expert.')],
+ q:TR('물 속 염료 분자의 흡수 스펙트럼 모양(용매 효과 포함)을 계산하려면?','How is the absorption line shape of a dye in water (including solvent effects) computed?'),a:TR('보통 둘 다. 힘장 MD로 용매 배치를 많이 만들고, 장면마다 DFT 계열(예: TDDFT) 계산으로 들뜸 에너지를 구해 모은다(확인 필요).','Usually with both. Force-field MD generates many solvent configurations, and for each snapshot a DFT-type calculation (e.g. TDDFT) gives the excitation energy; these are collected (to be verified).')}];
+
+const TABS=[{id:'dm',name:'DFT vs MD',sub:TR('전자 구조와 원자 운동','Electronic structure and atomic motion'),desc:TR('DFT는 한 장면의 전자 구조, MD는 원자의 동영상이다. 에너지 곡선, 진동수, 힘장, 스펙트럼 계산, 2D IR 계산까지 이어서 본다. 틀만 만든 노트라 전문가 검토가 필요하다.','DFT gives the electronic structure of one snapshot; MD is a movie of the atoms. The note runs through energy curves, frequencies, force fields, spectrum calculations and 2D IR calculations. It is a framework only and needs expert review.'),steps:DM}];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>

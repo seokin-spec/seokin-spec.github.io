@@ -1,0 +1,442 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Lab Operations Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · lab operations</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../lab-ops.html" href="../lab-ops.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 실험실 운영 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 실험실 운영
+// @status 검토 중
+// @lang ko en
+// @title.en Lab Operations Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · lab operations
+// @status.en Under review
+/* 실험실 운영 노트: 기초 장비, UPS·정전 대비
+   이 노트의 숫자는 일반 대략값·예시다. 실제 순서와 값은 장비 설명서와 연구실 규정을 따른다.
+   글은 TR('한국어','English')로 쓴다 (영어판 notes/en/lab-ops.html). */
+const NOTE={key:'labops'};
+
+/* ---------- UPS 헬퍼 ---------- */
+const upsOK='var(--s3)',upsBAT='var(--s4)';
+/* 가는 세로 막대 + 번호 */
+const upsGuide=(x1,y1,x2,y2)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="lvl2"/>`;
+/* 2단계: 전원 경로 한 줄 */
+function upsRow(y,n,name,kind){
+ let s=`<g data-n="${n}">${badge(16,y-28,n,'var(--fg)')}</g>`+T(30,y-24,name,'lab')+box(4,y-12,40,24,TR('전원','Mains'));
+ if(kind==='on'){
+  s+=LN(44,y,62,y,upsOK,{w:2})+box(62,y-12,56,24,'AC→DC')+LN(118,y,190,y,upsOK,{w:2})+T(154,y-6,TR('직류','DC'),'sub','middle')+box(190,y-12,56,24,'DC→AC')+LN(246,y,262,y,upsOK,{w:2,mk:'s3'})
+   +box(132,y+12,44,20,TR('배터리','Battery'))+LN(154,y+12,154,y+1,upsBAT,{w:2,dash:1});
+ }else{
+  if(kind==='li')s+=LN(44,y,70,y,upsOK,{w:2})+box(70,y-12,60,24,TR('전압 조정','AVR'))+LN(130,y,150,y,upsOK,{w:2});
+  else s+=LN(44,y,150,y,upsOK,{w:2});
+  s+=box(150,y-10,34,20,TR('전환','Switch'))+LN(184,y,262,y,upsOK,{w:2,mk:'s3'})+box(100,y+12,44,20,TR('배터리','Battery'))+PL([[144,y+22],[167,y+22],[167,y+12]],upsBAT,{dash:1,mk:'s4'});
+ }
+ return s+box(264,y-12,52,24,TR('장비','Device'))}
+/* 2단계: 출력 파형 (60 Hz 가정, 주기 약 16.7 ms) */
+const upsSin=(c0,a)=>t=>c0+a*Math.sin(2*Math.PI*t/16.67);
+/* 3단계: 버티는 시간 (분) = 216 Wh × 0.8 / 부하 × 60 */
+const upsMin=P=>216*0.8/P*60;
+/* 6단계: 켤 때 전류 (상대). 각 장비 = 정상 소비 + 순간 전류(지수 감쇠) */
+const upsDev=[{n:1,t:1,b:2,a:3,k:'s5'},{n:3,t:5,b:1.5,a:2.5,k:'s2'},{n:4,t:8,b:.5,a:1,k:'s6'}];
+const upsCur=(all,t)=>upsDev.reduce((sum,d)=>{const t0=all?1:d.t;return sum+(t>=t0?d.b+d.a*Math.exp(-(t-t0)/.25):0)},0);
+
+const UPS=[
+{t:TR('정전이 실험에 주는 피해','What a power outage does to an experiment'),ec:TR('전원이 끊기면 (일반 예시)','When power is lost (general example)'),mc:TR('다시 측정하기까지 걸리는 시간 (예시)','Time until measuring can resume (example)'),
+ e:()=>{const it=[[1,TR('레이저','Laser'),TR(['냉각이 멈춘 채 꺼짐','(장비마다 다름, 확인 필요)'],['Off with cooling stopped','(varies; to be verified)']),'s2'],[2,TR('냉각기','Chiller'),TR(['다시 식히는 데','시간이 걸림'],['Takes time to','cool down again']),'s5'],[3,TR('진공 펌프','Vacuum pump'),TR(['진공이 깨질 수 있음'],['Vacuum may be lost']),'s4'],[4,TR('측정 PC','Measurement PC'),TR(['저장 안 한 데이터 사라짐','스테이지 기준점 잃음'],['Unsaved data is lost','Stage loses its home']),'s6']];
+  return T(14,20,TR('순간 정전(1초 미만)으로도 재시작될 수 있다','Even a brief outage (< 1 s) can cause a restart'),'sub')+it.map(([n,name,lines,k],i)=>{const y=62+i*58;return `<g data-n="${n}">${badge(18,y,n,COL[k])}</g>`+box(34,y-15,96,30,name)+LN(130,y,150,y,'var(--muted)',{w:1,mk:'g'})+TM(156,y-(lines.length-1)*7+4,lines,'sub')}).join('')},
+ m:()=>{const P=plot({x:[1,1000],logx:1,noy:1,xt:[{v:1,l:'1'},{v:10,l:'10'},{v:100,l:'100'},{v:1000,l:'1000'}],xl:TR('분 (log, 예시)','minutes (log, example)'),L:96,R:300,T:44,B:236});
+  const it=[[4,TR('측정 PC','PC'),5,TR('약 5분','~5 min'),'s6'],[2,TR('냉각기','Chiller'),30,TR('약 30분','~30 min'),'s5'],[1,TR('레이저','Laser'),60,TR('약 1시간','~1 h'),'s2'],[3,TR('진공','Vacuum'),300,TR('수 시간','hours'),'s4']];
+  return P.s+upsGuide(P.X(35),P.T,P.X(35),P.B)+T(P.X(35),P.T-10,TR('UPS가 버티는 시간 예시 (3단계)','Example UPS runtime (step 3)'),'sub','middle')
+   +it.map(([n,name,v,lab,k],i)=>{const y=74+i*42;return `<g data-n="${n}">${badge(16,y,n,COL[k])}</g>`+T(30,y+4,name,'sub')+`<rect x="${P.L}" y="${y-6}" width="${P.X(v)-P.L}" height="12" rx="2" style="fill:${COL[k]}" fill-opacity=".55"/>`+T(P.X(v),y-11,lab,'sub','end')}).join('')},
+ read:[TR('이 탭은 일반 원리만 다룬다. 실제 순서와 값은 장비 설명서와 연구실 규정을 따른다.','This tab covers general principles only. Actual procedures and values follow the equipment manuals and lab rules.'),`${c(1,'s2')} `+TR('레이저: 갑자기 꺼지면 냉각이 멈춘 채 결정·다이오드가 뜨거운 상태로 남을 수 있다(장비마다 다름, 확인 필요).','Laser: if it shuts off suddenly, the crystal or diodes can be left hot with the cooling stopped (varies by unit; to be verified).'),TR(`${c(2,'s5')} 냉각기와 ${c(3,'s4')} 진공 펌프는 멈추면 다시 켜서 정상으로 돌아오기까지 시간이 걸린다. 진공은 깨질 수도 있다.`,`Once stopped, the ${c(2,'s5')} chiller and ${c(3,'s4')} vacuum pump take time to return to normal after a restart. The vacuum can also be lost.`),`${c(4,'s6')} `+TR('측정 PC: 저장하지 않은 데이터가 사라지고, delay stage 같은 모터가 기준점을 잃을 수 있다.','Measurement PC: unsaved data is lost, and motors such as the delay stage can lose their reference position.'),TR('순간 정전(1초 미만)만으로도 장비가 재시작될 수 있다.','A brief outage (under 1 s) alone can restart equipment.'),TR('오른쪽 막대는 감을 잡기 위한 예시다. 회복 시간이 UPS가 버티는 시간보다 길면, UPS는 "실험을 이어 가는" 장치가 아니라 "안전하게 끄는 시간을 버는" 장치다.','The bars on the right are examples for a sense of scale. If recovery takes longer than the UPS runtime, the UPS is not a device for "keeping the experiment going" but one for "buying time to shut down safely."')],
+ q:TR('UPS가 30분 버틴다면 그동안 측정을 계속해도 되나?','If the UPS lasts 30 minutes, can the measurement continue during that time?'),a:TR('보통은 아니다. UPS 시간은 데이터를 저장하고 장비를 순서대로 끄는 데 쓴다. 냉각기처럼 UPS에 안 물린 장비는 이미 멈췄을 수 있다.','Usually not. The UPS time is for saving data and shutting equipment down in order. Equipment not on the UPS, such as the chiller, may already have stopped.')},
+{t:TR('UPS 종류 세 가지','Three types of UPS'),ec:TR('전원이 가는 길','Power path'),mc:TR('정전 순간 출력 파형 (예시)','Output waveform at the moment of an outage (example)'),ev:'0 0 320 300',
+ e:()=>upsRow(54,1,TR('오프라인 (대기형)','Offline (standby)'),'off')+upsRow(146,2,TR('라인 인터랙티브','Line-interactive'),'li')+upsRow(238,3,TR('온라인 (이중 변환)','Online (double conversion)'),'on')
+  +LN(14,290,36,290,upsOK,{w:2})+T(42,294,TR('평소 경로','Normal path'),'sub')+LN(110,290,132,290,upsBAT,{w:2,dash:1})+T(138,294,TR('배터리에서 오는 경로','Path from battery'),'sub'),
+ m:()=>{const P=plot({x:[0,60],y:[0,3],noy:1,xt:[{v:0,l:'0'},{v:20,l:'20'},{v:40,l:'40'},{v:60,l:'60'}],xl:TR('시간 (ms)','time (ms)'),L:40,R:304,T:40,B:236});
+  const band=(n,c0,gap,lab)=>{const f=upsSin(c0,.32);let s=crv(P,f,0,20,upsOK)+crv(P,f,20+gap,60,gap?upsBAT:upsOK);if(gap)s+=crv(P,()=>c0,20,20+gap,'var(--s1)',{n:4});
+   return s+`<g data-n="${n}">${badge(20,P.Y(c0),n,'var(--fg)')}</g>`+T(P.X(20)+4,P.Y(c0+.45),lab,'sub')};
+  return P.s+upsGuide(P.X(20),P.T,P.X(20),P.B)+T(P.X(20),P.T-10,TR('정전','Outage'),'sub','middle')
+   +band(1,2.5,6,TR('수 ms 끊김 (예시, 확인 필요)','Few-ms gap (to be verified)'))+band(2,1.5,4,TR('수 ms 끊김 (예시)','Few-ms gap (example)'))+band(3,.5,0,TR('끊김 없음','No gap'))},
+ read:[`${c(1,'f')} `+TR('오프라인(대기형): 평소엔 전원을 그대로 장비로 보내고, 정전이 나면 배터리로 전환한다. 전환에 수 ms가 걸린다(확인 필요). 싸다.','Offline (standby): normally passes mains power straight to the equipment and switches to the battery when an outage occurs. The switch takes a few ms (to be verified). Cheap.'),`${c(2,'f')} `+TR('라인 인터랙티브: 오프라인에 전압 조정 기능을 더했다. 약한 전압 변동은 배터리 없이 보정한다.','Line-interactive: offline plus voltage regulation. Small voltage fluctuations are corrected without the battery.'),`${c(3,'f')} `+TR('온라인(이중 변환): 늘 교류 → 직류 → 교류로 바꿔 내보낸다. 배터리가 늘 직류 줄에 붙어 있어 전환 시간이 0이다. 비싸고 열이 난다.','Online (double conversion): always converts AC → DC → AC. The battery sits on the DC bus at all times, so the transfer time is zero. Expensive and runs hot.'),TR('오른쪽 파형은 60 Hz(한 주기 약 16.7 ms)를 가정한 예시다. 오프라인 형의 끊김은 컴퓨터는 버텨도 민감한 장비는 재시작시킬 수 있다.','The waveforms on the right are an example assuming 60 Hz (one period approx. 16.7 ms). A computer may ride through the offline-type gap, but sensitive equipment can restart.'),TR('레이저 제어기처럼 민감한 장비에는 온라인 형을 권하는 경우가 많다(확인 필요).','The online type is often recommended for sensitive equipment such as laser controllers (to be verified).')],
+ q:TR('오프라인 UPS에 물린 장비가 정전 때마다 재부팅된다. 의심할 것은?','Equipment on an offline UPS reboots at every outage. What is the likely cause?'),a:TR('전환 시간(수 ms) 동안 장비 전원이 버티지 못하는 것. 온라인 형으로 바꾸거나, 배터리·UPS 상태(용량 부족, 과부하)를 확인한다.','The equipment power supply cannot ride through the transfer time (a few ms). The fix is an online-type UPS, or a check of the battery and UPS condition (low capacity, overload).')},
+{t:TR('용량 계산: VA와 W, 버티는 시간','Sizing: VA vs W, and runtime'),ec:TR('부하 합 (예시)','Total load (example)'),mc:TR('버티는 시간 (가정: 배터리 216 Wh, 효율 0.8)','Runtime (assumed: 216 Wh battery, efficiency 0.8)'),
+ slider:{min:100,max:1000,step:10,init:300,label:TR('부하','Load'),fmt:v=>Math.round(v)+' W'},
+ e:v=>{const Y=w=>236-w*.2;let s=`<line x1="40" y1="236" x2="40" y2="30" class="ax"/><line x1="40" y1="236" x2="300" y2="236" class="ax"/>`;
+  s+=[0,300,600,900].map(w=>`<line x1="35" x2="40" y1="${Y(w)}" y2="${Y(w)}" class="ax"/>`+T(32,Y(w)+4,String(w),'sub','end')).join('')+T(12,22,TR('부하 (W)','load (W)'),'sub');
+  const seg=[[1,TR('측정 PC','PC'),0,200,'s5',216],[2,TR('모니터','Monitor'),200,230,'s6',192],[3,TR('제어기','Controller'),230,300,'s4',172]];
+  s+=seg.map(([n,name,a,b,k,ly])=>`<g data-n="${n}"><rect x="56" y="${Y(b)}" width="40" height="${Y(a)-Y(b)}" style="fill:${COL[k]}" fill-opacity=".6"/>${upsGuide(96,(Y(a)+Y(b))/2,108,ly-4)}${badge(118,ly-4,n,COL[k])}</g>`+T(130,ly,name+' '+(b-a)+' W','sub')).join('');
+  s+=T(76,Y(300)-8,TR('합 300 W','Total 300 W'),'sub','middle')+T(76,252,TR('예시 부하','Example load'),'sub','middle');
+  s+=`<line x1="40" x2="280" y1="${Y(900)}" y2="${Y(900)}" style="stroke:var(--s1)" stroke-dasharray="5 4" stroke-width="1.5"/>`+T(44,Y(900)-6,TR('1000 VA × 역률 0.9 = 900 W','1000 VA × power factor 0.9 = 900 W'),'sub','start','var(--s1)');
+  const over=v>900;s+=`<rect x="236" y="${Y(v)}" width="40" height="${236-Y(v)}" style="fill:${over?'var(--s1)':upsOK}" fill-opacity=".55"/>`+T(256,252,TR('슬라이더','Slider'),'sub','middle')+T(282,Y(v)+4,Math.round(v)+' W','sub');
+  if(over)s+=T(256,Y(v)-6,TR('과부하','Overload'),'sub','middle','var(--s1)');return s},
+ m:v=>{const P=plot({x:[100,1000],y:[0,110],xt:[{v:100,l:'100'},{v:300,l:'300'},{v:600,l:'600'},{v:900,l:'900'}],yt:[{v:0,l:'0'},{v:30,l:'30'},{v:60,l:'60'},{v:90,l:'90'}],xl:TR('부하 (W)','load (W)'),yl:TR('버티는 시간 (분)','runtime (min)'),T:30});
+  const t=upsMin(v),x=P.X(v),y=P.Y(t),rt=v<700,over=v>900;
+  return P.s+`<rect x="${P.X(900)}" y="${P.T}" width="${P.R-P.X(900)}" height="${P.B-P.T}" style="fill:var(--s1)" fill-opacity=".1"/>`+T(P.X(900)-4,P.Y(48),TR('900 W 넘으면 과부하','Overload > 900 W'),'sub','end','var(--s1)')
+   +crv(P,upsMin,100,900,upsOK)+crv(P,upsMin,900,1000,upsOK,{dash:1})+upsGuide(x,y,x,P.B)+upsGuide(P.L,y,x,y)+`<circle cx="${x}" cy="${y}" r="5" style="fill:${over?'var(--s1)':upsOK}"/>`
+   +(over?T(P.R,P.Y(32),TR('과부하: 출력이 끊길 수 있다','Overload: output may cut off'),'labn','end','var(--s1)'):T(x+(rt?8:-8),y-TR(10,15),TR('약 '+Math.round(t)+'분','≈ '+Math.round(t)+' min'),'labn',rt?'start':'end'))+T(P.R,P.T-10,TR('시간 ≈ 216 × 0.8 / 부하','time ≈ 216 × 0.8 / load'),'sub','end')+T(P.R,P.T+70,TR('실제로는 큰 부하에서 더 짧다','Shorter in practice at high load'),'sub','end')},
+ read:[TR('VA와 W는 다르다. W = VA × 역률. 1000 VA, 역률 0.9면 최대 900 W까지다.','VA and W are different. W = VA × power factor. 1000 VA at power factor 0.9 allows at most 900 W.'),TR(`부하를 더한다(예시): ${c(1,'s5')} 측정 PC 200 W + ${c(2,'s6')} 모니터 30 W + ${c(3,'s4')} 제어기 70 W = 300 W.`,`The loads add up (example): ${c(1,'s5')} measurement PC 200 W + ${c(2,'s6')} monitor 30 W + ${c(3,'s4')} controller 70 W = 300 W.`),TR('버티는 시간 ≈ 배터리 에너지 × 효율 / 부하. 12 V × 9 Ah × 2개 = 216 Wh, 효율 0.8 가정이면 216 × 0.8 / 300 ≈ 0.58 h ≈ 35분(대략).','Runtime ≈ battery energy × efficiency / load. 12 V × 9 Ah × 2 batteries = 216 Wh; assuming efficiency 0.8, 216 × 0.8 / 300 ≈ 0.58 h ≈ 35 min (approx.).'),TR('부하를 절반으로 줄이면 시간은 2배보다 조금 더 늘어난다. 배터리는 천천히 쓸수록 더 많이 꺼내 쓸 수 있기 때문이다. 오른쪽 곡선은 이 효과를 뺀 단순 계산이다.','Halving the load slightly more than doubles the runtime, because a battery delivers more energy when discharged slowly. The curve on the right is a simple calculation without this effect.'),TR('슬라이더를 900 W 넘게 올리면 UPS 한계를 넘는다. 이때 UPS는 버티지 못하고 출력을 끊을 수 있다.','Above 900 W on the slider, the load exceeds the UPS limit. The UPS then cannot hold and may cut its output.')],
+ q:TR('300 W 부하로 10분만 버티면 된다. 배터리는 대략 몇 Wh가 필요한가?','A 300 W load only needs to last 10 minutes. Roughly how many Wh of battery are needed?'),a:TR('300 × (10/60) / 0.8 ≈ 63 Wh. 배터리 노화와 큰 부하 효과를 생각해 2배 정도 여유를 둔다.','300 × (10/60) / 0.8 ≈ 63 Wh. About 2× margin is allowed for battery aging and the high-load effect.')},
+{t:TR('무엇을 UPS에 물리나','What goes on the UPS'),ec:TR('물리는 것과 피하는 것','What to connect and what to avoid'),mc:TR('켤 때 순간 전류 (예시)','Inrush current at switch-on (example)'),
+ e:()=>{const it=TR(['측정·제어 PC','저장 장치','레이저 제어기·인터락','네트워크 장비'],['Measurement/control PC','Data storage','Laser ctrl. & interlock','Network equipment']);
+  let s=T(14,20,TR('우선 물리는 것','Connect first'),'lab')+box(8,92,56,40,'UPS');
+  s+=it.map((name,i)=>{const y=46+i*44;return PL([[64,112],[100,112],[100,y],[136,y]],upsOK,{mk:'s3'})+box(138,y-14,136,28,name)+T(290,y+5,'✓','lab','middle',upsOK)}).join('');
+  s+=T(14,236,TR('피하는 것','Avoid'),'lab')+`<g data-n="1">${badge(22,258,1,'var(--s1)')}</g>`+T(38,262,TR('히터 · 냉각기 압축기 · 레이저 프린터','Heater · chiller compressor · laser printer'),'sub')+T(290,262,'✗','lab','middle','var(--s1)');
+  return s},
+ m:()=>{const P=plot({x:[0,2],y:[0,6],xt:[{v:0,l:'0'},{v:.5,l:'0.5'},{v:1,l:'1'},{v:1.5,l:'1.5'},{v:2,l:'2'}],yt:[{v:0,l:'0'},{v:1,l:'1'},{v:3,l:'3'},{v:5,l:'5'}],xl:TR('켠 뒤 시간 (s, 예시)','time after switch-on (s, example)'),yl:TR('전류 (정상 = 1)','current (normal = 1)'),T:30});
+  const f=t=>t<.2?0:1+4*Math.exp(-(t-.2)/.12);
+  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(2.5)}" y2="${P.Y(2.5)}" style="stroke:var(--s1)" stroke-dasharray="5 4" stroke-width="1.5"/>`+T(P.R,P.Y(2.5)-6,TR('UPS 출력 한계 (예시)','UPS output limit (example)'),'sub','end','var(--s1)')
+   +crv(P,f,0,2,'var(--s5)',{n:400})+`<g data-n="1">${badge(P.X(.2)+20,P.Y(5),1,'var(--s1)')}</g>`+T(P.X(.2)+34,P.Y(5)+4,TR('압축기·모터: 켤 때 수 배 (확인 필요)','Motor start: several × (to be verified)'),'sub')
+   +T(P.X(1.2),P.Y(1)-8,TR('켠 뒤에는 정상 소비','Normal draw once running'),'sub','middle')},
+ read:[TR('우선 물리는 것: 측정·제어 PC, 저장 장치, 레이저 제어기와 인터락, 네트워크 장비. 꺼지면 데이터나 안전이 걸린 것들이다.','Connect first: measurement and control PCs, data storage, laser controllers and interlocks, network equipment. These are the items where data or safety is at stake if they go off.'),`${c(1,'s1')} `+TR('피하는 것: 히터, 냉각기 압축기, 레이저 프린터처럼 소비가 크거나 켤 때 순간 전류가 큰 장비(확인 필요). UPS가 과부하로 꺼지면 우선 장비까지 같이 꺼진다.','Avoid: heaters, chiller compressors, laser printers and other equipment with a high draw or a large inrush current at switch-on (to be verified). If the UPS shuts down on overload, the priority equipment goes down with it.'),TR('오른쪽은 모터가 돌기 시작할 때 전류가 잠깐 정상의 몇 배로 뛰는 모양(예시)이다. 평소 소비가 UPS 용량 안이어도 이 순간에 한계를 넘을 수 있다.','The right panel shows (example) how the current briefly jumps to several times normal when a motor starts. Even when the normal draw is within the UPS capacity, this moment can exceed the limit.'),TR('냉각기나 대형 레이저 전원은 별도 UPS나 건물 비상 전원에 물려 있는지 확인한다(확인 필요).','Whether chillers and large laser power supplies are on a separate UPS or on building emergency power is to be verified.')],
+ q:TR('UPS 용량이 900 W인데 600 W 냉각기를 물렸더니 냉각기가 켜질 때마다 UPS가 경고를 낸다. 왜인가?','A 600 W chiller is connected to a 900 W UPS, and the UPS gives a warning every time the chiller starts. Why?'),a:TR('압축기가 켜질 때 순간 전류가 정상의 몇 배로 뛰어 UPS 한계를 잠깐 넘기 때문이다. 냉각기는 UPS에서 빼고 별도 전원 대책을 쓴다.','When the compressor starts, the inrush current jumps to several times normal and briefly exceeds the UPS limit. The chiller comes off the UPS and gets a separate power solution.')},
+{t:TR('정전 때 순서 (일반 예시)','Order of steps during an outage (general example)'),ec:TR('끄는 순서','Shutdown order'),mc:TR('UPS 시간 안에 끝내기 (예시)','Finishing within the UPS time (example)'),
+ e:()=>{const st=TR([['측정 중지, 데이터 저장'],['레이저 셔터 닫기','설명서대로 대기·종료'],['측정 PC 종료'],['UPS 자체 끄기','(배터리가 다 떨어지기 전)']],[['Stop measurement, save data'],['Close laser shutter','Standby or shutdown per manual'],['Shut down measurement PC'],['Turn off the UPS itself','(before the battery runs out)']]);
+  return st.map(([a,b],i)=>{const y=14+i*66,n=i+1;return `<g data-n="${n}">${badge(24,y+20,n,'var(--fg)')}</g>`+box(44,y,236,40,a,b)+(i<3?LN(162,y+40,162,y+64,'var(--muted)',{w:1.5,mk:'g'}):'')}).join('')},
+ m:()=>{const P=plot({x:[0,36],noy:1,xt:[{v:0,l:'0'},{v:10,l:'10'},{v:20,l:'20'},{v:30,l:'30'}],xl:TR('정전 뒤 시간 (분, 예시)','time after outage (min, example)'),L:40,R:304,T:30,B:236});
+  const d=[2,5,3,1];let t0=0;
+  let s=P.s+`<rect x="${P.L}" y="44" width="${P.X(35)-P.L}" height="10" rx="2" style="fill:var(--s6)" fill-opacity=".3"/>`+T(P.L,38,TR('UPS가 버티는 시간 약 35분 (3단계 예시)','UPS runtime approx. 35 min (step 3 example)'),'sub')
+   +upsGuide(P.X(17.5),60,P.X(17.5),P.B)+T(P.X(17.5)+4,72,TR('남은 시간의 절반','Half the remaining time'),'sub');
+  s+=d.map((m,i)=>{const y=84+i*36,n=i+1,a=t0;t0+=m;return `<g data-n="${n}">${badge(22,y,n,'var(--fg)')}</g><rect x="${P.X(a)}" y="${y-6}" width="${P.X(t0)-P.X(a)}" height="12" rx="2" style="fill:var(--s3)" fill-opacity=".6"/>`+T(P.X(t0)+6,y+4,m+TR('분',' min'),'sub')}).join('');
+  return s+T(P.X(17.5)+6,222,TR('합 11분: 절반 안에 끝난다','Total 11 min: within half'),'sub')},
+ read:[TR('정전 때 쓰는 일반 예시 순서다. 실제 순서는 장비 설명서와 연구실 규정을 따른다(확인 필요).','This is a general example order for an outage. The actual order follows the equipment manuals and lab rules (to be verified).'),`${c(1,'f')} `+TR('측정을 멈추고 데이터를 저장한다.','The measurement is stopped and the data saved.'),`${c(2,'f')} `+TR('레이저 셔터를 닫고, 설명서에 따른 대기 또는 종료 절차를 밟는다.','The laser shutter is closed, and the standby or shutdown procedure in the manual is followed.'),TR(`${c(3,'f')} 측정 PC를 끈다. ${c(4,'f')} UPS가 다 떨어지기 전에 UPS 자체를 끈다.`,`${c(3,'f')} The measurement PC is shut down. ${c(4,'f')} The UPS itself is turned off before its battery runs out.`),TR('UPS의 남은 시간 표시를 보고, 남은 시간의 절반 안에 끝낼 수 있게 순서를 미리 적어 둔다. 오른쪽 걸리는 시간은 예시다.','The order is written down in advance so that, going by the UPS remaining-time display, everything finishes within half the remaining time. The durations on the right are examples.')],
+ q:TR('UPS를 끝까지 쓰다가 저절로 꺼지게 두면 안 되는 이유는?','Why not run the UPS to the end and let it shut off by itself?'),a:TR('장비가 순서 없이 한꺼번에 꺼지고, 배터리를 완전히 비우면 배터리 수명도 준다. 남은 시간이 있을 때 정해진 순서로 끈다.','All equipment goes off at once in no particular order, and fully draining the battery also shortens its life. Equipment is shut down in the set order while time remains.')},
+{t:TR('복전 때 순서: 하나씩 켠다','Order when power returns: one at a time'),ec:TR('켜는 순서 (일반 예시)','Start-up order (general example)'),mc:TR('켤 때 전체 전류 (예시, 순간 전류 봉우리 폭은 보기 쉽게 크게 늘림)','Total current at start-up (example; inrush peak width enlarged for visibility)'),tg:[{k:'all',l:TR('한꺼번에 켜기','Switch on all at once'),on:false}],
+ e:()=>{const st=[[0,TR('전원이 안정됐는지 몇 분 본다','A few minutes to confirm stable power')],[1,TR('냉각기 켜기','Chiller on')],[2,TR('냉각수 온도가 정상 범위인지 확인','Coolant temperature within range?')],[3,TR('레이저 켜기','Laser on')],[4,TR('측정 PC·제어기 켜기','Measurement PC and controllers on')]];
+  const bc={1:'var(--s5)',2:'var(--fg)',3:'var(--s2)',4:'var(--s6)'};
+  return st.map(([n,a],i)=>{const y=12+i*52;return (n?`<g data-n="${n}">${badge(24,y+17,n,bc[n])}</g>`:T(24,y+21,'0','num','middle'))+box(44,y,236,34,a)+(i<4?LN(162,y+34,162,y+50,'var(--muted)',{w:1.5,mk:'g'}):'')}).join('')},
+ m:(v,tg)=>{const all=tg.all,P=plot({x:[0,11],y:[0,11],xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10'}],yt:[{v:0,l:'0'},{v:4,l:'4'},{v:8,l:'8'}],xl:TR('시간 (분, 예시)','time (min, example)'),yl:TR('전체 전류 (상대)','total current (relative)'),T:30});
+  let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(7)}" y2="${P.Y(7)}" style="stroke:var(--s1)" stroke-dasharray="5 4" stroke-width="1.5"/>`+T(P.R,P.Y(7)-6,TR('차단기 한계 (예시)','Breaker limit (example)'),'sub','end','var(--s1)')
+   +crv(P,t=>upsCur(all,t),0,11,'var(--fg)',{n:800,clip:[0,11]});
+  if(all)s+=T(P.X(1)+12,P.Y(10.3),TR('세 장비가 한꺼번에 → 한계를 넘는다','All three at once → over the limit'),'sub','start','var(--s1)');
+  else{s+=upsDev.map(d=>`<g data-n="${d.n}">${badge(P.X(d.t)-12,P.Y(d.b+d.a+upsCur(false,d.t-.01))-10,d.n,COL[d.k])}</g>`).join('');
+   s+=`<g data-n="2"><path d="M${P.X(1.6)},${P.Y(9)} V${P.Y(9.4)} H${P.X(4.6)} V${P.Y(9)}" fill="none" style="stroke:var(--muted)"/>${badge(P.X(3.1),P.Y(9.4)-12,2,'var(--fg)')}</g>`+T(P.X(3.1)+14,P.Y(9.4)-8,TR('온도 확인 동안 기다림','Waiting on coolant temp.'),'sub')}
+  return s},
+ read:[TR('복전되자마자 다 켜지 않는다. 전원이 안정됐는지 몇 분 본다. 복전 직후 다시 끊기는 경우도 있다.','Not everything goes back on the moment power returns. A few minutes are spent confirming that the power is stable. Power sometimes drops again right after it returns.'),TR(`큰 장비를 한꺼번에 켜면 순간 전류가 몰려 차단기가 다시 떨어질 수 있다. ${c(1,'s5')} 냉각기부터 하나씩 켠다(확인 필요).`,`Switching large equipment on all at once piles up inrush current and can trip the breaker again. Equipment goes on one at a time, starting with the ${c(1,'s5')} chiller (to be verified).`),TR(`${c(2,'f')} 냉각수 온도가 정상 범위에 들어온 뒤 ${c(3,'s2')} 레이저를 켠다. 그다음 ${c(4,'s6')} 측정 PC와 제어기.`,`The ${c(3,'s2')} laser goes on after the ${c(2,'f')} coolant temperature is within the normal range. Then ${c(4,'s6')} the measurement PC and controllers.`),TR('"한꺼번에 켜기"를 켜 보면 세 장비의 순간 전류가 같은 순간에 겹쳐 한계를 넘는다. 하나씩 켜면 각 봉우리가 따로 지나간다. 4단계 순간 전류와 같은 논리다.','With "Switch on all at once" checked, the inrush currents of the three devices overlap at the same instant and exceed the limit. Switched on one at a time, each peak passes separately. This is the same logic as the inrush current in step 4.')],
+ q:TR('복전 뒤 냉각기와 레이저를 동시에 켜면 어떤 문제가 생길 수 있나?','What can go wrong if the chiller and laser are switched on at the same time after power returns?'),a:TR('순간 전류가 겹쳐 차단기가 떨어질 수 있다. 또 냉각수가 아직 정상 온도가 아닐 때 레이저가 돌게 된다.','The overlapping inrush currents can trip the breaker. Also, the laser runs while the coolant is not yet at its normal temperature.')},
+{t:TR('정기 점검: 배터리는 닳는다','Regular checks: batteries wear out'),ec:TR('배터리 노화 (예시)','Battery aging (example)'),mc:TR('UPS에 붙여 둘 기록표 (예시)','Log sheet to post on the UPS (example)'),
+ e:()=>{const P=plot({x:[0,6],y:[0,110],xt:[{v:0,l:'0'},{v:2,l:'2'},{v:4,l:'4'},{v:6,l:'6'}],yt:[{v:0,l:'0'},{v:50,l:'50'},{v:100,l:'100'}],xl:TR('사용 연수 (년)','years in use'),yl:TR('버티는 시간 (처음 = 100%)','runtime (new = 100%)'),T:30});
+  const f=t=>Math.max(0,100-4*t-2*t*t);
+  return P.s+`<rect x="${P.X(3)}" y="${P.T}" width="${P.X(5)-P.X(3)}" height="${P.B-P.T}" style="fill:var(--s4)" fill-opacity=".14"/>`+T(P.X(4),P.T+14,TR('교체 권장','Replace'),'sub','middle')+T(P.X(4),P.T+28,TR('대략 3–5년','approx. 3–5 yr'),'sub','middle')+T(P.X(4),P.T+42,TR('(확인 필요)','(to be verified)'),'sub','middle')
+   +crv(P,f,0,6,'var(--s4)')+`<g data-n="1">${badge(P.X(1.2),P.Y(f(1.2))+18,1,'var(--s4)')}</g>`+upsGuide(P.L,P.Y(f(3)),P.X(3),P.Y(f(3)))+`<circle cx="${P.X(3)}" cy="${P.Y(f(3))}" r="4" style="fill:var(--s4)"/>`+T(P.X(.2),P.Y(40),TR('3년 뒤 70%: 35분 → 약 25분 (예시)','3 yr: 70%, 35 → ~25 min (example)'),'sub')},
+ m:()=>{let s=`<rect x="30" y="40" width="260" height="170" rx="6" style="fill:var(--soft);stroke:var(--fg)"/>`+T(160,64,TR('UPS 점검 기록','UPS check log'),'labn','middle')+`<line x1="44" x2="276" y1="74" y2="74" class="ax"/>`;
+  const rows=[[0,TR('설치일: 20__ . __ . __','Installed: 20__ . __ . __')],[1,TR('배터리 교체 예정: 20__ . __','Battery replacement due: 20__ . __')],[2,TR('마지막 자가 시험: 20__ . __','Last self-test: 20__ . __')],[0,TR('연결 장비: PC, 제어기, 인터락','Connected: PC, controller, interlock')]];
+  s+=rows.map(([n,txt],i)=>{const y=100+i*28;return (n?`<g data-n="${n}">${badge(56,y-4,n,n===1?'var(--s4)':'var(--s3)')}</g>`:'')+T(74,y,txt,'sub')}).join('');
+  return s+T(160,236,TR('자가 시험은 중요한 측정이 없는 날에','Self-test on days without key measurements'),'sub','middle')},
+ read:[`${c(1,'s4')} `+TR('배터리는 쓰지 않아도 닳는다. 수명은 대략 3–5년이다(확인 필요). 왼쪽 곡선 모양은 예시다.','Batteries wear out even when unused. Service life is approx. 3–5 years (to be verified). The curve shape on the left is an example.'),TR('배터리가 닳으면 3단계에서 35분이던 시간이 모르는 사이에 줄어 있다. 그래서 교체 날짜를 UPS에 붙여 둔다.','As the battery wears, the 35 minutes from step 3 quietly shrinks. That is why the replacement date is posted on the UPS.'),`${c(2,'s3')} `+TR('자가 시험 기능을 주기적으로 돌린다. 시험 중 전환이 일어나므로 중요한 측정이 있는 날은 피한다.','The self-test function is run periodically. A test involves a transfer to battery, so days with important measurements are avoided.'),TR('기록표에 연결 장비 목록을 같이 적어 두면, 4단계 "무엇을 물리나"를 새 사람이 바로 확인할 수 있다.','With the connected equipment listed on the log sheet, a newcomer can check step 4 "What goes on the UPS" right away.')],
+ q:TR('5년 된 UPS가 자가 시험은 통과했다. 3단계 계산대로 35분 버틴다고 믿어도 되나?','A 5-year-old UPS passed its self-test. Can it be trusted to last 35 minutes as calculated in step 3?'),a:TR('아니다. 자가 시험은 짧게 전환만 확인하는 경우가 많다. 배터리가 닳아 실제 시간은 훨씬 짧을 수 있으니 교체 시기를 보고, 필요하면 실제 부하로 시간을 재 본다.','No. A self-test often only checks a brief transfer. With a worn battery the real runtime can be much shorter, so the replacement date is checked and, if needed, the runtime is measured under the real load.')}];
+
+/* ======================= 기초 장비 ======================= */
+/* ---------- 기초 장비 헬퍼 (eq) ---------- */
+/* erfc 근사 (Abramowitz–Stegun 7.1.26) */
+function eqErfc(x){const s=x<0?-1:1,z=Math.abs(x),t=1/(1+.3275911*z),y=1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-z*z);return 1-s*y}
+/* 1단계: 공기 스프링 전달률 (f0 = 1.5 Hz, ζ = 0.1 가정) */
+const eqTr=f=>{const r=f/1.5,z=.1;return Math.sqrt((1+(2*z*r)**2)/((1-r*r)**2+(2*z*r)**2))};
+/* 2단계: 두 거울 정렬. 거울 M1(z=0), M2(z=100), 조리개 I1(z=300), I2(z=600) (단위는 예시).
+   t1, t2 = 각 거울의 각도 오차. 조리개 위치의 빔 어긋남 x1 = 300 t1 + 200 t2, x2 = 600 t1 + 500 t2 */
+function eqAng(k,wrong){let t1=.02,t2=-.005;const h=[[t1,t2]];
+ for(let i=0;i<k;i++){const a=i%2===0;
+  if(!wrong){if(a)t1=-t2*200/300;else t2=-t1*600/500}
+  else{if(a)t2=-t1*300/200;else t1=-t2*500/600}
+  h.push([t1,t2])}
+ return h}
+const eqAlign=(k,wrong)=>eqAng(k,wrong).map(([a,b])=>[300*a+200*b,600*a+500*b]);
+/* 6단계: 두 가우시안 빔 겹침 (1/e² 반경 wp, wr, 중심 거리 d) */
+const eqOv=(d,wp,wr)=>Math.exp(-2*d*d/(wp*wp+wr*wr));
+/* 8단계: 수증기·CO₂ 흡수선 (모양만 예시, 위치·세기는 실제와 다름) */
+const eqLines=Array.from({length:46},(_,i)=>[1380+((i*137)%520),.25+((i*53)%10)/12]).concat(Array.from({length:30},(_,i)=>[3520+((i*97)%420),.2+((i*31)%10)/14]));
+function eqAbs(w,h,c2){let a=0;for(const[p,s]of eqLines)a+=h*s*2.2*Math.exp(-(((w-p)/2.2)**2));a+=c2*2.5*(Math.exp(-(((w-2335)/10)**2))+Math.exp(-(((w-2360)/10)**2)));return Math.exp(-a)}
+const eqFE=e=>e>=1e-3?(e*1e3).toPrecision(3)+' mJ':e>=1e-6?(e*1e6).toPrecision(3)+' µJ':(e*1e9).toPrecision(3)+' nJ';
+
+const EQ=[
+{t:TR('광학 테이블: 바닥 진동을 떼어 낸다','Optical table: isolating floor vibration'),ec:TR('테이블과 공기 다리','Table and air legs'),mc:TR('바닥 진동이 테이블로 전달되는 비율 (예시)','Fraction of floor vibration transmitted to the table (example)'),
+ e:()=>`<rect x="40" y="70" width="240" height="30" rx="3" class="dev"/>`+Array.from({length:22},(_,i)=>`<circle cx="${50+(i%11)*22}" cy="${78+Math.floor(i/11)*14}" r="1.6" style="fill:var(--muted)"/>`).join('')
+  +[80,240].map(x=>`<rect x="${x-14}" y="100" width="28" height="44" class="dev"/>`+PL([[x,144],[x-8,150],[x+8,158],[x-8,166],[x+8,174],[x,180]],'var(--fg)',{w:1.4})+`<rect x="${x-14}" y="180" width="28" height="44" class="dev"/>`).join('')
+  +`<g data-n="1">${badge(124,160,1,'var(--s3)')}</g>`+T(140,164,TR('공기 다리','Air legs'),'sub')
+  +`<line x1="20" x2="300" y1="224" y2="224" class="lvl"/>`+[60,160,260].map(x=>PL([[x-14,244],[x-7,236],[x,244],[x+7,236],[x+14,244]],'var(--s1)',{w:1.4})).join('')+T(160,266,TR('바닥 진동 (발걸음, 펌프, 건물)','Floor vibration (footsteps, pumps, building)'),'sub','middle')
+  +`<rect x="70" y="56" width="18" height="14" class="dev"/><rect x="150" y="52" width="10" height="18" class="dev"/><rect x="220" y="56" width="22" height="14" class="dev"/>`+LN(88,62,150,62,'var(--s1)',{w:1})+LN(160,62,220,62,'var(--s1)',{w:1})+T(40,36,TR('무거운 판 + 아주 무른 용수철','Heavy plate + very soft spring'),'lab'),
+ m:()=>{const P=plot({x:[.3,100],y:[.001,10],logx:1,logy:1,xt:[{v:1,l:'1'},{v:10,l:'10'},{v:100,l:'100'}],yt:[{v:.001,l:'0.1%'},{v:.01,l:'1%'},{v:.1,l:'10%'},{v:1,l:'100%'},{v:10,l:'×10'}],xl:TR('바닥 진동 주파수 (Hz)','floor vibration frequency (Hz)'),yl:TR('전달 비율','transmission'),T:30});
+  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(1)}" y2="${P.Y(1)}" class="lvl2"/>`+`<g data-n="1">${PL(Array.from({length:301},(_,i)=>{const f=.3*10**(i/300*Math.log10(100/.3));return[P.X(f),P.Y(Math.max(.001,Math.min(10,eqTr(f))))]}).map(([x,y])=>[x.toFixed(1),y.toFixed(1)]),'var(--s3)',{w:2})}</g>`+T(P.X(2.2),P.Y(5.5),TR('공진 (약 1.5 Hz 가정)','Resonance (1.5 Hz, assumed)'),'sub')+T(P.X(9),P.Y(.25),TR('여기부터 줄어든다','Drops from here'),'sub')+T(P.R,P.T-12,TR('공기 다리 없이 바닥에 놓으면 = 100% 선','100% line = on the floor, no air legs'),'sub','end')},
+ read:[TR('광학 테이블은 무거운 판을 아주 무른 용수철(공기 다리) 위에 올린 것이다. 무겁고 무르면 공진 진동수가 낮아진다(대략 1–2 Hz, 예시).','An optical table is a heavy plate on very soft springs (air legs). Heavy and soft means a low resonance frequency (approx. 1–2 Hz, example).'),`${c(1,'s3')} `+TR('공진보다 빠른 바닥 진동(사람 발걸음, 펌프, 건물 진동 대략 수–수십 Hz)은 테이블에 거의 전달되지 않는다. 진동수가 공진의 10배면 전달이 대략 2% 수준으로 준다(이 그림의 가정: 공진 1.5 Hz, 감쇠비 0.1).','Floor vibration faster than the resonance (footsteps, pumps, building vibration, approx. a few to tens of Hz) hardly reaches the table. At 10× the resonance frequency, transmission drops to approx. 2% (assumed in this figure: resonance 1.5 Hz, damping ratio 0.1).'),TR('반대로 공진 근처의 아주 느린 흔들림은 오히려 커진다. 공기 다리를 켠 채 테이블을 세게 밀면 한동안 출렁이는 이유다.','Conversely, very slow motion near the resonance is amplified. That is why a table pushed hard with the air legs on keeps swaying for a while.'),TR('표면의 나사 구멍(보통 25 mm 간격, 확인 필요)에 마운트를 고정한다. 판 내부의 벌집 구조가 판 자체의 떨림을 줄인다.','Mounts are fixed in the threaded holes on the surface (usually 25 mm spacing, to be verified). The honeycomb core inside the plate damps vibration of the plate itself.'),TR('진동만 문제가 아니다. 방 온도가 바뀌면 금속 테이블·포스트·마운트가 늘었다 줄며 정렬이 틀어진다. 온도를 되돌려도 정렬이 완전히 돌아오지 않았다는 경험이 있다(논문 A.8.1, 마운트의 기계적 이력 때문으로 추정, 확인 필요). 그래서 실험실 온도를 일정하게 유지하고, 큰 온도 변화 뒤에는 정렬을 다시 확인한다.','Vibration is not the only issue. When the room temperature changes, the metal table, posts and mounts expand and contract, and the alignment drifts. In our experience the alignment did not fully recover even after the temperature returned (thesis A.8.1; presumably mechanical hysteresis of the mounts, to be verified). That is why the lab temperature is kept constant and the alignment is rechecked after a large temperature change.')],
+ q:TR('공기 다리 압축 공기가 빠졌다. 무엇이 달라지나?','The compressed air in the air legs has run out. What changes?'),a:TR('테이블이 다리 받침에 내려앉아 단단히 붙는다. 그러면 바닥 진동이 거의 그대로 전달된다. 측정 전에 공기 압력과 테이블이 떠 있는지 확인한다.','The table settles onto the leg supports and becomes rigidly coupled to them. Floor vibration is then transmitted almost unchanged. The air pressure and whether the table is floating are checked before measuring.')},
+{t:TR('두 거울 정렬: 가까운 조리개는 먼 거울, 먼 조리개는 가까운 거울','Two-mirror alignment: near iris with the far mirror, far iris with the near mirror'),ec:TR('위에서 본 빔 경로 (각도 오차는 크게 과장)','Beam path seen from above (angle errors greatly exaggerated)'),mc:TR('조리개에서 빔이 벗어난 정도 (예시 단위)','Beam offset at the irises (example units)'),
+ slider:{min:0,max:10,step:1,init:0,label:TR('조정 횟수','Adjustments'),fmt:v=>Math.round(v)+TR('번',''),play:1},tg:[{k:'wr',l:TR('순서를 바꿔 본다 (틀린 방법)','Swapped order (wrong method)'),on:false}],
+ e:(v,tg)=>{const k=Math.round(v),wr=!!tg.wr,[t1,t2]=eqAng(k,wr)[k],[x1,x2]=eqAlign(k,wr)[k];
+  /* Z자(잠망경) 배치: 레이저 → M1(아래, 위로 꺾음) → M2(위, 오른쪽으로 꺾음) → 조리개 1, 2.
+     거리: M1→M2 100, M2→조리개 1 200, 조리개 1→2 300 (예시 단위). 어긋남은 6배로 과장. */
+  const mx=70,y1=214,y2=104,sc=.46,X=z=>mx+(z-100)*sc,G=6,cl=d=>Math.max(-60,Math.min(60,d));
+  /* M1 오차로 M2에 닿는 점이 가로로 dh 밀리면, 45° 거울 M2에서 반사된 뒤에는 세로로 dh 어긋난다. 그래서 닿는 점은 M2 거울면 위 (mx+dh, y2−dh).
+     M2 뒤 빔은 곧은 선 하나 (기울기 = 두 거울 오차의 합). 거울 기호는 실제 그린 입사·반사 빔의 이등분 방향으로 돌린다 (입사각 = 반사각). */
+  const dh=cl(G*t1*100),hx=mx+dh,hy=y2-dh,sl=-G*(t1+t2)/sc,Yb=x=>Math.max(y2-80,Math.min(y2+80,hy+sl*(x-hx))),Y=z=>Yb(X(z));
+  const adj=k%2===0?(wr?2:1):(wr?1:2),tgt=k%2===0?1:2;
+  const th1=Math.atan2(y1-hy,hx-mx),th2=Math.atan2(-sl,1);
+  const mir=(x,y,ph,on)=>{const cx=17*Math.cos(ph),cy=17*Math.sin(ph);return `<line x1="${x-cx}" y1="${y+cy}" x2="${x+cx}" y2="${y-cy}" style="stroke:${on?'var(--s4)':'var(--fg)'}" stroke-width="${on?4:3}"/>`};
+  let s=`<path d="M44,${y1} H${mx} V${y2} H306" fill="none" class="lvl2"/>`+`<rect x="8" y="${y1-8}" width="36" height="16" rx="2" class="dev"/>`+T(26,y1+26,TR('레이저','Laser'),'sub','middle');
+  s+=PL([[44,y1],[mx,y1],[hx,hy],[X(600),Y(600)]],'var(--s1)',{w:2});
+  s+=mir(mx,y1,th1/2,adj===1)+T(mx+16,y1+22,'M1','labn','start',adj===1?'var(--s4)':undefined)+mir(hx,hy,(th1+th2)/2,adj===2)+T(Math.min(mx,hx)-16,hy-12,'M2','labn','end',adj===2?'var(--s4)':undefined);
+  [[300,1,'s5'],[600,2,'s2']].forEach(([z,n,kk])=>{const x=X(z),w=tgt===n?4:3;
+   s+=`<g data-n="${n}"><line x1="${x}" x2="${x}" y1="${y2-34}" y2="${y2-6}" style="stroke:${COL[kk]}" stroke-width="${w}"/><line x1="${x}" x2="${x}" y1="${y2+6}" y2="${y2+34}" style="stroke:${COL[kk]}" stroke-width="${w}"/>`
+    +`<circle cx="${x}" cy="${Y(z)}" r="3.5" style="fill:var(--s1)"/>`+badge(x,y2+50,n,COL[kk])+'</g>'+T(n===2?x+8:x,y2+76,TR('조리개 ','Iris ')+n,'sub',n===2?'end':'middle')});
+  const next=wr?(adj===2?TR('다음: M2로 조리개 1에 맞춘다 (틀린 짝)','Next: M2 to iris 1 (wrong pair)'):TR('다음: M1로 조리개 2에 맞춘다 (틀린 짝)','Next: M1 to iris 2 (wrong pair)')):(adj===1?TR('다음: M1로 조리개 1에 맞춘다','Next: M1 to iris 1'):TR('다음: M2로 조리개 2에 맞춘다','Next: M2 to iris 2'));
+  return s+T(14,24,next,'lab')+T(14,42,TR(`어긋남 — 조리개 1: ${x1.toFixed(1)} · 조리개 2: ${x2.toFixed(1)}`,`Offset — iris 1: ${x1.toFixed(1)} · iris 2: ${x2.toFixed(1)}`),'sub')+T(14,272,TR('점선 = 맞춰야 할 경로, 빨간 점 = 조리개에 닿는 위치','Dotted = target path, red dot = where beam hits iris'),'sub')+T(14,256,TR('노란 거울 = 다음에 돌릴 거울','Yellow mirror = next one to adjust'),'sub')},
+ m:(v,tg)=>{const k=Math.round(v),h=eqAlign(10,!!tg.wr);const P=plot({x:[0,10],y:[0,30],xt:[0,2,4,6,8,10].map(x=>({v:x,l:String(x)})),yt:[0,10,20,30].map(y=>({v:y,l:String(y)})),xl:TR('조정 횟수','adjustments'),yl:TR('벗어난 정도 |x|','offset |x|'),T:30});
+  const pts=j=>h.slice(0,k+1).map((p,i)=>[P.X(i),P.Y(Math.min(30,Math.abs(p[j])))]);
+  let s=P.s+`<g data-n="1">${PL(pts(0),'var(--s5)',{w:2})}${pts(0).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.5" style="fill:var(--s5)"/>`).join('')}</g><g data-n="2">${PL(pts(1),'var(--s2)',{w:2})}${pts(1).map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3.5" style="fill:var(--s2)"/>`).join('')}</g>`;
+  s+=`<line x1="${P.R-130}" x2="${P.R-110}" y1="${P.T-14}" y2="${P.T-14}" style="stroke:var(--s5)" stroke-width="2"/>`+T(P.R-106,P.T-10,TR('조리개 1','Iris 1'),'sub')+`<line x1="${P.R-56}" x2="${P.R-36}" y1="${P.T-14}" y2="${P.T-14}" style="stroke:var(--s2)" stroke-width="2"/>`+T(P.R-32,P.T-10,TR('조리개 2','Iris 2'),'sub');
+  return s+T(P.R,P.Y(26),tg.wr?TR('점점 커진다 (발산)','Keeps growing (diverges)'):TR('점점 0으로 간다','Goes toward 0'),'sub','end')},
+ read:[TR('거울 두 개면 빔의 위치와 방향을 둘 다 맞출 수 있다. 조리개 두 개를 빔이 지나가야 할 축 위에 세워 두고 번갈아 맞춘다.','Two mirrors can set both the position and the direction of a beam. Two irises are placed on the axis the beam should follow, and the beam is aligned to them in turn.'),TR(`순서: M1(빔이 먼저 닿는, 조리개에서 먼 거울)로 ${c(1,'s5')} 가까운 조리개를 맞추고, M2(조리개에 가까운 거울)로 ${c(2,'s2')} 먼 조리개를 맞춘다. 이걸 반복한다.`,`Order: M1 (hit first by the beam, far from the irises) aligns the beam to the ${c(1,'s5')} near iris, and M2 (close to the irises) aligns it to the ${c(2,'s2')} far iris. This is repeated.`),TR('재생을 누르면 한 번 맞출 때마다 두 조리개의 어긋남이 함께 줄어든다. 이 배치(예시 거리)에서는 한 바퀴마다 약 0.8배로 줄어 몇 바퀴면 거의 0이 된다.','With Play, every adjustment reduces the offsets at both irises together. In this layout (example distances) they shrink by approx. 0.8× per round and are nearly 0 after a few rounds.'),TR('체크박스를 켜서 순서를 바꾸면(M2로 가까운 조리개, M1로 먼 조리개) 한 바퀴마다 약 1.25배로 커진다. "맞출수록 더 틀어지는" 경험의 이유다.','With the checkbox on, the order is swapped (M2 for the near iris, M1 for the far iris), and the offsets grow by approx. 1.25× per round. This explains the experience of "the more I align, the worse it gets."'),TR('줄어드는 속도는 거울과 조리개 사이 거리에 따라 다르다. 조리개 사이를 멀리 둘수록 방향을 정밀하게 맞출 수 있다.','How fast the offsets shrink depends on the distances between the mirrors and the irises. The farther apart the irises, the more precisely the direction can be set.')],
+ q:TR('조리개 하나만 쓰면 무엇을 못 맞추나?','What cannot be set with a single iris?'),a:TR('빔이 그 점을 지나기만 하면 방향은 아무래도 된다. 위치와 방향 두 가지를 정하려면 점이 두 개 필요하다.','As long as the beam passes through that point, any direction is allowed. Fixing both position and direction takes two points.')},
+{t:TR('파워미터와 에너지미터: 평균 출력과 펄스 하나','Power meter and energy meter: average power and a single pulse'),ec:TR('5 ms 동안의 펄스 (평균 출력 1 W 고정)','Pulses within 5 ms (average power fixed at 1 W)'),mc:TR('펄스 하나 에너지 = 평균 출력 / 반복률','Single-pulse energy = average power / repetition rate'),
+ slider:{min:0,max:6,step:.05,init:3,label:TR('반복률','Repetition rate'),fmt:v=>{const f=10**v;return f>=1e6?(f/1e6).toFixed(1)+' MHz':f>=1e3?(f/1e3).toFixed(f<1e4?1:0)+' kHz':f.toFixed(f<10?1:0)+' Hz'}},
+ e:v=>{const f=10**v,E=1/f,n=f*5e-3,H=e=>20+(Math.log10(e)+6)/6*130,y0=210;let s=`<line x1="30" x2="300" y1="${y0}" y2="${y0}" class="ax"/>`+T(30,226,'0','sub','middle')+T(300,226,'5 ms','sub','middle');
+  if(n<=60){const N=Math.max(1,Math.floor(n));if(n>=1)for(let i=0;i<N;i++){const x=30+(i+.5)/n*270;s+=`<line x1="${x}" x2="${x}" y1="${y0}" y2="${y0-H(E)}" style="stroke:var(--s1)" stroke-width="2"/>`}else s+=T(165,y0-40,TR('이 5 ms 안에는 펄스가 없을 수도 있다','This 5 ms window may contain no pulse'),'sub','middle')}
+  else s+=`<rect x="30" y="${y0-H(E)}" width="270" height="${H(E)}" style="fill:var(--s1)" fill-opacity=".35"/>`+T(165,y0-H(E)-8,TR('촘촘해서 띠로 보임','So dense it looks like a band'),'sub','middle');
+  return s+T(20,30,TR('5 ms 안 펄스 수 ≈ ','Pulses in 5 ms ≈ ')+(n<1?n.toPrecision(2):Math.round(n).toLocaleString('en-US'))+TR('개',''),'lab')+T(20,48,TR('펄스 하나 = 1 W / 반복률 = ','One pulse = 1 W / rep. rate = ')+(E>=.9995?E.toPrecision(3)+' J':eqFE(E)),'lab')+T(20,262,TR('막대 높이 = 펄스 에너지 (log 눈금, 보기용)','Bar height = pulse energy (log scale, for display)'),'sub')},
+ m:v=>{const f=10**v,P=plot({x:[1,1e6],y:[1e-6,1],logx:1,logy:1,xt:[{v:1,l:'1 Hz'},{v:1e3,l:'1 kHz'},{v:1e6,l:'1 MHz'}],yt:[{v:1e-6,l:'1 µJ'},{v:1e-3,l:'1 mJ'},{v:1,l:'1 J'}],xl:TR('반복률','repetition rate'),yl:TR('펄스 에너지','pulse energy'),L:62,T:30});
+  return P.s+`<g data-n="2"><rect x="${P.L}" y="${P.T}" width="${P.X(3e3)-P.L}" height="${P.B-P.T}" style="fill:var(--s4)" fill-opacity=".1"/>${badge(P.X(3),P.Y(1e-5),2,'var(--s4)')}</g>`+T(P.X(3)+14,P.Y(1e-5)+4,TR('에너지미터가 한 발씩 읽는 쪽','Energy meter: single shots'),'sub')
+   +`<g data-n="1">${crv(P,x=>1/x,1,1e6,'var(--fg)')}${badge(P.X(30)+12,P.Y(1/30)-14,1,'var(--fg)')}</g>`+T(P.X(30)+26,P.Y(1/30)-10,TR('1 W 선','1 W line'),'sub')+`<circle cx="${P.X(f)}" cy="${P.Y(1/f)}" r="6" style="fill:var(--s1)"/>`+T(P.R,P.T-12,TR('색 영역 경계 3 kHz는 예시 (확인 필요)','Shaded edge at 3 kHz: example (to be verified)'),'sub','end')},
+ read:[`${c(1,'f')} `+TR('파워미터는 열을 재는 센서가 많아 반응이 느리다. 그래서 평균 출력(W)을 읽는다. 반복률과 상관없이 쓸 수 있다.','Power meters often use thermal sensors and respond slowly, so they read the average power (W). They work at any repetition rate.'),`${c(2,'s4')} `+TR('에너지미터(초전 센서 등)는 펄스 하나의 에너지(J)를 한 발씩 읽는다. 대신 읽을 수 있는 반복률에 한계가 있다(모델마다 다름, 확인 필요).','Energy meters (pyroelectric sensors, etc.) read the energy of each single pulse (J). In exchange, the repetition rate they can follow is limited (model-dependent, to be verified).'),TR('세어 보기: 평균 1 W, 1 kHz면 펄스 하나 = 1 W / 1000 Hz = 1 mJ다. 같은 1 W라도 100 kHz면 10 µJ로 100배 작다.','Counting it out: at 1 W average and 1 kHz, one pulse = 1 W / 1000 Hz = 1 mJ. The same 1 W at 100 kHz gives 10 µJ, 100× smaller.'),TR('봉우리 출력은 훨씬 크다. 1 mJ 펄스가 100 fs 동안 몰려 나오면 1 mJ / 100 fs = 10 GW다(가정한 펄스 폭). 그래서 같은 평균 출력에서도 펄스 레이저는 광학 부품을 쉽게 상하게 한다.','The peak power is far higher. A 1 mJ pulse delivered within 100 fs gives 1 mJ / 100 fs = 10 GW (assumed pulse width). That is why, at the same average power, pulsed lasers damage optics easily.'),TR('작은 출력을 잴 때는 배경(빛을 막고 읽은 값)을 꼭 뺀다. 배경도 시간에 따라 흔들린다.','When measuring small powers, the background (the reading with the beam blocked) must be subtracted. The background also drifts over time.')],
+ case:TR('<b>사례: 배경이 신호보다 크다.</b> 우리 셋업에서 핀홀을 통과한 pump를 잴 때, 파워미터 배경이 약 275 µW로 통과한 신호(약 120 µW)의 2배가 넘었다. 같은 날 배경 자체가 17 µW 변하기도 했다(논문 3.7). 작은 변화를 따질 때는 배경을 측정 직전·직후에 다시 잰다.','<b>Case: background larger than the signal.</b> When the pump transmitted through a pinhole was measured in our setup, the power meter background was approx. 275 µW, more than twice the transmitted signal (approx. 120 µW). The background itself also changed by 17 µW within the same day (thesis 3.7). When small changes matter, the background is remeasured right before and right after the measurement.'),
+ q:TR('1 kHz, 펄스 하나 2 mJ면 파워미터는 얼마를 읽나?','At 1 kHz and 2 mJ per pulse, what does the power meter read?'),a:'2 mJ × 1000 Hz = 2 W.'},
+{t:TR('편광자 둘로 세기 줄이기: cos⁴θ','Attenuating with two polarizers: cos⁴θ'),ec:TR('편광자 두 개의 정면 모습 (빔 순서대로 옆에 늘어놓음)','Front view of the two polarizers (laid side by side in beam order)'),mc:TR('투과율 vs 첫 편광자 각도','Transmission vs first polarizer angle'),
+ slider:{min:0,max:90,step:1,init:45,label:TR('첫 편광자 각도 θ','First polarizer angle θ'),fmt:v=>Math.round(v)+'°',play:1},
+ e:v=>{const th=v*Math.PI/180,cy=130,Ar=(x,ang,len)=>{const dx=Math.sin(ang)*len/2,dy=Math.cos(ang)*len/2;return len<4?`<circle cx="${x}" cy="${cy}" r="2.5" style="fill:var(--s1)"/>`:LN(x-dx,cy+dy,x+dx,cy-dy,'var(--s1)',{w:2.5,mk:'s1'})+LN(x+dx,cy-dy,x-dx,cy+dy,'var(--s1)',{w:2.5,mk:'s1'})};
+  const pol=(x,ang,n,lab)=>{let s=`<g data-n="${n}"><circle cx="${x}" cy="${cy}" r="36" style="fill:var(--soft);stroke:var(--fg)"/>`;for(let j=-4;j<=4;j++){const ox=Math.cos(ang)*j*7,oy=-Math.sin(ang)*j*7,Lw=Math.sqrt(Math.max(0,1225-(j*7)**2));s+=`<line x1="${x+ox+Math.sin(ang)*Lw}" y1="${cy+oy+Math.cos(ang)*Lw}" x2="${x+ox-Math.sin(ang)*Lw}" y2="${cy+oy-Math.cos(ang)*Lw}" style="stroke:var(--muted)" stroke-width=".8"/>`}return s+badge(x,cy-50,n,'var(--fg)')+'</g>'+T(x,cy+56,lab,'sub','middle')};
+  return LN(10,cy,310,cy,'var(--pump)',{w:1,dash:1})+Ar(40,0,60)+pol(110,Math.PI/2-th,1,`P1 (θ = ${Math.round(v)}°)`)+Ar(170,th,60*Math.cos(th))+pol(230,Math.PI/2,2,TR('P2 (세로 고정)','P2 (fixed vertical)'))+Ar(292,0,60*Math.cos(th)**2)
+   +T(40,214,'E₀','sub','middle')+T(170,214,'E₀ cos θ','sub','middle')+T(292,214,'E₀ cos²θ','sub','middle')+T(20,30,TR('점선 = 빔. 왼쪽에서 오른쪽으로 간다','Dotted line = beam, travelling left to right'),'sub')+T(20,236,TR('원 = 빔 축을 따라 본 편광자 정면 (옆으로 늘어놓음)','Circles = polarizers viewed along the beam axis'),'sub')+T(20,252,TR('회색 줄 = 금속 줄. 투과 축은 줄에 수직이다','Gray lines = wire grid; pass axis ⊥ wires'),'sub')+T(20,268,TR('빨간 화살표 = 같은 방향에서 본 전기장 방향과 크기','Red arrows = E-field direction and size, same view'),'sub')},
+ m:v=>{const P=plot({x:[0,90],y:[0,1.05],xt:[0,15,30,45,60,75,90].map(x=>({v:x,l:x+'°'})),yt:[{v:0,l:'0'},{v:.25,l:'25%'},{v:.5,l:'50%'},{v:1,l:'100%'}],xl:TR('첫 편광자 각도 θ','first polarizer angle θ'),yl:TR('투과율 I / I₀','transmission I / I₀'),T:30});
+  const d=Math.PI/180,y4=Math.cos(v*d)**4;
+  return P.s+crv(P,x=>Math.cos(x*d)**2,0,90,'var(--s6)',{dash:1})+crv(P,x=>Math.cos(x*d)**4,0,90,'var(--s2)')+`<circle cx="${P.X(v)}" cy="${P.Y(y4)}" r="6" style="fill:var(--s2)"/>`+T(P.R,P.T-12,`θ = ${Math.round(v)}° → ${(y4*100).toFixed(1)}%`,'labn','end')
+   +`<line x1="${P.X(58)}" x2="${P.X(66)}" y1="${P.Y(.92)}" y2="${P.Y(.92)}" style="stroke:var(--s2)" stroke-width="2"/>`+T(P.X(67),P.Y(.92)+4,TR('둘: cos⁴θ','two: cos⁴θ'),'sub')+`<line x1="${P.X(58)}" x2="${P.X(66)}" y1="${P.Y(.8)}" y2="${P.Y(.8)}" style="stroke:var(--s6)" stroke-width="2" stroke-dasharray="5 4"/>`+T(P.X(67),P.Y(.8)+4,TR('하나: cos²θ','one: cos²θ'),'sub')},
+ read:[TR('편광자 하나를 θ만큼 돌리면 투과 세기가 cos²θ가 된다(Malus 법칙). 전기장은 cos θ, 세기는 그 제곱이다.','Rotating a single polarizer by θ makes the transmitted intensity cos²θ (Malus\'s law). The field scales as cos θ, the intensity as its square.'),TR(`${c(1,'f')} 첫 편광자 P1을 θ로 돌리고 ${c(2,'f')} 둘째 편광자 P2를 원래 편광(세로)으로 고정하면 cos²θ를 두 번 거쳐 cos⁴θ가 된다. 45°면 25%, 60°면 6.25%다.`,`With the ${c(1,'f')} first polarizer P1 rotated to θ and the ${c(2,'f')} second polarizer P2 fixed at the original polarization (vertical), cos²θ applies twice, giving cos⁴θ. 45° gives 25%, 60° gives 6.25%.`),TR('장점: 나가는 편광이 P2 때문에 항상 세로로 고정된다. pump 세기를 바꿔도 시료에서 편광(예: magic angle 조건)이 바뀌지 않는다.','Advantage: P2 always fixes the output polarization to vertical. Changing the pump intensity does not change the polarization at the sample (e.g., the magic-angle condition).'),TR('반파장판 + 편광자도 같은 일을 하지만, 반파장판은 설계 파장 근처에서만 제대로 돈다. 파장을 넓게 바꾸는 중적외선에서는 편광자 두 개가 낫다(논문 A.3.7).','A half-wave plate + polarizer does the same job, but a half-wave plate rotates the polarization correctly only near its design wavelength. In the mid-IR, where the wavelength is tuned over a wide range, two polarizers work better (thesis A.3.7).'),TR('대가: 편광자마다 θ = 0에서도 손실이 있어 최대 투과가 줄고, 아무리 돌려도 소광비만큼은 새어 나온다. 우리 편광자의 기판 재질과 소광비는 확인 필요(논문 TODO).','Cost: each polarizer has some loss even at θ = 0, which lowers the maximum transmission, and some light always leaks through, set by the extinction ratio. The substrate material and extinction ratio of our polarizers are to be verified (thesis TODO).')],
+ q:TR('pump를 원래의 약 1/10로 줄이려면 θ는 대략?','Roughly what θ reduces the pump to approx. 1/10 of the original?'),a:TR('cos⁴θ = 0.1 → cos θ ≈ 0.56 → θ ≈ 56°. 실제 다이얼 눈금은 최대 투과 위치만큼 어긋나 있으니 측정으로 확인한다.','cos⁴θ = 0.1 → cos θ ≈ 0.56 → θ ≈ 56°. The actual dial reading is offset by the position of maximum transmission, so the value is confirmed by measurement.')},
+{t:TR('지연 스테이지: 거리가 시간이 된다','Delay stage: distance becomes time'),ec:TR('역반사경을 얹은 스테이지 (위에서 본 모습, 레일은 아래에 따로 그림)','Stage carrying a retroreflector (top view; rail drawn separately below)'),mc:TR('스테이지 이동 거리 → 시간 지연','Stage travel → time delay'),
+ slider:{min:0,max:90,step:1,init:15,label:TR('스테이지 이동 L','Stage travel L'),fmt:v=>Math.round(v)+' mm',play:1},
+ e:v=>{const x=150+v*1.4;
+  let s=`<line x1="120" x2="300" y1="196" y2="196" style="stroke:var(--muted)" stroke-width="5"/>`+T(300,216,TR('레일','Rail'),'sub','end');
+  s+=`<rect x="${x+30}" y="114" width="14" height="72" class="dev"/>`+`<path d="M${x},120 L${x+30},150 L${x},180" fill="none" style="stroke:var(--fg)" stroke-width="2.5"/>`;
+  /* 역반사경(지붕형): 열린 쪽이 빔을 향한다. 위 빔이 윗면 → 아랫면에서 두 번 반사되어 아래로 평행하게 돌아간다 */
+  s+=LN(20,130,x+8,130,'var(--s1)',{w:2,mk:'s1'})+LN(x+10,131,x+10,169,'var(--s1)',{w:2})+LN(x+8,170,20,170,'var(--s1)',{w:2,mk:'s1'})+T(20,120,TR('들어오는 빔','Incoming beam'),'sub')+T(20,188,TR('되돌아가는 빔','Returning beam'),'sub');
+  s+=`<line x1="150" x2="150" y1="96" y2="196" class="lvl2"/>`+(v>4?LN(152,104,x-2,104,'var(--fg)',{w:1,mk:'f'}):'')+T(150,88,TR('처음 위치','Start position'),'sub','middle')+T(Math.min(300,Math.max(196,x+24)),100,`L = ${Math.round(v)} mm`,'sub',x+24>260?'end':'start');
+  return s+T(20,30,TR('스테이지가 L만큼 가면 빛은 왕복으로 2L 더 간다','Stage moves L → round-trip path grows by 2L'),'lab')+T(20,48,`2L / c = ${(2*v*1e-3/2.998e8*1e12).toFixed(1)} ps`,'lab')+T(20,246,TR('세어 보기: 1 µm 이동 → 2 µm 더 감 → 약 6.67 fs','Counting: 1 µm move → 2 µm more path → ≈ 6.67 fs'),'sub')+T(20,264,TR('역반사경은 들어온 방향 그대로 되돌려 보낸다','A retroreflector sends light back the way it came'),'sub')},
+ m:v=>{const ps=L=>2*L*1e-3/2.998e8*1e12;const P=plot({x:[0,90],y:[0,620],xt:[0,30,60,90].map(x=>({v:x,l:x+' mm'})),yt:[200,400,600].map(y=>({v:y,l:y+' ps'})),xl:TR('스테이지 이동 L','stage travel L'),yl:TR('시간 지연','time delay'),L:64,T:30});
+  return P.s+crv(P,ps,0,90,'var(--s1)')+`<circle cx="${P.X(v)}" cy="${P.Y(ps(v))}" r="6" style="fill:var(--s1)"/>`+T(P.X(v)-10,P.Y(ps(v))-8,ps(v).toFixed(0)+' ps','labn','end')+T(P.R,P.B-10,TR('90 mm 이동 = 빛 길이 180 mm = 약 600 ps','90 mm → 180 mm path ≈ 600 ps'),'sub','end')},
+ read:[TR('pump와 probe 사이 시간 차이는 빛이 가는 길이로 만든다. 빛은 1 ps에 약 0.3 mm 간다.','The time difference between pump and probe is made from the distance the light travels. Light covers approx. 0.3 mm in 1 ps.'),TR('역반사경은 빔을 들어온 방향 그대로 되돌린다. 스테이지가 L만큼 움직이면 빛 길이는 2L 늘어난다. 그래서 1 µm 이동이 약 6.67 fs다.','A retroreflector sends the beam back in the direction it came from. When the stage moves by L, the optical path grows by 2L. So a 1 µm move corresponds to approx. 6.67 fs.'),TR('우리 pump 스테이지는 −50 ps부터 +550 ps까지 600 ps를 훑는다. 이건 스테이지 90 mm, 빛 길이 180 mm다(논문 3.7).','Our pump stage scans 600 ps, from −50 ps to +550 ps. That is 90 mm of stage travel and 180 mm of optical path (thesis 3.7).'),TR('스테이지 정밀도가 곧 시간 정밀도다. 0.1 µm 단위로 움직이면 약 0.67 fs 단위다.','Stage precision is time precision. Steps of 0.1 µm correspond to steps of approx. 0.67 fs.'),TR('길게 움직일수록 빔이 조금씩 옆으로 흐를 수 있다(다음 단계). <a href="pumpprobe.html">IR pump-probe 노트</a>에서 이 지연을 어떻게 쓰는지 이어 본다.','Over long travel the beam can slowly drift sideways (next step). The <a href="pumpprobe.html">IR pump-probe note</a> continues with how this delay is used.')],
+ q:TR('스테이지를 0.3 mm 움직이면 시간 지연은?','What time delay does a 0.3 mm stage move give?'),a:TR('빛 길이 0.6 mm → 약 2 ps.','0.6 mm of optical path → approx. 2 ps.')},
+{t:TR('빔 흐름(beam walk): 지연이 길어지면 겹침이 줄 수 있다','Beam walk: overlap can drop at long delays'),ec:TR('시료 위치에서 본 두 빔 (어긋남 3배 과장)','The two beams at the sample position (offset exaggerated 3×)'),mc:TR('겹침 신호 vs 지연 (가정한 흐름)','Overlap signal vs delay (assumed drift)'),
+ slider:{min:-50,max:550,step:5,init:250,label:TR('지연','Delay'),fmt:v=>Math.round(v)+' ps',play:1},
+ e:v=>{const d=40*(v+50)/600,sc=.32,cx=150,cy=140,ov=eqOv(d,167.6,132);
+  return `<circle cx="${cx}" cy="${cy}" r="${132*sc}" style="fill:var(--s3)" fill-opacity=".25" stroke="var(--s3)"/>`+`<circle cx="${cx+3*d*sc}" cy="${cy}" r="${167.6*sc}" style="fill:none;stroke:var(--s5)" stroke-width="2" stroke-dasharray="5 3"/>`
+   +`<circle cx="${cx}" cy="${cy}" r="2.5" style="fill:var(--s3)"/>`+`<circle cx="${cx+3*d*sc}" cy="${cy}" r="2.5" style="fill:var(--s5)"/>`
+   +T(20,30,TR(`중심 어긋남 d = ${d.toFixed(0)} µm`,`Center offset d = ${d.toFixed(0)} µm`),'lab')+T(20,48,TR(`겹침 = ${(ov*100).toFixed(1)}% (−50 ps 대비)`,`Overlap = ${(ov*100).toFixed(1)}% (relative to −50 ps)`),'lab')
+   +`<circle cx="30" cy="236" r="6" style="fill:var(--s3)" fill-opacity=".25" stroke="var(--s3)"/>`+T(42,240,'probe (w ≈ 132 µm)','sub')+`<circle cx="180" cy="236" r="6" style="fill:none;stroke:var(--s5)" stroke-width="2" stroke-dasharray="3 2"/>`+T(192,240,'pump (w ≈ 168 µm)','sub')+T(20,264,TR('원 = 1/e² 반경. 흐름은 지연에 비례한다고 가정','Circles = 1/e² radius; drift assumed ∝ delay'),'sub')},
+ m:v=>{const f=t=>eqOv(40*(t+50)/600,167.6,132);const P=plot({x:[-50,550],y:[.9,1.01],xt:[0,100,200,300,400,500].map(x=>({v:x,l:String(x)})),yt:[{v:.9,l:'90%'},{v:.95,l:'95%'},{v:1,l:'100%'}],xl:TR('지연 (ps)','delay (ps)'),yl:TR('신호 (상대)','signal (relative)'),L:62,T:30});
+  return P.s+crv(P,f,-50,550,'var(--s5)')+`<circle cx="${P.X(v)}" cy="${P.Y(f(v))}" r="6" style="fill:var(--s5)"/>`+T(P.R,P.T-12,TR('진짜 감쇠가 없어도 신호가 줄어 보인다','The signal appears to drop with no real decay'),'sub','end')+T(P.X(-40),P.Y(.915),TR('끝(+550 ps)에서 약 6.8% 감소','approx. 6.8% lower at the end (+550 ps)'),'sub')},
+ read:[TR('스테이지 축이 빔과 조금이라도 비뚤면, 스테이지가 움직일 때 빔이 옆으로 흐른다. 그러면 시료에서 pump와 probe의 겹침이 지연에 따라 바뀐다.','If the stage axis is even slightly misaligned with the beam, the beam drifts sideways as the stage moves. The pump–probe overlap at the sample then changes with delay.'),TR('겹침이 줄면 신호도 준다. 시료에는 아무 변화가 없어도 "느리게 사라지는 성분"처럼 보일 수 있다.','Less overlap means less signal. Even with no change in the sample, this can look like a "slowly decaying component."'),TR('우리 셋업 예: 600 ps 이동 동안 핀홀 통과 pump가 약 10% 줄었다. 가우시안 빔이 옮겨 갔다고 보면 약 40 µm 어긋남이다. 이 경우 겹침 신호는 끝에서 약 6.8% 준다(논문 3.7). 이 계산은 가정에 기댄 추정이고, 측정한 보정값은 아니다.','Example from our setup: over 600 ps of travel, the pump transmitted through the pinhole dropped by approx. 10%. Treated as a shifted Gaussian beam, this is an offset of approx. 40 µm. In that case the overlap signal drops by approx. 6.8% at the end (thesis 3.7). This calculation is an estimate resting on assumptions, not a measured correction.'),TR('같은 감소를 빔 크기 변화(약 5.7% 커짐)나 레이저·배경 흔들림으로도 설명할 수 있다. 위치와 크기를 따로 보려면 knife-edge로 중심을 직접 따라간다(다음 단계).','The same drop can also be explained by a change in beam size (approx. 5.7% larger) or by laser or background fluctuations. Separating position from size requires tracking the center directly with a knife-edge (next step).'),TR('정리: 10 ps 안쪽의 빠른 변화에는 영향이 거의 없다(이 가정에서 −10 → +10 ps 사이 약 0.04%, −50 → +50 ps 사이 약 0.2%). 수백 ps의 느린 성분을 해석할 때는 이 효과를 먼저 재거나 범위를 정해 둔다.','In summary: fast changes within 10 ps are hardly affected (under this assumption, approx. 0.04% between −10 and +10 ps, approx. 0.2% between −50 and +50 ps). Before slow components of hundreds of ps are interpreted, this effect is measured first or its range is bounded.')],
+ q:TR('지연 스캔에서 느린 감쇠가 보인다. 빔 흐름 때문인지 가리려면?','A slow decay shows up in a delay scan. How can beam walk be identified as the cause or ruled out?'),a:TR('시료 위치에서 pump의 위치·크기·출력을 지연마다 잰다. 겹침 변화만으로 같은 감쇠가 나오면 빔 흐름이 원인일 수 있다.','The pump position, size and power at the sample position are measured at each delay. If the overlap change alone reproduces the same decay, beam walk may be the cause.')},
+{t:TR('빔 크기 재기: 핀홀과 knife-edge','Measuring beam size: pinhole and knife-edge'),ec:TR('핀홀 통과 (반경 a = 50 µm)','Pinhole transmission (radius a = 50 µm)'),mc:TR('knife-edge: 칼날 위치에 따른 통과 출력','Knife-edge: transmitted power vs blade position'),
+ slider:{min:60,max:300,step:1,init:168,label:TR('빔 반경 w (1/e²)','Beam radius w (1/e²)'),fmt:v=>Math.round(v)+' µm'},
+ e:v=>{const a=50,T0=1-Math.exp(-2*a*a/(v*v)),sc=.3,cx=120,cy=140,r0=v*sc*1.25;
+  return `<defs><radialGradient id="eqG"><stop offset="0" stop-color="#c9512f" stop-opacity=".75"/><stop offset="1" stop-color="#c9512f" stop-opacity="0"/></radialGradient></defs>`
+   +`<rect x="${cx-r0}" y="${cy-r0}" width="${2*r0}" height="${2*r0}" fill="url(#eqG)"/><path d="M${cx-v*sc},${cy} a${v*sc},${v*sc} 0 1 0 ${2*v*sc},0 a${v*sc},${v*sc} 0 1 0 ${-2*v*sc},0" style="fill:none;stroke:var(--s1)" stroke-dasharray="4 3"/>`
+   +`<g data-n="1"><path d="M${cx-a*sc},${cy} a${a*sc},${a*sc} 0 1 0 ${2*a*sc},0 a${a*sc},${a*sc} 0 1 0 ${-2*a*sc},0" style="fill:none;stroke:var(--fg)" stroke-width="2.5"/></g>`
+   +`<g data-n="1">${badge(262,92,1,'var(--fg)')}</g>`+T(262,118,TR('핀홀 = 검은 원','Black = pinhole'),'sub','middle')+T(262,170,TR('빔 1/e² = 점선','Dashed = beam 1/e²'),'sub','middle')
+   +T(20,30,`T = 1 − exp(−2a²/w²) = ${T0.toFixed(3)}`,'lab')+T(20,250,TR('거꾸로 T를 재서 w를 구한다. T = 0.163 → w = 168 µm','Measured T gives w: T = 0.163 → w = 168 µm'),'sub')+T(20,266,TR('(우리 pump, 논문 3.3. 중심·원형·가우시안·초점 가정)','(our pump, thesis 3.3; four assumptions, see text)'),'sub')},
+ m:v=>{const P=plot({x:[-400,400],y:[0,1.08],xt:[-400,-200,0,200,400].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:.1,l:'10%'},{v:.9,l:'90%'},{v:1,l:'100%'}],xl:TR('칼날 위치 x (µm)','blade position x (µm)'),yl:TR('통과 출력','transmitted power'),L:58,T:30});
+  const f=x=>.5*eqErfc(Math.SQRT2*x/v),x10=.6408*v;
+  return P.s+`<g data-n="2">${crv(P,f,-400,400,'var(--s2)',{n:400})}${badge(P.X(-360),P.Y(.8),2,'var(--s2)')}</g>`
+   +[[-x10,.9],[x10,.1]].map(([x,y])=>`<line x1="${P.X(x)}" x2="${P.X(x)}" y1="${P.Y(y)}" y2="${P.B}" class="lvl2"/><circle cx="${P.X(x)}" cy="${P.Y(y)}" r="4" style="fill:var(--s2)"/>`).join('')
+   +`<line x1="${P.X(-x10)}" x2="${P.X(x10)}" y1="${P.B-14}" y2="${P.B-14}" style="stroke:var(--fg)" stroke-width="1"/>`+T(P.R,P.T-12,TR(`90%→10% 간격 = 1.28 w = ${(1.2816*v).toFixed(0)} µm`,`90%→10% width = 1.28 w = ${(1.2816*v).toFixed(0)} µm`),'sub','end')},
+ read:[`${c(1,'f')} `+TR('핀홀: 시료 위치에 작은 구멍(여기서 지름 100 µm)을 두고, 통과 출력 / 전체 출력 = T를 잰다. 가우시안이면 T = 1 − exp(−2a²/w²)라 T에서 w를 바로 구한다. 빠르다.','Pinhole: a small hole (here 100 µm in diameter) is placed at the sample position, and T = transmitted power / total power is measured. For a Gaussian beam, T = 1 − exp(−2a²/w²), so w follows directly from T. Fast.'),TR('대신 가정이 넷이다: 빔이 구멍 한가운데, 원형, 가우시안, 초점이 구멍 평면. 중심이 어긋나거나 타원·비가우시안이면 T가 작아져 w를 크게 잡는다.','But it rests on four assumptions: the beam is centered on the hole, round, Gaussian, and focused at the hole plane. If it is off-center, elliptical or non-Gaussian, T comes out smaller and w is overestimated.'),`${c(2,'s2')} `+TR('knife-edge: 칼날을 빔을 가로질러 옮기며 통과 출력을 잰다. 가우시안이면 오차 함수 모양이고, 90%와 10% 위치 사이가 1.28 w다. 슬라이더로 w를 바꾸면 곡선이 가팔라지거나 완만해진다.','Knife-edge: a blade is moved across the beam while the transmitted power is measured. For a Gaussian beam the curve is an error function, and the distance between the 90% and 10% points is 1.28 w. Changing w with the slider makes the curve steeper or gentler.'),TR('knife-edge는 시간이 더 들지만 빔 중심 위치도 함께 나와, 빔 흐름(앞 단계)처럼 위치와 크기를 나눠 봐야 할 때 쓴다.','A knife-edge scan takes longer but also gives the beam center position, so it is used when position and size must be separated, as with beam walk (previous step).'),TR('빔 크기는 보통 1/e² 세기 반경 w로 적는다. 반치폭(FWHM)은 약 1.18 w다. 어느 정의인지 꼭 같이 적는다.','Beam size is usually given as the 1/e² intensity radius w. The full width at half maximum (FWHM) is approx. 1.18 w. The definition used is always stated alongside the value.')],
+ q:TR('핀홀이 빔 중심에서 조금 빗나갔는데 그대로 계산하면?','What happens if the pinhole is slightly off the beam center and the calculation is done as usual?'),a:TR('통과량 T가 실제보다 작게 나와 w가 실제보다 크게 계산된다. 그러면 fluence(단위 면적당 에너지)를 작게 잡게 된다.','T comes out smaller than it really is, so w is calculated larger than it really is. The fluence (energy per unit area) is then underestimated.')},
+{t:TR('건조 공기·질소 퍼지: 공기 속 물과 CO₂를 뺀다','Dry-air / nitrogen purge: removing water and CO₂ from the beam path'),ec:TR('빔 경로 상자에 퍼지 가스','Purge gas in the beam-path enclosure'),mc:TR('공기 중 투과 스펙트럼 (선 위치·세기는 모양만 예시)','Transmission through air (line positions and strengths: shape-only example)'),
+ slider:{min:0,max:10,step:.1,init:0,label:TR('퍼지 시간','Purge time'),fmt:v=>v.toFixed(1)+TR(' 분 (예시)',' min (example)'),play:1},
+ e:v=>{const h=Math.exp(-v/2.5),n=Math.round(30*h);let s=`<rect x="40" y="80" width="240" height="110" rx="6" class="dev"/>`+LN(10,135,310,135,'var(--s1)',{w:2,mk:'s1'});
+  for(let i=0;i<n;i++){const x=56+((i*47)%208),y=94+((i*29)%84);if(Math.abs(y-135)<6)continue;s+=`<circle cx="${x}" cy="${y}" r="3" style="fill:var(--s2)" fill-opacity=".7"/>`}
+  s+=LN(90,44,90,78,'var(--s3)',{w:2,mk:'s3'})+T(100,62,TR('건조 공기 / N₂ 넣음','Dry air / N₂ in'),'sub')+LN(240,192,240,232,'var(--s3)',{w:2,mk:'s3'})+T(232,226,TR('밀려 나감','Pushed out'),'sub','end');
+  return s+T(20,24,TR('남은 수증기 (처음 대비): ','Remaining water vapor (vs start): ')+(h*100).toFixed(0)+'%','lab')+`<circle cx="26" cy="256" r="3" style="fill:var(--s2)" fill-opacity=".7"/>`+T(36,260,TR('= 물 분자 (개수는 예시)','= water molecule (count is an example)'),'sub')},
+ m:v=>{const h=Math.exp(-v/2.5),P=plot({x:[4000,1200],y:[0,1.05],xt:[4000,3000,2000,1200].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'wavenumber (cm⁻¹)',yl:TR('투과율','transmission'),T:30});
+  return P.s+crv(P,w=>eqAbs(w,h,h),4000,1200,'var(--fg)',{n:1400,w:1.2})+T(P.X(1650),P.T-8,TR('물 굽힘','H₂O bend'),'sub','middle')+T(P.X(2350),P.T-8,'CO₂','sub','middle')+T(P.X(3730),P.T-8,TR('물 신축','H₂O stretch'),'sub','middle')},
+ read:[TR('공기 중 수증기는 중적외선에 가는 흡수선이 빽빽하다(대략 1400–1900 cm⁻¹ 굽힘, 3500–3900 cm⁻¹ 신축). CO₂는 약 2350 cm⁻¹에 센 띠가 있다.','Water vapor in air has dense, narrow absorption lines in the mid-IR (approx. 1400–1900 cm⁻¹ bending, 3500–3900 cm⁻¹ stretching). CO₂ has a strong band near 2350 cm⁻¹.'),TR('이 선들이 빔 경로에 있으면 스펙트럼에 겹쳐 나온다. 습도가 바뀌면 같이 바뀌어 pump-probe 신호나 FTIR 배경 나눗셈을 흔든다.','When these lines lie in the beam path, they show up on top of the spectrum. They change with humidity and disturb the pump-probe signal and the FTIR background division.'),TR('빔 경로를 상자로 덮고 건조 공기나 질소(N₂)를 흘려 공기를 밀어낸다. 재생을 누르면 시간이 지나며 흡수선이 얕아진다(속도는 예시).','The beam path is enclosed in a box and flushed with dry air or nitrogen (N₂) to push the air out. With Play, the absorption lines become shallower over time (the rate is an example).'),TR('건조 공기 장치가 CO₂까지 빼는지는 장치마다 다르다(확인 필요). N₂는 둘 다 뺀다.','Whether a dry-air unit also removes CO₂ depends on the unit (to be verified). N₂ removes both.'),TR('퍼지는 상자를 열면 바로 깨진다. 정렬 뒤 다시 충분히 기다리고 측정한다. FTIR 배경 문제는 <a href="lab-techniques.html">측정 기법 노트</a> FTIR 탭과 같은 이야기다.','Opening the box breaks the purge at once. After alignment, the measurement waits again until the purge has settled. The FTIR background problem is the same story as in the FTIR tab of the <a href="lab-techniques.html">lab techniques note</a>.')],
+ q:TR('퍼지 상자를 연 직후 측정한 pump-probe 스펙트럼에 1600 cm⁻¹ 근처 가는 줄무늬가 생겼다. 왜?','A pump-probe spectrum measured right after the purge box was opened shows narrow stripes near 1600 cm⁻¹. Why?'),a:TR('공기 중 수증기가 다시 들어와 probe 스펙트럼에 흡수선이 생겼다. 퍼지가 다시 안정될 때까지 기다린다.','Water vapor from the room air came back in and added absorption lines to the probe spectrum. The measurement waits until the purge is stable again.')},
+{t:TR('안전: LN₂ 1 L는 기체 약 700 L','Safety: 1 L of LN₂ becomes approx. 700 L of gas'),ec:TR('작은 방에 LN₂를 쏟으면 (3 × 3 × 2.5 m, 예시. 파란 높이 = N₂로 바뀐 부피 비율)','LN₂ spilled in a small room (3 × 3 × 2.5 m, example; blue height = fraction of volume replaced by N₂)'),mc:TR('방 안 산소 농도 (가정)','Oxygen concentration in the room (assumed)'),
+ slider:{min:0,max:20,step:.5,init:5,label:TR('쏟은 LN₂','LN₂ spilled'),fmt:v=>v.toFixed(1)+' L'},
+ e:v=>{const V=.7*v,frac=Math.min(1,V/22.5),y0=230,H=160;
+  return `<rect x="40" y="${y0-H}" width="200" height="${H}" style="fill:none;stroke:var(--fg)" stroke-width="2"/>`+`<rect x="41" y="${y0-H*frac}" width="198" height="${H*frac}" style="fill:var(--s2)" fill-opacity=".2"/>`
+   +`<rect x="256" y="170" width="30" height="60" rx="6" class="dev"/>`+T(271,248,TR('듀어','Dewar'),'sub','middle')
+   +T(20,30,TR(`${v.toFixed(1)} L × 700 = 기체 약 ${(V*1000).toFixed(0)} L`,`${v.toFixed(1)} L × 700 = approx. ${(V*1000).toFixed(0)} L of gas`),'lab')+T(20,48,TR(`방 22 500 L 중 ${(frac*100).toFixed(0)}%가 N₂로 바뀜`,`${(frac*100).toFixed(0)}% of the 22 500 L room is now N₂`),'lab')
+   +(frac>.08?T(140,y0-H*frac/2+4,TR('새로 생긴 N₂','Added N₂'),'sub','middle'):'')+T(20,266,TR('고루 섞인다고 가정 (실제로는 찬 기체가 바닥에 먼저 고인다)','Even mixing assumed (cold gas actually pools low)'),'sub')},
+ m:v=>{const o=L=>20.9*(1-Math.min(1,.7*L/22.5));const P=plot({x:[0,20],y:[5,22],xt:[0,5,10,15,20].map(x=>({v:x,l:x+' L'})),yt:[{v:10,l:'10%'},{v:15,l:'15%'},{v:20.9,l:'21%'}],xl:TR('쏟은 LN₂','LN₂ spilled'),yl:TR('산소 농도','oxygen concentration'),L:58,T:30});
+  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(19.5)}" y2="${P.Y(19.5)}" class="lvl2" style="stroke:var(--s1)"/>`+T(P.R,P.T-12,TR('빨간 점선 19.5% = 흔히 쓰는 산소 결핍 기준 (확인 필요)','Red 19.5%: common low-O₂ limit (to be verified)'),'sub','end')
+   +crv(P,o,0,20,'var(--s2)')+`<circle cx="${P.X(v)}" cy="${P.Y(o(v))}" r="6" style="fill:var(--s2)"/>`+T(P.X(v)+(v>14?-10:10),P.Y(o(v))+(v>14?18:-10),o(v).toFixed(1)+'%','labn',v>14?'end':'start')},
+ read:[TR('LN₂는 끓는점 77 K(−196 °C)의 액체다. 독성은 없지만 1 L가 기체 약 700 L가 된다(논문 A.4.3).','LN₂ is a liquid that boils at 77 K (−196 °C). It is not toxic, but 1 L becomes approx. 700 L of gas (thesis A.4.3).'),TR('세어 보기: 3 × 3 × 2.5 m 방은 22 500 L다. 10 L 듀어를 쏟으면 N₂ 7000 L가 생겨 방 공기의 약 3분의 1을 밀어낸다. 산소는 21%에서 약 14%로 떨어진다(고루 섞인다는 가정).','Counting it out: a 3 × 3 × 2.5 m room holds 22 500 L. Spilling a 10 L dewar produces 7000 L of N₂, displacing approx. one third of the room air. Oxygen falls from 21% to approx. 14% (assuming even mixing).'),TR('산소가 모자라도 숨이 차다는 느낌 없이 의식을 잃을 수 있다. 작은 방, 환기가 약한 곳에서는 산소 경보기와 환기를 확인한다(기준 농도와 우리 실험실 설비는 확인 필요).','Oxygen deficiency can cause loss of consciousness without any feeling of breathlessness. In small or poorly ventilated rooms, oxygen alarms and ventilation are checked (the threshold concentration and our lab facilities are to be verified).'),TR('액체에 닿으면 동상을 입는다. 듀어를 채울 때 저온 장갑과 보안경을 쓴다.','Contact with the liquid causes frostbite. Cryogenic gloves and safety glasses are worn when filling a dewar.'),TR('레이저 보안경은 OD(광학 밀도)로 고른다. OD 4 = 투과 10⁻⁴다. 1 W 빔이면 100 µW가 지나온다. OD는 파장마다 다르니 쓰는 파장(800 nm, 중적외선 등)에서의 OD를 확인한다(우리 보안경 규격은 확인 필요).','Laser safety eyewear is chosen by OD (optical density). OD 4 = transmission 10⁻⁴: with a 1 W beam, 100 µW gets through. OD depends on wavelength, so the OD at the wavelength in use (800 nm, mid-IR, etc.) is what matters (the rating of our eyewear is to be verified).')],
+ q:TR('OD 3 보안경으로 평균 2 W 빔을 직접 맞으면 눈에 들어오는 출력은?','With OD 3 eyewear, how much power reaches the eye from a direct hit by a beam of 2 W average power?'),a:TR('2 W × 10⁻³ = 2 mW. 직접 보기에 안전한 수준이 아니다. 파장에 맞는 충분한 OD를 쓰고, 애초에 빔 높이에 눈을 두지 않는다.','2 W × 10⁻³ = 2 mW. This is not a safe level for direct viewing. Eyewear with enough OD at the wavelength is used, and the eyes are never brought to beam height in the first place.')}];
+
+const TABS=[{id:'eq',name:TR('기초 장비','Basic equipment'),sub:TR('테이블·정렬·측정·안전','Table · alignment · measurement · safety'),desc:TR('광학 테이블, 두 거울 정렬, 파워미터와 에너지미터, 편광자 감쇠, 지연 스테이지와 빔 흐름, 빔 크기, 퍼지, LN₂·레이저 안전. 값은 대략이고, 우리 셋업 값은 논문에서 가져왔다.','Optical table, two-mirror alignment, power and energy meters, polarizer attenuation, delay stage and beam walk, beam size, purge, LN₂ and laser safety. Values are approximate; values for our setup come from the thesis.'),steps:EQ},{id:'ups',name:TR('UPS · 정전','UPS · outages'),sub:TR('전원이 끊길 때','When the power goes out'),desc:TR('UPS 종류, 용량 계산, 무엇을 물릴지, 정전·복전 때 순서, 정기 점검. 일반 원리만 다루며, 실제 순서는 장비 설명서와 연구실 규정을 따른다.','UPS types, sizing, what to connect, order of steps during an outage and when power returns, regular checks. General principles only; actual procedures follow the equipment manuals and lab rules.'),steps:UPS}];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>

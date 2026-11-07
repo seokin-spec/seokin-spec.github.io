@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Detection and Spectrometer Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · detection and spectrometers</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../detection.html" href="../detection.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 검출과 분광기 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 검출과 분광기
+// @status 검토 중
+// @lang ko en
+// @title.en Detection and Spectrometer Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · detection and spectrometers
+// @status.en Under review
+/* 검출과 분광기 노트: 모노크로메이터(Czerny-Turner), 검출기(MCT·CCD·PMT), Boxcar 적분기.
+   빛이 들어오는 순서대로: 분광기가 파장을 고르고 → 검출기가 광자를 전자로 바꾸고 → boxcar가 샷마다 숫자 하나로 만든다. */
+const NOTE={key:'detection'};
+
+/* ---------- 공통 헬퍼 (mo = 모노크로메이터, dt = 검출기) ---------- */
+/* 파장(nm) → 보기용 색. 700 nm 넘으면 어두운 빨강 (근적외선, 실제로는 안 보임) */
+const moCol=l=>l>700?'hsl(0,55%,36%)':`hsl(${Math.round(Math.max(0,Math.min(270,270*(1-(l-400)/300))))},72%,40%)`;
+const moGauss=(x,x0,w)=>Math.exp(-(((x-x0)/w)**2)*2.77);
+const moTri=(x,x0,w)=>Math.max(0,1-Math.abs(x-x0)/w);
+/* 오목거울: 빛이 아래에서 오므로 오목한 면(가장자리가 내려온 쪽)이 아래를 향한다 */
+const moMir=(x,y)=>`<path d="M${x-28},${y+6} Q${x},${y-10} ${x+28},${y+6}" style="fill:none;stroke:var(--fg)" stroke-width="2.5"/>`;
+/* Czerny-Turner 광로. o.cols = [[λ nm, 위치 오프셋 -1..1], ...], o.exit = 'slit' | 'array', o.rot = 격자 회전(°), o.num = 번호 배지 */
+function moCT(o={}){const cols=o.cols||[[550,0]],rot=o.rot??0;
+ let s=LN(46,252,56,252,'var(--fg)',{w:3})+LN(64,252,74,252,'var(--fg)',{w:3});
+ /* 광선이 돌아간 격자 면(중심 160,190, 양쪽 16) 위에서 끝나게 한다. 들어오고 나가는 빛은 각각 평행광을 유지한다 */
+ const ur=rot*Math.PI/180,h1x=160-16*Math.cos(ur),h1y=190-16*Math.sin(ur),h2x=160+16*Math.cos(ur),h2y=190+16*Math.sin(ur),m1=h1x-(h1y-54)*70/136,m2=h2x-(h2y-54)*70/136;
+ s+=LN(60,252,m1,54,'var(--pump)',{w:1})+LN(60,252,m2,54,'var(--pump)',{w:1})+LN(m1,54,h1x,h1y,'var(--pump)',{w:1})+LN(m2,54,h2x,h2y,'var(--pump)',{w:1});
+ cols.forEach(([l,k])=>{const col=moCol(l),g=7*k+70,a=h1x+(h1y-54)*g/136,b=h2x+(h2y-54)*g/136,f=262+22*k;
+  s+=LN(h1x,h1y,a,54,col,{w:1.3})+LN(h2x,h2y,b,54,col,{w:1.3})+LN(a,54,f,250,col,{w:1.3})+LN(b,54,f,250,col,{w:1.3})});
+ s+=moMir(90,52)+moMir(230,52)+`<rect x="138" y="186" width="44" height="8" class="dev" transform="rotate(${rot} 160 190)"/>`;
+ if(o.exit==='array'){s+=Array.from({length:12},(_,i)=>`<rect x="${222+i*7}" y="252" width="6" height="10" style="fill:var(--s3)" fill-opacity="${.25+.06*(i%3)}" stroke="var(--s3)" stroke-width=".6"/>`).join('')}
+ else s+=`<line x1="222" x2="302" y1="252" y2="252" class="lvl2"/>`+LN(242,252,256,252,'var(--fg)',{w:3})+LN(268,252,282,252,'var(--fg)',{w:3});
+ s+=T(60,272,TR('입구 슬릿','entrance slit'),'sub','middle')+T(90,24,TR('거울 1','mirror 1'),'sub','middle')+T(160,222,TR('회절격자','grating'),'sub','middle')+T(230,24,TR('거울 2','mirror 2'),'sub','middle')+T(262,276,o.exit==='array'?TR('배열 검출기','array detector'):TR('출구 슬릿','exit slit'),'sub','middle');
+ if(o.num){const B=(x,y,n)=>`<g data-n="${n}">${badge(x,y,n,'var(--fg)')}</g>`;s+=B(30,252,1)+B(54,36,2)+B(196,202,3)+B(270,36,4)+B(298,236,5)}
+ return s}
+/* 격자 방정식: d = 1/(gr/mm) */
+const MO_D=1e6/1200; /* 1200 gr/mm → d ≈ 833 nm (3단계 격자 회전) */
+/* 1단계·7단계 격자 그림: 600 gr/mm, 입사각 α = 50° (오른쪽에서 들어옴).
+   β는 법선의 입사 반대쪽(왼쪽)에서 잰다: m λ = d (sin α − sin β). β = α면 0차(거울 반사). */
+const MO_D1=1e6/600,MO_AL=50*Math.PI/180;
+const moBeta=(l,m=1)=>Math.asin(Math.sin(MO_AL)-m*l/MO_D1);
+function moGr(cx,cy,R,inLab){const al=MO_AL;
+ return `<line x1="40" x2="280" y1="${cy}" y2="${cy}" class="lvl"/>`+Array.from({length:24},(_,i)=>`<path d="M${40+i*10},${cy} l8,6 l2,-6" fill="none" style="stroke:var(--muted)" stroke-width=".8"/>`).join('')
+  +`<line x1="${cx}" x2="${cx}" y1="${cy}" y2="${cy-R-8}" class="lvl2"/>`+T(cx,cy-R-14,TR('법선','normal'),'sub','middle')
+  +LN(cx+R*Math.sin(al),cy-R*Math.cos(al),cx+4,cy-4,'var(--pump)',{w:2,mk:'g'})+T(cx+R*Math.sin(al)+4,cy-R*Math.cos(al)-8,inLab,'sub','end')
+  +LN(cx,cy,cx-.7*R*Math.sin(al),cy-.7*R*Math.cos(al),'var(--pump)',{w:1.2,dash:1})+T(cx-.7*R*Math.sin(al)-4,cy-.7*R*Math.cos(al)+4,TR('0차','0th order'),'sub','end')+T(cx-.7*R*Math.sin(al)-4,cy-.7*R*Math.cos(al)+18,TR('(거울 반사)','(specular)'),'sub','end')
+  +`<path d="M${cx},${cy-34} A34,34 0 0 1 ${cx+34*Math.sin(al)},${cy-34*Math.cos(al)}" fill="none" style="stroke:var(--muted)"/>`+T(cx+16,cy-40,'α','sub')}
+
+/* ======================= 모노크로메이터 (Czerny-Turner) ======================= */
+const MO=[
+{t:TR('회절격자: 파장마다 꺾이는 각도가 다르다','Diffraction grating: each wavelength leaves at a different angle'),ec:TR('격자에 들어오고 나가는 빛 (600 gr/mm, α = 50°)','Light entering and leaving the grating (600 gr/mm, α = 50°)'),mc:TR('회절각 β vs 파장','Diffraction angle β vs wavelength'),
+ slider:{min:400,max:900,step:10,init:550,label:TR('파장 λ','Wavelength λ'),fmt:v=>Math.round(v)+' nm'},
+ e:v=>{const R=140,cx=160,cy=210,b=moBeta(v);
+  let s=moGr(cx,cy,R,TR('들어오는 빛 (백색)','incoming light (white)'));
+  [400,650,900].forEach(l=>{const bb=moBeta(l);s+=LN(cx,cy,cx-(R-10)*Math.sin(bb),cy-(R-10)*Math.cos(bb),moCol(l),{w:1})});
+  s+=LN(cx,cy,cx-R*Math.sin(b),cy-R*Math.cos(b),moCol(v),{w:3})+T(cx-R*Math.sin(b)-4,cy-R*Math.cos(b)-6,Math.round(v)+' nm','sub','end',moCol(v))
+   +`<path d="M${cx},${cy-56} A56,56 0 0 0 ${cx-56*Math.sin(b)},${cy-56*Math.cos(b)}" fill="none" style="stroke:${moCol(v)}"/>`+T(cx-72*Math.sin(.09),cy-72*Math.cos(.09)+4,'β','sub','end',moCol(v));
+  s+=T(20,250,TR(`1차 회절: λ = ${Math.round(v)} nm → β = ${(b*180/Math.PI).toFixed(1)}°`,`1st order: λ = ${Math.round(v)} nm → β = ${(b*180/Math.PI).toFixed(1)}°`),'lab')+T(20,268,TR('얇은 선 = 400, 650, 900 nm 위치','thin lines = 400, 650, 900 nm'),'sub')+T(282,228,TR('격자 홈','grooves'),'sub','end');
+  return s},
+ m:v=>{const bt=l=>moBeta(l)*180/Math.PI;
+  const P=plot({x:[400,900],y:[0,50],xt:[400,500,600,700,800,900].map(x=>({v:x,l:String(x)})),yt:[0,10,20,30,40,50].map(y=>({v:y,l:y+'°'})),xl:'wavelength λ (nm)',yl:TR('회절각 β (°)','diffraction angle β (°)'),T:30});
+  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(50)}" y2="${P.Y(50)}" class="lvl2"/>`+T(P.R,P.Y(50)+14,TR('0차 (β = α = 50°)','0th order (β = α = 50°)'),'sub','end')+crv(P,bt,400,900,'var(--fg)')+`<circle cx="${P.X(v)}" cy="${P.Y(bt(v))}" r="6" style="fill:${moCol(v)}"/>`+T(P.L+8,P.T-10,'m λ = d (sin α − sin β), m = 1','lab')},
+ read:[TR('격자는 아주 촘촘한 홈(여기서는 1 mm에 600개, 홈 간격 d ≈ 1667 nm)이 새겨진 거울이다.','A grating is a mirror ruled with very fine grooves (here 600 per mm, groove spacing d ≈ 1667 nm).'),TR('홈마다 반사된 빛이 서로 간섭한다. 이웃 홈에서 온 빛의 길이 차이 d (sin α − sin β)가 파장의 정수배(m λ)가 되는 방향에서만 세게 더해진다. 이게 격자 방정식이다.','Light reflected from each groove interferes. It adds up strongly only in directions where the path difference between neighbouring grooves, d (sin α − sin β), is an integer number of wavelengths (m λ). This is the grating equation.'),TR('여기서 β는 법선의 입사 반대쪽에서 잰 각이다. 책마다 부호 약속이 달라 m λ = d (sin α + sin β)로 쓰고 β를 음수로 두기도 한다. 내용은 같다.','Here β is measured on the side of the normal opposite to the incident beam. Sign conventions differ between textbooks; some write m λ = d (sin α + sin β) with a negative β. The content is the same.'),TR('0차(m = 0)는 길이 차이가 0인 방향, 곧 β = α인 거울 반사다. 파장과 상관없어 색이 나뉘지 않는다.','Zeroth order (m = 0) is the direction with zero path difference, that is β = α, specular reflection. It does not depend on wavelength, so the colours do not separate.'),TR('1차에서는 파장이 길수록 β가 작아진다. 거울 반사 방향에서 더 멀리 꺾이는 셈이다. 그래서 백색광이 각도로 펼쳐진다. 슬라이더로 λ를 바꾸면 굵은 선이 움직인다.','In first order, a longer wavelength gives a smaller β, so it is bent further away from the specular direction. White light therefore fans out in angle. Changing λ with the slider moves the thick line.'),TR('홈이 더 촘촘하면(d가 작으면) 같은 파장 차이가 더 큰 각도 차이로 벌어진다.','With denser grooves (smaller d), the same wavelength difference spreads into a larger angle difference.')],
+ q:TR('1200 gr/mm 격자로 바꾸면 d와 각도 퍼짐은?','With a 1200 gr/mm grating, what happens to d and to the angular spread?'),a:TR('d가 약 833 nm로 절반이 되고, 같은 파장 차이에 대한 각도 차이는 대략 2배가 된다.','d halves to about 833 nm, and the angle difference for the same wavelength difference roughly doubles.')},
+{t:TR('Czerny-Turner 배치: 거울 둘, 격자 하나, 슬릿 둘','Czerny-Turner layout: two mirrors, one grating, two slits'),ec:TR('광로 (위에서 본 그림, 보기 쉽게 단순화)','Optical path (top view, simplified for clarity)'),mc:TR('출구 평면에서 본 빛','Light at the exit plane'),
+ e:()=>moCT({cols:[[450,-1],[550,0],[650,1]],num:1}),
+ m:()=>{const P=plot({x:[-6,6],y:[0,1.15],xt:[{v:-4,l:'−4'},{v:0,l:'0'},{v:4,l:'+4'}],xl:TR('출구 평면 위치 (mm, 예시)','position on exit plane (mm, example)'),L:30,noy:1,T:34});
+  let s=P.s+`<g data-n="5"><rect x="${P.X(-.5)}" y="${P.T}" width="${P.X(.5)-P.X(-.5)}" height="${P.B-P.T}" style="fill:var(--s4)" fill-opacity=".18"/>${badge(P.X(0),P.T-12,5,'var(--fg)')}</g>`;
+  [[450,-4],[550,0],[650,4]].forEach(([l,x])=>{s+=crv(P,u=>moGauss(u,x,.8),x-2,x+2,moCol(l))+T(P.X(x),P.Y(1.06),l+' nm','sub','middle',moCol(l))});
+  return s+T(P.X(0)+14,P.T-8,TR('출구 슬릿 (나머지는 막힘)','exit slit (rest blocked)'),'sub')},
+ read:[TR(`${c(1,'f')} 입구 슬릿이 좁은 광원 역할을 한다.`,`${c(1,'f')} The entrance slit acts as a narrow light source.`),TR(`${c(2,'f')} 오목거울 1이 퍼지는 빛을 평행광으로 만든다.`,`${c(2,'f')} Concave mirror 1 turns the diverging light into a collimated beam.`),TR(`${c(3,'f')} 격자가 파장마다 다른 각도로 보낸다(1단계).`,`${c(3,'f')} The grating sends each wavelength at a different angle (step 1).`),TR(`${c(4,'f')} 오목거울 2가 평행광을 다시 모으는데, 각도가 다르니 파장마다 출구 평면의 다른 위치에 초점이 맺힌다.`,`${c(4,'f')} Concave mirror 2 refocuses the collimated light. Because the angles differ, each wavelength comes to a focus at a different position on the exit plane.`),TR(`${c(5,'f')} 출구 슬릿은 그중 한 좁은 띠만 통과시킨다. "한 색만 고른다"는 뜻의 monochromator다.`,`${c(5,'f')} The exit slit passes only one narrow band of it. This is the monochromator: it "selects one colour".`),TR('거울 두 개를 대칭으로 놓으면 한 거울이 만드는 수차(코마)를 다른 거울이 일부 상쇄한다(확인 필요). 실제 장치는 각도가 더 작고, 그림의 광선 간격은 보기 쉽게 과장했다.','With the two mirrors placed symmetrically, the aberration (coma) of one mirror is partly cancelled by the other (to be verified). Real instruments use smaller angles, and the ray spacing in the figure is exaggerated for clarity.')],
+ q:TR('출구 슬릿을 빼면 어떤 장치가 되나?','What does the instrument become without the exit slit?'),a:TR('출구 평면 전체에 스펙트럼이 펼쳐진다. 거기에 배열 검출기를 두면 여러 파장을 한 번에 찍는 분광기(spectrograph)가 된다(6단계).','The spectrum spreads over the whole exit plane. An array detector placed there turns it into a spectrograph that records many wavelengths at once (step 6).')},
+{t:TR('격자를 돌리면 출구 파장이 바뀐다','Rotating the grating changes the exit wavelength'),ec:TR('격자 회전 (위에서 본 그림, 광로 각도는 보기 쉽게 과장)','Grating rotation (top view, path angles exaggerated for clarity)'),mc:TR('광원 스펙트럼 위의 통과 대역','Passband on the source spectrum'),
+ slider:{min:13,max:34,step:.5,init:20,label:TR('격자 각도 θ','Grating angle θ'),fmt:v=>v.toFixed(1)+'°',play:1},
+ e:v=>{const l=2*MO_D*Math.cos(15*Math.PI/180)*Math.sin(v*Math.PI/180),r=v*Math.PI/180;
+  /* θ = 0이면 격자 법선이 세로 점선(입사·회절 방향의 가운데선)과 겹쳐 거울(0차)처럼 된다. 법선이 출구 쪽으로 θ만큼 돈다 */
+  const nrm=`<line x1="160" y1="186" x2="160" y2="132" class="lvl2"/>`+LN(160,186,160+54*Math.sin(r),186-54*Math.cos(r),'var(--fg)',{w:1.2,dash:1})
+   +`<path d="M160,${186-40} A40,40 0 0 1 ${160+40*Math.sin(r)},${186-40*Math.cos(r)}" fill="none" style="stroke:var(--muted)"/>`;
+  return moCT({cols:[[l,0]],rot:v})+nrm+T(96,244,TR(`법선 회전 θ = ${v.toFixed(1)}°`,`normal rotated θ = ${v.toFixed(1)}°`),'lab')+T(96,262,TR(`출구 λ ≈ ${Math.round(l)} nm`,`exit λ ≈ ${Math.round(l)} nm`),'lab','start',moCol(l))},
+ m:v=>{const l=2*MO_D*Math.cos(15*Math.PI/180)*Math.sin(v*Math.PI/180),src=x=>Math.min(1,.15+.85*Math.exp(-(((x-750)/320)**2)));
+  const P=plot({x:[350,950],y:[0,1.15],xt:[400,500,600,700,800,900].map(x=>({v:x,l:String(x)})),xl:'wavelength λ (nm)',yl:TR('세기 (상대)','intensity (relative)'),T:30});
+  return P.s+crv(P,src,350,950,'var(--s6)',{dash:1})+`<rect x="${P.X(l-6)}" y="${P.Y(src(l))}" width="${Math.max(2,P.X(l+6)-P.X(l-6))}" height="${P.B-P.Y(src(l))}" style="fill:${moCol(l)}" fill-opacity=".8"/>`
+   +T(P.R,P.T-12,TR('점선 = 할로젠 램프 (예시)','dashed = halogen lamp (example)'),'sub','end')+T(P.X(l),P.Y(1.1),Math.round(l)+' nm','sub','middle')},
+ read:[TR('Czerny-Turner에서는 입구와 출구 방향이 고정되어 있고 격자만 돈다. 격자를 돌리면 α와 β가 함께 바뀌고 출구 슬릿에 오는 파장이 바뀐다.','In a Czerny-Turner, the entrance and exit directions are fixed and only the grating rotates. Rotating it changes α and β together, and with them the wavelength that reaches the exit slit.'),TR('입사와 회절 사이 각도(편향각)가 고정이면 λ = (2d/m) cos K sin θ 꼴이 된다. K = 편향각의 절반, θ = 격자 회전각이다(여기서는 K = 15° 가정). θ는 격자 법선(진한 점선)이 입사·회절 방향의 가운데선(옅은 세로 점선)에서 돌아간 각이다. θ = 0이면 격자가 거울처럼 0차만 보낸다.','With a fixed angle between incidence and diffraction (deviation angle), λ = (2d/m) cos K sin θ, where K = half the deviation angle and θ = grating rotation angle (here K = 15°, assumed). θ is the angle by which the grating normal (dark dashed line) has turned away from the bisector of the incident and diffracted directions (faint vertical dashed line). At θ = 0 the grating acts as a mirror and sends only zeroth order.'),TR('재생을 누르면 격자가 돌며 통과 대역이 광원 스펙트럼 위를 훑는다. 출구 뒤에 PMT 같은 단일 검출기를 두고 값을 기록하면 파장 스캔이 된다.','With Play, the grating rotates and the passband sweeps across the source spectrum. A single detector such as a PMT behind the exit slit, recording as it goes, gives a wavelength scan.'),TR('그래서 모노크로메이터 + 단일 검출기는 "한 번에 한 파장"이다. 넓은 범위를 찍으려면 시간이 걸린다.','A monochromator plus a single detector is therefore "one wavelength at a time". Covering a wide range takes time.')],
+ q:TR('파장 스캔 중 광원 세기가 흔들리면 어떻게 되나?','What happens if the source intensity fluctuates during a wavelength scan?'),a:TR('스펙트럼에 그대로 섞인다. 한 파장씩 다른 시간에 재기 때문이다. 그래서 기준 검출기로 광원을 같이 재서 나누거나 이중 빔 배치를 쓴다.','The fluctuation goes straight into the spectrum, because each wavelength is measured at a different time. For this reason the source is measured at the same time with a reference detector and divided out, or a double-beam layout is used.')},
+{t:TR('슬릿 폭과 분해능은 맞바꾼다','Slit width trades against resolution'),ec:TR('출구 평면의 슬릿 상 (Hg 노란 두 줄)','Slit images on the exit plane (Hg yellow doublet)'),mc:TR('측정 스펙트럼 (역선형 분산 2.5 nm/mm 예시)','Measured spectrum (reciprocal linear dispersion 2.5 nm/mm, example)'),
+ slider:{min:50,max:1000,step:10,init:200,label:TR('슬릿 폭','Slit width'),fmt:v=>Math.round(v)+' µm'},
+ e:v=>{const D=2.5,sc=100,w=v/1000*sc,sep=2.1/D*sc,x1=120,x2=x1+sep;
+  let s=T(20,30,TR(`통과 대역 ≈ 슬릿 폭 × 역선형 분산`,`passband ≈ slit width × reciprocal dispersion`),'lab')+T(20,48,`= ${(v/1000).toFixed(2)} mm × 2.5 nm/mm = ${(v/1000*D).toFixed(2)} nm`,'lab');
+  s+=T(20,72,v/1000*D<2.1?TR('→ 두 줄이 갈라져 보인다','→ the two lines are resolved'):TR('→ 두 줄이 한 덩어리로 뭉친다','→ the two lines merge into one'),'labn')+`<line x1="20" x2="300" y1="200" y2="200" class="lvl2"/>`+T(20,218,TR('출구 평면','exit plane'),'sub');
+  s+=`<g data-n="1"><rect x="${x1-w/2}" y="110" width="${w}" height="80" style="fill:var(--s4)" fill-opacity=".45"/>${badge(x1,98,1,'var(--s4)')}</g>`;
+  s+=`<g data-n="2"><rect x="${x2-w/2}" y="110" width="${w}" height="80" style="fill:var(--s5)" fill-opacity=".45"/>${badge(x2,98,2,'var(--s5)')}</g>`;
+  s+=LN(x1,236,x2,236,'var(--muted)',{w:1})+T((x1+x2)/2,252,TR('두 줄 간격 2.1 nm = 0.84 mm','line spacing 2.1 nm = 0.84 mm'),'sub','middle')+T(20,272,TR('막대 폭 = 입구 슬릿의 상 (슬릿 폭과 같음, 배율 1 가정)','bar width = slit image (= slit width, 1:1 assumed)'),'sub');
+  return s},
+ m:v=>{const bp=v/1000*2.5,h=v/1000;const P=plot({x:[572,584],y:[0,1.15],xt:[574,576,578,580,582].map(x=>({v:x,l:String(x)})),xl:'wavelength λ (nm)',yl:TR('세기 (상대, 같은 축)','intensity (rel., same axis)'),T:30});
+  const f=x=>h*(moTri(x,577.0,bp)+moTri(x,579.1,bp));
+  return P.s+crv(P,f,572,584,'var(--fg)',{n:600})+crv(P,x=>h*moTri(x,577.0,bp),572,584,'var(--s4)',{n:600,dash:1,w:1.2})+crv(P,x=>h*moTri(x,579.1,bp),572,584,'var(--s5)',{n:600,dash:1,w:1.2})
+   +`<g data-n="1">${badge(P.X(577),P.Y(Math.max(f(577),h))-16,1,'var(--s4)')}</g><g data-n="2">${badge(P.X(579.1),P.Y(Math.max(f(579.1),h))-16,2,'var(--s5)')}</g>`
+   },
+ read:[TR('출구에서 옆으로 1 mm 갈 때 파장이 얼마나 바뀌는지를 역선형 분산(nm/mm)이라 한다. 여기서는 2.5 nm/mm로 가정했다(초점거리 약 300 mm, 1200 gr/mm 근처의 대략값, 확인 필요).','The change in wavelength per 1 mm sideways at the exit is the reciprocal linear dispersion (nm/mm). Here it is assumed to be 2.5 nm/mm (approx. value for a focal length of about 300 mm near 1200 gr/mm, to be verified).'),TR(`입구 슬릿의 상이 출구 평면에 맺힌다. 파장이 다른 ${c(1,'s4')} 577.0 nm와 ${c(2,'s5')} 579.1 nm는 0.84 mm 떨어진 두 막대가 된다.`,`The image of the entrance slit forms on the exit plane. The two wavelengths ${c(1,'s4')} 577.0 nm and ${c(2,'s5')} 579.1 nm become two bars 0.84 mm apart.`),TR('슬릿을 넓히면 막대가 넓어져 서로 겹친다. 통과 대역이 두 줄 간격(2.1 nm)보다 넓어지면 한 봉우리로 뭉친다.','Widening the slit widens the bars until they overlap. Once the passband is wider than the line spacing (2.1 nm), the two lines merge into one peak.'),TR('대신 슬릿이 넓을수록 빛이 많이 들어온다. 오른쪽 그림은 같은 축이라 슬릿을 넓히면 봉우리가 높아진다. 분해능과 신호를 맞바꾸는 셈이다.','In exchange, a wider slit lets in more light. The right panel keeps the same axis, so widening the slit raises the peaks. Resolution is traded for signal.'),TR('분산을 키우려면 초점거리를 늘리거나 홈이 더 촘촘한 격자를 쓴다.','Dispersion increases with a longer focal length or a grating with denser grooves.')],
+ q:TR('슬릿 50 µm, 역선형 분산 4 nm/mm면 통과 대역은?','Slit 50 µm, reciprocal linear dispersion 4 nm/mm: what is the passband?'),a:'0.05 mm × 4 nm/mm = 0.2 nm.'},
+{t:TR('홈 개수와 blaze: 효율이 높은 파장을 고른다','Groove density and blaze: choosing the high-efficiency wavelength'),ec:TR('격자 단면 (톱니 홈)','Grating cross-section (sawtooth grooves)'),mc:TR('회절 효율 (예시)','Diffraction efficiency (example)'),
+ slider:{min:0,max:2,step:1,init:0,label:TR('격자','Grating'),fmt:v=>['1200 gr/mm · 500 nm','600 gr/mm · 1 µm','150 gr/mm · 4 µm'][Math.round(v)]},
+ e:v=>{const i=Math.round(v),p=[16,32,128][i],th=17.5*Math.PI/180,x0=30,x1=290,y=170;let d=`M${x0},${y}`;
+  let x=x0;for(;x+p<=x1;x+=p){const h=p*Math.cos(th)*Math.sin(th);d+=` L${x+p*Math.cos(th)**2},${y-h} L${x+p},${y}`}
+  if(x<x1)d+=` L${x1},${y}`; /* 남는 자리는 평평하게 (반쪽 톱니를 그리지 않는다) */
+  const xf=x0+p*Math.cos(th)**2*.5,yf=y-p*Math.cos(th)*Math.sin(th)*.5;
+  return `<path d="${d}" style="fill:var(--soft);stroke:var(--fg)" stroke-width="1.4"/>`+`<line x1="${x0}" x2="${x1}" y1="${y}" y2="${y}" class="lvl2"/>`
+   +LN(x0,y+18,x0+p,y+18,'var(--muted)',{w:1})+LN(x0,y+12,x0,y+24,'var(--muted)',{w:1})+LN(x0+p,y+12,x0+p,y+24,'var(--muted)',{w:1})+T(x0+p+6,y+22,'d = '+['833 nm','1667 nm','6.7 µm'][i],'sub')
+   +T(20,30,['1200 gr/mm, blaze 500 nm','600 gr/mm, blaze 1 µm','150 gr/mm, blaze 4 µm'][i],'lab')+T(20,48,TR('세 격자 모두 blaze 각 약 17.5° (예시)','all three: blaze angle approx. 17.5° (example)'),'sub')
+   +T(20,250,TR('홈 면의 기울기(blaze 각)가 한 파장에서 반사 방향과','The facet tilt (blaze angle) aligns reflection and'),'sub')+T(20,266,TR('회절 방향을 맞춰 그 파장 효율을 높인다','diffraction at one wavelength, raising its efficiency'),'sub')+(i===2?'':LN(xf,yf-30,xf,yf-4,'var(--muted)',{w:1})+T(xf,yf-34,TR('톱니 하나','one tooth'),'sub','middle'))},
+ m:v=>{const i=Math.round(v),lb=[.5,1,4];const P=plot({x:[.3,10],y:[0,1],logx:1,xt:[{v:.3,l:'0.3'},{v:1,l:'1'},{v:3,l:'3'},{v:10,l:'10'}],yt:[{v:0,l:'0'},{v:.5,l:'50%'},{v:1,l:'100%'}],xl:'wavelength (µm)',yl:TR('효율','efficiency'),T:30});
+  const ef=b=>x=>.85*Math.exp(-((Math.log10(x/b)/(x<b?.17:.3))**2));
+  return P.s+lb.map((b,j)=>crv(P,ef(b),Math.max(.3,b/2.5),Math.min(10,b*4),j===i?'var(--s3)':'var(--s6)',{w:j===i?2.5:1,dash:j!==i,n:300})).join('')+lb.map((b,j)=>T(P.X(b),P.Y(.9),['500 nm','1 µm','4 µm'][j],'sub','middle',j===i?'var(--s3)':undefined)).join('')+T(P.R,P.T-12,TR('실선 = 고른 격자, 점선 = 나머지','solid = selected grating, dashed = others'),'sub','end')},
+ read:[TR('홈 단면을 톱니 모양으로 깎으면, 각 홈 면이 작은 거울처럼 한 방향으로 빛을 몰아 준다. 그 방향이 원하는 파장의 1차 회절 방향과 맞으면 효율이 크게 오른다. 그 파장을 blaze 파장이라 한다.','Cutting the grooves into a sawtooth profile makes each facet act as a small mirror that throws the light in one direction. When that direction matches the first-order direction of the desired wavelength, the efficiency rises sharply. That wavelength is called the blaze wavelength.'),TR('효율 곡선은 blaze 파장 근처에서 높고, 짧은 쪽으로 빨리, 긴 쪽으로 천천히 떨어진다(대략적인 모양, 예시).','The efficiency curve is high near the blaze wavelength and falls quickly on the short side and slowly on the long side (approx. shape, example).'),TR('파장이 길수록 홈 간격 d도 커야 한다. m λ ≤ 2d라야 1차 회절이 생기기 때문이다. 그래서 중적외선용 격자는 홈이 성기다(예: 수십–150 gr/mm, 확인 필요).','Longer wavelengths need a larger groove spacing d, because first-order diffraction requires m λ ≤ 2d. Mid-infrared gratings therefore have sparse grooves (e.g. tens to 150 gr/mm, to be verified).'),TR('분광기 하나에 격자 두세 개를 달아 돌려 가며 쓰는 경우가 많다. 측정 파장에 맞는 격자를 골랐는지 먼저 본다.','A spectrometer often carries two or three gratings that can be swapped by rotation. The first check is whether the grating matches the measurement wavelength.')],
+ q:TR('5 µm(2000 cm⁻¹)를 1200 gr/mm 격자로 보면?','What happens when 5 µm (2000 cm⁻¹) is measured with a 1200 gr/mm grating?'),a:TR('d ≈ 0.83 µm라 m λ ≤ 2d ≈ 1.7 µm 조건을 넘는다. 1차 회절이 생기지 않는다. 중적외선용 격자(홈이 성긴 것)로 바꿔야 한다.','d ≈ 0.83 µm, so the condition m λ ≤ 2d ≈ 1.7 µm is not met. No first-order diffraction occurs. A mid-infrared grating (sparse grooves) is needed.')},
+{t:TR('출구 슬릿 대신 배열 검출기: 분광기(spectrograph)','An array detector instead of the exit slit: the spectrograph'),ec:TR('출구 평면에 배열 검출기','Array detector at the exit plane'),mc:TR('한 번에 찍은 스펙트럼 (64화소, 예시)','Spectrum recorded at once (64 pixels, example)'),
+ e:()=>moCT({cols:[[450,-1],[550,0],[650,1]],exit:'array'})+TM(100,238,[TR('출구 평면 전체를','tens to thousands'),TR('화소 수십~수천 개가','of pixels cover the'),TR('받는다','whole exit plane')]),
+ m:()=>{const P=plot({x:[0,65],y:[0,1.15],xt:[{v:1,l:'1'},{v:16,l:'16'},{v:32,l:'32'},{v:48,l:'48'},{v:64,l:'64'}],xl:TR('화소 번호','pixel number'),yl:TR('신호 (상대)','signal (relative)'),T:30});
+  let s=P.s;for(let i=1;i<=64;i++){const y=.08+.92*Math.exp(-(((i-30)/14)**2))-.35*Math.exp(-(((i-38)/2.5)**2));s+=`<rect x="${P.X(i-.4)}" y="${P.Y(y)}" width="${P.X(i+.4)-P.X(i-.4)}" height="${P.B-P.Y(y)}" style="fill:var(--s3)" fill-opacity=".75"/>`}
+  return s+LN(P.X(43),P.Y(.56),P.X(38.6),P.Y(.44),'var(--muted)',{w:1})+T(P.X(43),P.Y(.6),TR('흡수 띠','absorption band'),'sub')+T(P.R,P.T-12,TR('화소 하나 = 파장 한 칸','one pixel = one wavelength bin'),'sub','end')},
+ read:[TR('출구 슬릿을 빼고 출구 평면에 CCD나 MCT 배열을 놓으면, 여러 파장을 한 번에 찍는다. 이걸 spectrograph(분광기)라 부른다.','Removing the exit slit and placing a CCD or MCT array at the exit plane records many wavelengths at once. This is called a spectrograph.'),TR('화소당 파장 간격 = 역선형 분산 × 화소 폭. 예: 2.5 nm/mm × 25 µm = 0.0625 nm (예시).','Wavelength step per pixel = reciprocal linear dispersion × pixel width. Example: 2.5 nm/mm × 25 µm = 0.0625 nm (example).'),TR('분해능은 출구 슬릿 대신 입구 슬릿 폭과 화소 크기가 정한다. 입구 슬릿 상이 화소 두세 개보다 좁으면 화소가 한계가 된다.','Resolution is then set by the entrance slit width and the pixel size instead of the exit slit. When the entrance slit image is narrower than two or three pixels, the pixels set the limit.'),TR('우리 IR pump-probe 셋업은 모노크로메이터(Horiba iHR 320) 뒤에 MCT 배열(한 스펙트럼 64화소)을 둔다. 격자와 화소당 간격은 확인 필요(논문 TODO).','Our IR pump-probe setup places an MCT array (64 pixels per spectrum) after a monochromator (Horiba iHR 320). The grating and the step per pixel are to be verified (thesis TODO).'),TR('배열이라도 화소 수가 유한해 한 번에 보는 범위가 정해진다. 범위를 넓히려면 격자를 돌려 여러 구간을 이어 붙인다.','Even an array has a finite number of pixels, which fixes the range seen at once. A wider range is covered by rotating the grating and stitching several windows together.')],
+ q:TR('64화소 배열로 200 cm⁻¹ 범위를 찍으면 화소당 간격은?','With a 64-pixel array covering 200 cm⁻¹, what is the step per pixel?'),a:TR('약 3 cm⁻¹ (200 / 64 ≈ 3.1 cm⁻¹).','About 3 cm⁻¹ (200 / 64 ≈ 3.1 cm⁻¹).')},
+{t:TR('고차 회절이 겹친다: order-sorting 필터','Higher orders overlap: order-sorting filters'),ec:TR('같은 방향으로 나가는 두 빛','Two beams leaving in the same direction'),mc:TR('측정 스펙트럼 (가로축 = 1차 기준 파장)','Measured spectrum (x axis = first-order wavelength)'),
+ tg:[{k:'f',l:TR('long-pass 필터 (500 nm 아래 차단)','long-pass filter (blocks below 500 nm)'),on:false}],
+ e:(v,tg)=>{const cx=160,cy=200,R=140,b=moBeta(800);
+  let s=moGr(cx,cy,R,TR('백색광','white light'));
+  s+=`<g data-n="1">`+LN(cx,cy,cx-R*Math.sin(b)-2,cy-R*Math.cos(b),'var(--s3)',{w:3})+badge(cx-R*.62*Math.sin(b)-22,cy-R*.62*Math.cos(b),1,'var(--s3)')+'</g>';
+  if(!tg.f)s+=`<g data-n="2">`+LN(cx,cy,cx-R*Math.sin(b)+2,cy-R*Math.cos(b),'var(--s5)',{w:2,dash:1})+badge(cx-R*.75*Math.sin(b)+18,cy-R*.75*Math.cos(b),2,'var(--s5)')+'</g>';
+  s+=T(20,24,'1 × 800 nm = 2 × 400 nm','lab')+T(20,42,TR('m λ가 같으면 β도 같다','same m λ → same β'),'sub');
+  s+=`<line x1="40" x2="74" y1="244" y2="244" style="stroke:var(--s3)" stroke-width="3"/>`+T(80,248,TR('1차 800 nm','m = 1: 800 nm'),'sub')+`<line x1="160" x2="194" y1="244" y2="244" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="4 3"/>`+T(200,248,TR('2차 400 nm','m = 2: 400 nm'),'sub');
+  const fx=cx+.6*R*Math.sin(MO_AL),fy=cy-.6*R*Math.cos(MO_AL);
+  if(tg.f)s+=`<rect x="${fx-5}" y="${fy-18}" width="10" height="36" style="fill:var(--s4)" fill-opacity=".6" transform="rotate(-40 ${fx} ${fy})"/>`+T(fx+14,fy+14,TR('필터','filter'),'sub')+T(20,270,TR('필터가 400 nm를 미리 막는다 (실제로는 입구 슬릿 앞)','filter blocks 400 nm (really at the entrance slit)'),'sub');
+  else s+=T(20,270,TR('두 빛이 같은 화소(출구)에 도착한다','both reach the same pixel (exit)'),'sub');
+  return s},
+ m:(v,tg)=>{const P=plot({x:[600,1000],y:[0,1.15],xt:[600,700,800,900,1000].map(x=>({v:x,l:String(x)})),xl:TR('표시 파장 (nm, 1차 기준)','displayed wavelength (nm, first order)'),yl:TR('신호 (상대)','signal (relative)'),T:30});
+  let s=P.s+crv(P,x=>.6*moGauss(x,900,40),600,1000,'var(--s3)')+`<g data-n="1">${badge(P.X(900),P.Y(.6)-16,1,'var(--s3)')}</g>`+T(P.X(900),P.Y(.6)-32,TR('진짜 900 nm','real 900 nm'),'sub','middle');
+  if(!tg.f)s+=crv(P,x=>.9*moGauss(x,800,6),760,840,'var(--s5)')+`<g data-n="2">${badge(P.X(800)-18,P.Y(.9),2,'var(--s5)')}</g>`+TM(P.X(800)-14,P.Y(.72),[TR('유령','ghost'),TR('(실제는 400 nm 2차)','(really 400 nm, m = 2)')],'sub','end');
+  else s+=T(P.X(800),P.Y(.3),TR('유령 사라짐','ghost removed'),'sub','middle');
+  return s},
+ read:[TR('격자 방정식에는 m λ가 들어간다. 1차 800 nm와 2차 400 nm는 m λ가 같아서 같은 각도로 나간다.','The grating equation contains m λ. First-order 800 nm and second-order 400 nm have the same m λ and leave at the same angle.'),TR('광원에 400 nm 빛이 있으면 800 nm 자리에 가짜 봉우리가 생긴다. 체크박스를 끄고 켜며 비교하면 유령이 필터로 사라진다.','If the source contains 400 nm light, a false peak appears at the 800 nm position. Toggling the checkbox shows the ghost removed by the filter.'),TR('그래서 보려는 범위의 절반보다 짧은 파장을 막는 필터(order-sorting, long-pass)를 슬릿 앞에 둔다. 넓은 범위를 스캔하는 장비는 필터 바퀴로 구간마다 바꾼다.','A filter that blocks wavelengths shorter than half of the range of interest (order-sorting, long-pass) is therefore placed in front of the slit. Instruments that scan a wide range change the filter for each window with a filter wheel.'),TR('중적외선에서도 같다. 4 µm(2500 cm⁻¹) 자리에 2 µm(5000 cm⁻¹) 2차가 겹칠 수 있다.','The same holds in the mid-infrared. Second-order 2 µm (5000 cm⁻¹) can overlap at the 4 µm (2500 cm⁻¹) position.')],
+ q:TR('1차 1200 nm 자리에 또 어떤 빛이 올 수 있나?','What other light can appear at the first-order 1200 nm position?'),a:TR('2차 600 nm, 3차 400 nm.','Second-order 600 nm and third-order 400 nm.')},
+{t:TR('파장 보정: 알려진 선으로 화소 → 파장을 맞춘다','Wavelength calibration: mapping pixel → wavelength with known lines'),ec:TR('Hg 램프를 찍은 원시 신호','Raw signal of an Hg lamp'),mc:TR('화소 → 파장 보정 곡선','Pixel → wavelength calibration curve'),
+ e:()=>{const lam=p=>400+.4*p-2e-5*p*p,pix=l=>{const a=-2e-5,b=.4,c0=400-l;return(-b+Math.sqrt(b*b-4*a*c0))/(2*a)};
+  const L4=[[404.7,'s5'],[435.8,'s2'],[546.1,'s3'],[577.0,'s4']];const P=plot({x:[0,512],y:[0,1.15],xt:[0,128,256,384,512].map(x=>({v:x,l:String(x)})),xl:TR('화소 번호','pixel number'),yl:TR('신호 (상대)','signal (relative)'),T:30});
+  let s=P.s+crv(P,p=>L4.reduce((t,[l],i)=>t+[.55,.8,1,.7][i]*moGauss(p,pix(l),5),.03),0,512,'var(--fg)',{n:600});
+  L4.forEach(([l,k],i)=>{const x=P.X(pix(l)),h=[.55,.8,1,.7][i];s+=`<g data-n="${i+1}">${badge(x,P.Y(h)-14,i+1,COL[k])}</g>`});
+  return s+T(P.R,P.T-12,TR('값은 예시','values are examples'),'sub','end')},
+ m:()=>{const a=-2e-5,b=.4,pix=l=>(-b+Math.sqrt(b*b-4*a*(400-l)))/(2*a),lam=p=>400+b*p+a*p*p;
+  const L4=[[404.7,'s5'],[435.8,'s2'],[546.1,'s3'],[577.0,'s4']];const P=plot({x:[0,512],y:[380,620],xt:[0,128,256,384,512].map(x=>({v:x,l:String(x)})),yt:[400,450,500,550,600].map(y=>({v:y,l:String(y)})),xl:TR('화소 번호','pixel number'),yl:'wavelength (nm)',T:30});
+  return P.s+crv(P,lam,0,512,'var(--muted)',{w:1.5,dash:1})+L4.map(([l,k],i)=>`<g data-n="${i+1}"><circle cx="${P.X(pix(l))}" cy="${P.Y(l)}" r="5" style="fill:${COL[k]}"/>`+T(P.X(pix(l))+(i===3?-10:10),P.Y(l)+(i===3?-8:4),l.toFixed(1),'sub',i===3?'end':'start')+'</g>').join('')+T(P.L+8,P.T-10,TR('점선 = 2차 다항식 맞춤','dashed = 2nd-order polynomial fit'),'sub')},
+ read:[TR('화소 번호만으로는 파장을 모른다. 파장을 이미 아는 빛을 찍어 둘 사이 관계를 맞춘다.','The pixel number alone does not give the wavelength. Light of known wavelength is recorded to fit the relation between the two.'),TR(`Hg 램프는 ${c(1,'s5')} 404.7, ${c(2,'s2')} 435.8, ${c(3,'s3')} 546.1, ${c(4,'s4')} 577.0 nm 같은 선이 있다. 각 선이 몇 번 화소에 오는지 찾는다.`,`An Hg lamp has lines such as ${c(1,'s5')} 404.7, ${c(2,'s2')} 435.8, ${c(3,'s3')} 546.1 and ${c(4,'s4')} 577.0 nm. The pixel on which each line falls is located.`),TR('화소와 파장 관계는 직선에 가깝지만 조금 휜다. 그래서 보통 2차나 3차 다항식으로 맞춘다.','The pixel–wavelength relation is close to a straight line but slightly curved, so a 2nd- or 3rd-order polynomial is usually fitted.'),TR('격자를 돌리면 관계가 바뀐다. 격자 각도를 바꾼 뒤에는 보정을 다시 확인한다.','Rotating the grating changes the relation. The calibration is checked again after any change of grating angle.'),TR('중적외선에서는 램프 대신 알려진 흡수선(폴리스타이렌 필름, 공기 중 CO₂·수증기 등)을 쓰기도 한다(확인 필요).','In the mid-infrared, known absorption lines (polystyrene film, atmospheric CO₂ and water vapour, etc.) are sometimes used instead of a lamp (to be verified).')],
+ q:TR('기준 선이 두 개뿐이면 무엇까지 맞출 수 있나?','With only two reference lines, how far can the fit go?'),a:TR('직선(1차식)까지. 휘는 정도를 맞추려면 선이 셋 이상, 넓게 퍼져 있어야 한다.','Up to a straight line (first order). Fitting the curvature needs three or more lines spread widely.')}];
+
+/* ======================= 검출기 (MCT · CCD · PMT) ======================= */
+/* 0~99를 고정된 순서로 섞은 것 (QE 그림에서 어느 광자가 전자가 되는지) */
+const DT_ORD=Array.from({length:100},(_,i)=>(i*37+11)%100);
+const DT_RNG=[[.2,.9],[.2,1.1],[.9,1.7],[2,12]]; /* 실용 범위 (µm, 대략). 짧은 쪽 끝은 띠 간격이 아니라 창·기판·표면 흡수가 정한다 */
+const DT_DET=[[TR('PMT 광음극','PMT photocathode'),1.4,'s5'],['Si (CCD)',1.12,'s2'],['InGaAs',.75,'s4'],['HgCdTe (MCT)',.1,'s1']]; /* MCT: 우리 MCT 배열 차단 약 12 µm (1.24 / 12 ≈ 0.1 eV) */
+const dtKT=t=>8.617e-5*t; /* eV */
+const DT=[
+{t:TR('공통 원리: 광자 하나가 전자 하나를 만든다','Common principle: one photon makes one electron'),ec:TR('광자 100개 (예시)','100 photons (example)'),mc:TR('세어 보기','Counting'),
+ slider:{min:.1,max:.9,step:.05,init:.6,label:TR('양자 효율 QE','Quantum efficiency QE'),fmt:v=>Math.round(v*100)+'%'},
+ e:v=>{const n=Math.round(v*100),on=new Set(DT_ORD.slice(0,n));let s='';
+  for(let i=0;i<100;i++){const x=40+(i%10)*24,y=40+Math.floor(i/10)*20;s+=on.has(i)?`<circle cx="${x}" cy="${y}" r="6" style="fill:var(--s3)"/>`:`<circle cx="${x}" cy="${y}" r="6" style="fill:none;stroke:var(--s6)" stroke-width="1.2"/>`}
+  return s+`<circle cx="44" cy="256" r="6" style="fill:var(--s3)"/>`+T(56,260,TR('전자를 만든 광자','made an electron'),'sub')+`<circle cx="176" cy="256" r="6" style="fill:none;stroke:var(--s6)" stroke-width="1.2"/>`+T(188,260,TR('반사·통과·손실','reflected/passed/lost'),'sub')},
+ m:v=>{const n=Math.round(v*100);const P=plot({x:[0,3],y:[0,110],xt:[],yt:[0,50,100].map(y=>({v:y,l:String(y)})),yl:TR('개수','count'),T:30,B:230});
+  return P.s+`<rect x="${P.X(.5)}" y="${P.Y(100)}" width="${P.X(1.3)-P.X(.5)}" height="${P.B-P.Y(100)}" style="fill:var(--s6)" fill-opacity=".5"/>`+`<rect x="${P.X(1.7)}" y="${P.Y(n)}" width="${P.X(2.5)-P.X(1.7)}" height="${P.B-P.Y(n)}" style="fill:var(--s3)"/>`
+   +T(P.X(.9),P.Y(100)-6,'100','labn','middle')+T(P.X(2.1),P.Y(n)-6,String(n),'labn','middle')+T(P.X(.9),P.B+18,TR('광자','photons'),'sub','middle')+T(P.X(2.1),P.B+18,TR('전자','electrons'),'sub','middle')+T(P.X(1.5),P.B+40,TR('전자 = 광자 × QE','electrons = photons × QE'),'lab','middle')},
+ read:[TR('모든 광검출기는 광자 하나가 전자 하나(또는 전자-정공 쌍)를 만드는 데서 시작한다. 이 단계가 노트 전체의 출발점이다.','Every photodetector starts from one photon producing one electron (or electron–hole pair). This step is the starting point of the whole note.'),TR('들어온 광자 중 전자를 만든 비율이 양자 효율(QE)이다. 광자 100개, QE 60%면 전자 60개다.','The fraction of incoming photons that produce an electron is the quantum efficiency (QE). 100 photons at QE 60% give 60 electrons.'),TR('나머지 광자는 표면에서 반사되거나, 흡수되지 않고 지나가거나, 전자를 만들었다가 잃는다.','The other photons are reflected at the surface, pass through without being absorbed, or produce an electron that is then lost.'),TR('QE는 파장마다 다르다. 다음 단계에서 보듯 재료가 "어느 파장까지 전자를 만들 수 있나"를 정한다.','QE depends on wavelength. As the next step shows, the material decides "up to which wavelength electrons can be produced".')],
+ q:TR('광자 500개가 QE 20% 검출기에 들어오면 전자는 평균 몇 개?','If 500 photons enter a detector with QE 20%, how many electrons are produced on average?'),a:TR('100개.','100.')},
+{t:TR('파장 한계는 재료의 띠 간격이 정한다','The band gap of the material sets the wavelength limit'),ec:TR('띠 간격과 광자 에너지','Band gap and photon energy'),mc:TR('쓸 수 있는 파장 범위 (대략)','Usable wavelength range (approx.)'),
+ slider:{min:-.6,max:1.25,step:.01,init:0,label:TR('광자 파장','Photon wavelength'),fmt:v=>{const l=10**v;return (l<1?l.toFixed(2):l.toFixed(1))+' µm · '+Math.round(1e4/l)+' cm⁻¹'}},
+ e:v=>{const l=10**v,E=1.24/l,Y=e=>236-e/1.6*200;let s=`<line x1="40" x2="40" y1="36" y2="236" class="ax"/>`+[0,.4,.8,1.2,1.6].map(e=>`<line x1="35" x2="40" y1="${Y(e)}" y2="${Y(e)}" class="ax"/>`+T(32,Y(e)+4,String(e),'sub','end')).join('');
+  s+=TR(`<text x="12" y="136" class="lab" text-anchor="middle" transform="rotate(-90 12 136)">에너지 (eV)</text>`,`<text x="12" y="136" class="lab" text-anchor="middle" transform="rotate(-90 12 136)">energy (eV)</text>`);
+  DT_DET.forEach(([n,g,k],i)=>{const x=74+i*62,ok=E>=g,st=!ok?'x':(l<DT_RNG[i][0]?'s':'o');s+=`<g data-n="${i+1}"><rect x="${x-16}" y="${Y(g)}" width="32" height="${236-Y(g)}" style="fill:${COL[k]}" fill-opacity=".22" stroke="${COL[k]}"/>`+badge(x,Y(g)-14,i+1,COL[k])+T(x,252,n.split(' ')[0],'sub','middle')+(n.includes(' ')?T(x,266,n.split(' ')[1],'sub','middle'):'')+'</g>'
+   +T(x,Y(Math.min(E,1.6))-(Y(g)-Y(Math.min(E,1.6))<26?-14:-14)+0,'','sub')+`<text x="${236-Y(g)<20?x+24:x}" y="${236-Y(g)<20?234:230}" class="labn" text-anchor="middle" style="fill:${{o:'var(--s3)',s:'var(--s4)',x:'var(--s1)'}[st]}">${{o:'✓',s:'△',x:'✗'}[st]}</text>`});
+  const yE=Y(Math.min(E,1.6));s+=`<line x1="44" x2="300" y1="${yE}" y2="${yE}" class="cur" style="stroke:var(--fg)" stroke-width="1.5" stroke-dasharray="6 3"/>`;
+  return s+T(44,12,TR('막대 = 띠 간격, 점선 = 광자 ','bars = band gap, dashed = photon ')+E.toFixed(2)+' eV'+(E>1.6?TR(' (위로 넘침)',' (off scale)'):''),'sub')+T(44,28,TR('✓ 보임 · △ 짧은 쪽 한계 · ✗ 띠 간격 미달','✓ detected · △ short-side limit · ✗ below band gap'),'sub')},
+ m:v=>{const l=10**v;const P=plot({x:[.2,20],y:[0,5],logx:1,xt:[{v:.2,l:'0.2'},{v:1,l:'1'},{v:2,l:'2'},{v:5,l:'5'},{v:10,l:'10'},{v:20,l:'20'}],xl:'wavelength (µm)',L:20,noy:1,T:30});
+  const R=DT_RNG;
+  let s=P.s+DT_DET.map(([n,g,k],i)=>{const y=P.Y(4.3-i)+0;return `<g data-n="${i+1}"><rect x="${P.X(R[i][0])}" y="${y-8}" width="${P.X(R[i][1])-P.X(R[i][0])}" height="16" rx="3" style="fill:${COL[k]}" fill-opacity=".45"/>`+badge(P.X(R[i][0])-12+(i===0||i===1?14:0),y-18,i+1,COL[k])+'</g>'+(i===3?T(P.X(1)-6,y+4,n,'sub','end'):T(P.X(R[i][1])+6,y+4,n,'sub'))}).join('');
+  return s+`<line x1="${P.X(l)}" x2="${P.X(l)}" y1="${P.T}" y2="${P.B}" class="cur" style="stroke:var(--fg)" stroke-width="1.5" stroke-dasharray="6 3"/>`+`<rect x="${P.X(1)}" y="${P.Y(1.3)-8}" width="${P.X(2)-P.X(1)}" height="16" rx="3" style="fill:var(--s1)" fill-opacity=".15" stroke="var(--s1)" stroke-dasharray="3 3"/>`+T(P.R,P.T-12,TR('오른쪽 끝 = 띠 간격 · 왼쪽 끝 = 창·표면','right end = band gap · left end = window/surface'),'sub','end')+T(P.R,P.B-8,TR('MCT 점선 칸 = 창 재질에 따라 (확인 필요)','MCT dashed box = depends on window (to be verified)'),'sub','end')},
+ read:[TR('광자 에너지가 재료의 띠 간격(PMT는 광음극의 일함수)보다 커야 전자가 생긴다. 그래서 검출기마다 긴 파장 한계가 있다. 광자 에너지(eV) ≈ 1.24 / 파장(µm).','An electron is produced only when the photon energy exceeds the band gap of the material (for a PMT, the work function of the photocathode). Each detector therefore has a long-wavelength limit. Photon energy (eV) ≈ 1.24 / wavelength (µm).'),TR(`${c(2,'s2')} Si는 띠 간격 약 1.1 eV라 약 1.1 µm까지 본다. CCD와 흔한 포토다이오드가 여기에 속한다.`,`${c(2,'s2')} Si has a band gap of about 1.1 eV and detects up to about 1.1 µm. CCDs and common photodiodes belong here.`),TR(`${c(3,'s4')} InGaAs는 대략 0.9–1.7 µm(근적외선), ${c(1,'s5')} PMT 광음극은 재료에 따라 대략 UV–0.9 µm다(확인 필요).`,`${c(3,'s4')} InGaAs covers approx. 0.9–1.7 µm (near infrared), and ${c(1,'s5')} PMT photocathodes cover approx. UV–0.9 µm depending on the material (to be verified).`),TR(`${c(4,'s1')} HgCdTe(MCT)는 Hg와 Cd 비율로 띠 간격을 바꾼다. 3–5 µm용은 Cd 비율 x ≈ 0.3이고, 우리 MCT 배열은 차단 파장이 약 12 µm(띠 간격 약 0.1 eV)다.`,`${c(4,'s1')} HgCdTe (MCT) tunes its band gap through the Hg:Cd ratio. Detectors for 3–5 µm have a Cd fraction x ≈ 0.3, and our MCT array has a cutoff wavelength of about 12 µm (band gap about 0.1 eV).`),TR('같은 단위로 긴 쪽 한계: Si 약 1.1 µm, InGaAs 약 1.7 µm, MCT 약 12 µm(우리 배열 기준, 조성에 따라 더 길게도 만든다). 중적외선 pump-probe에 MCT를 쓰는 이유다.','Long-wavelength limits in the same unit: Si about 1.1 µm, InGaAs about 1.7 µm, MCT about 12 µm (our array; other compositions reach further). This is why MCT is used for mid-infrared pump-probe.'),TR('짧은 쪽은 띠 간격으로 막히지 않는다. 띠 간격보다 큰 광자는 원리상 모두 전자를 만든다. 대신 다른 이유로 효율이 떨어진다: 첫째, 검출기 창 재질(예: Ge 창은 약 1.8 µm보다 짧은 빛을 막는다, 대략), 둘째, 에너지가 큰 광자는 표면 바로 아래에서 흡수되어 표면 재결합으로 전자를 잃는다, 셋째, 같은 W에 든 광자 수가 줄어 반응도(A/W)가 λ에 비례해 낮아진다. InGaAs가 약 0.9 µm 아래에서 약해지는 것도 같은 종류의 이유(기판 흡수)다(확인 필요).','The short side is not limited by the band gap. In principle every photon above the band gap produces an electron. The efficiency drops for other reasons instead. First, the detector window (e.g. a Ge window blocks light shorter than about 1.8 µm, approx.). Second, high-energy photons are absorbed just below the surface, and the electrons are lost to surface recombination. Third, the number of photons per watt falls, so the responsivity (A/W) drops in proportion to λ. The weakening of InGaAs below about 0.9 µm has the same kind of origin (substrate absorption) (to be verified).'),TR('그래서 MCT의 실용 범위는 대략 2 µm 위로 잡는다. 반대로 pump(근적외선 등)의 산란광이 MCT 창을 통과하면 원치 않는 신호가 될 수 있어, 앞에 필터를 두기도 한다(확인 필요).','The practical range of MCT is therefore taken as above approx. 2 µm. Conversely, scattered pump light (near infrared, etc.) that passes the MCT window can give an unwanted signal, so a filter is sometimes placed in front (to be verified).'),TR('슬라이더로 파장을 늘리면 ✓가 ✗로(긴 쪽 한계), 줄이면 MCT와 InGaAs가 △로(짧은 쪽 한계) 바뀐다.','Increasing the wavelength with the slider turns ✓ into ✗ (long-side limit); decreasing it turns MCT and InGaAs into △ (short-side limit).')],
+ q:TR('2000 cm⁻¹(5 µm) 빛을 Si CCD로 볼 수 있나? 반대로 800 nm 빛은 MCT에 안 잡히나?','Can 2000 cm⁻¹ (5 µm) light be seen with a Si CCD? Conversely, is 800 nm light invisible to MCT?'),a:TR('5 µm는 Si로 못 본다. 광자 에너지 약 0.25 eV가 Si 띠 간격(약 1.1 eV)보다 작다. 800 nm는 띠 간격으로는 MCT에 잡힐 수 있지만, 창 재질과 표면 흡수 때문에 효율이 낮거나 창에서 막힌다. 막히지 않으면 산란광이 섞일 수 있다.','5 µm cannot be seen with Si: the photon energy of about 0.25 eV is below the Si band gap (about 1.1 eV). 800 nm can be detected by MCT as far as the band gap is concerned, but the window material and surface absorption make the efficiency low, or the window blocks it. If it is not blocked, scattered light can leak into the signal.')},
+{t:TR('MCT를 액체 질소로 식히는 이유: 열로 생기는 전자','Why MCT is cooled with liquid nitrogen: thermally generated electrons'),ec:TR('MCT 띠 그림 (띠 간격 0.1 eV 예시)','MCT band diagram (band gap 0.1 eV, example)'),mc:TR('열 전자 수 (300 K 대비, log)','Number of thermal electrons (relative to 300 K, log)'),
+ slider:{min:60,max:300,step:1,init:300,label:TR('온도','Temperature'),fmt:v=>Math.round(v)+' K'},
+ e:v=>{const g=.1,f=t=>Math.exp(-g/(2*dtKT(t))),r=f(v)/f(300),n=Math.round(40*r);let s=`<rect x="30" y="60" width="260" height="70" style="fill:var(--s2)" fill-opacity=".1"/>`+T(296,100,TR('전도띠','conduction band'),'sub','end')
+   +`<rect x="30" y="170" width="260" height="70" style="fill:var(--s6)" fill-opacity=".15"/>`+T(296,212,TR('가전자띠','valence band'),'sub','end')+LN(30,130,290,130,'var(--fg)')+LN(30,170,290,170,'var(--fg)')
+   +T(160,154,TR('띠 간격 0.1 eV','band gap 0.1 eV'),'sub','middle');
+  for(let i=0;i<n;i++){const x=40+((i*53)%22)*TR(10,7.6),y=72+((i*29)%5)*11; /* 22칸 × 5줄, 겹치지 않음. 오른쪽 '전도띠' 글자 자리는 비운다 */s+=`<circle cx="${x}" cy="${y}" r="3.5" style="fill:var(--s2)"/>`}
+  return s+T(30,30,`kT = ${(dtKT(v)*1000).toFixed(1)} meV`,'lab')+T(30,48,TR(`열 전자 (300 K 40개 기준): ${n<1&&r>0?'1개 미만':n+'개'}`,`thermal electrons (40 at 300 K): ${n<1&&r>0?'fewer than 1':n}`),'lab')+T(30,262,TR('점 = 열로 띠 간격을 넘은 전자 (개수는 예시)','dots = thermally excited electrons (example)'),'sub')},
+ m:v=>{const f=(g,t)=>Math.exp(-g/(2*dtKT(t)))/Math.exp(-g/(2*dtKT(300)));const P=plot({x:[60,300],y:[1e-9,1],logy:1,xt:[{v:77,l:'77'},{v:150,l:'150'},{v:200,l:'200'},{v:300,l:'300'}],yt:[{v:1,l:'1'},{v:1e-3,l:'10⁻³'},{v:1e-6,l:'10⁻⁶'},{v:1e-9,l:'10⁻⁹'}],xl:TR('온도 (K)','temperature (K)'),yl:TR('상대값','relative value'),L:62,T:30});
+  return P.s+crv(P,t=>f(.1,t),60,300,'var(--s1)')+crv(P,t=>f(.25,t),60,300,'var(--s5)',{dash:1})+`<line x1="${P.X(77)}" x2="${P.X(77)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(77)+4,P.Y(1e-8),'LN₂ 77 K','sub')+`<line x1="${P.X(220)}" x2="${P.X(220)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(220)+4,P.Y(1e-8),TR('TE 약 220 K','TE approx. 220 K'),'sub')+`<line x1="${P.X(295)}" x2="${P.X(295)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(295)+4,P.T-8,TR('상온 약 295 K','room temp. approx. 295 K'),'sub','end')
+   +`<circle cx="${P.X(v)}" cy="${P.Y(f(.1,v))}" r="5" style="fill:var(--s1)"/>`+`<line x1="${P.X(140)}" x2="${P.X(140)+22}" y1="${P.Y(1e-6)}" y2="${P.Y(1e-6)}" style="stroke:var(--s1)" stroke-width="2"/>`+T(P.X(140)+28,P.Y(1e-6)+4,TR('0.1 eV (약 12 µm 차단)','0.1 eV (approx. 12 µm cutoff)'),'sub')+`<line x1="${P.X(140)}" x2="${P.X(140)+22}" y1="${P.Y(1e-7)}" y2="${P.Y(1e-7)}" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="5 4"/>`+T(P.X(140)+28,P.Y(1e-7)+4,TR('0.25 eV (약 5 µm 차단)','0.25 eV (approx. 5 µm cutoff)'),'sub')},
+ read:[TR('띠 간격이 작으면 긴 파장을 보지만, 열에너지만으로도 전자가 띠 간격을 넘어 버린다. 빛 없이 생긴 이 전자가 암전류와 잡음이 된다.','A small band gap reaches long wavelengths, but then thermal energy alone can lift electrons across the gap. These electrons, produced without light, become dark current and noise.'),TR('300 K의 kT는 약 26 meV(약 208 cm⁻¹)다. 띠 간격 0.1 eV는 kT의 4배뿐이다. Si(1.1 eV)는 kT의 40배가 넘어 실온에서도 훨씬 조용하다.','kT at 300 K is about 26 meV (about 208 cm⁻¹). A band gap of 0.1 eV is only 4 kT. Si (1.1 eV) is more than 40 kT, so it is much quieter even at room temperature.'),TR('열 전자 수는 대략 exp(−E_g / 2kT)를 따른다(온도 앞 인자는 무시한 근사). 세어 보기: 300 K에서 1000개라면 77 K에서는 약 4개다.','The number of thermal electrons roughly follows exp(−E_g / 2kT) (approximation that ignores the temperature prefactor). Counting it out: 1000 at 300 K become about 4 at 77 K.'),TR('그래서 MCT는 액체 질소(77 K)로 식힌다. 열전 냉각(TE)은 단 수에 따라 대략 200–240 K까지 내려간다(그림의 220 K는 예시, 확인 필요). 77 K까지 못 내려가 우리 12 µm MCT 같은 긴 파장 검출기에는 LN₂를 대신하지 못한다(논문 A.4.3).','MCT is therefore cooled with liquid nitrogen (77 K). Thermoelectric (TE) cooling reaches approx. 200–240 K depending on the number of stages (220 K in the figure is an example, to be verified). It cannot reach 77 K, so it does not replace LN₂ for long-wavelength detectors such as our 12 µm MCT (thesis A.4.3).'),TR('띠 간격도 온도에 따라 바뀐다. 측정 중 온도가 일정해야 하는 이유이기도 하다. LN₂가 떨어지면 신호와 잡음이 같이 변한다.','The band gap also changes with temperature. This is another reason the temperature must stay constant during a measurement. When the LN₂ runs out, the signal and the noise change together.')],
+ q:TR('5 µm 차단 MCT(0.25 eV)와 12 µm 차단 MCT(0.1 eV) 중 냉각이 더 절실한 쪽은?','Which needs cooling more: a 5 µm cutoff MCT (0.25 eV) or a 12 µm cutoff MCT (0.1 eV)?'),a:TR('12 µm 쪽. 띠 간격이 작아 같은 온도에서 열 전자가 훨씬 많다.','The 12 µm one. Its smaller band gap gives far more thermal electrons at the same temperature.')},
+{t:TR('PMT: 광전자 하나를 수백만 개로 키운다','PMT: one photoelectron multiplied into millions'),ec:TR('광음극 → 다이노드 → 양극','Photocathode → dynodes → anode'),mc:TR('증폭률 vs 다이노드 단 수 (단마다 4배)','Gain vs number of dynode stages (×4 per stage)'),
+ slider:{min:1,max:12,step:1,init:10,label:TR('다이노드 수','Dynode stages'),fmt:v=>Math.round(v)+TR('단',' stages')},
+ e:v=>{const n=Math.round(v);let s=`<rect x="12" y="150" width="14" height="70" style="fill:var(--s5)" fill-opacity=".35" stroke="var(--s5)"/>`+T(TR(19,4),240,TR('광음극','photocathode'),'sub',TR('middle','start'))+LN(2,128,12,160,'var(--s4)',{w:2,mk:'s4'})+T(4,120,TR('광자','photon'),'sub');
+  let px=26,py=185;for(let i=1;i<=12;i++){const x=26+i*20,y=i%2?110:200,on=i<=n;s+=`<rect x="${x-7}" y="${y-4}" width="14" height="8" rx="2" style="fill:${on?'var(--fg)':'var(--line)'}"/>`;if(on){s+=LN(px,py,x,y+(i%2?4:-4),'var(--s2)',{w:Math.min(3.5,.6+i*.25)});px=x;py=y+(i%2?4:-4)}}
+  const ax=26+(n+1)*20;s+=`<rect x="${ax-4}" y="140" width="8" height="40" style="fill:var(--s3)"/>`+LN(px,py,ax-4,160,'var(--s2)',{w:3.5})+T(ax,196,TR('양극','anode'),'sub','middle');
+  return s+T(12,36,TR(`전자 1개 × 4^${n} = ${Math.round(4**n).toLocaleString('en-US')}개`,`1 electron × 4^${n} = ${Math.round(4**n).toLocaleString('en-US')} electrons`),'lab')+T(12,54,TR(`= 전하 약 ${(q=>q>=100?Math.round(q).toLocaleString('en-US'):String(+q.toPrecision(2)))(4**n*1.602e-4)} fC`,`= charge approx. ${(q=>q>=100?Math.round(q).toLocaleString('en-US'):String(+q.toPrecision(2)))(4**n*1.602e-4)} fC`),'sub')+T(12,266,TR('선 굵기 = 전자 수 (보기용)','line width = number of electrons (for illustration)'),'sub')},
+ m:v=>{const n=Math.round(v);const P=plot({x:[0,13],y:[1,1e8],logy:1,xt:[1,4,8,12].map(x=>({v:x,l:String(x)})),yt:[{v:1,l:'1'},{v:1e2,l:'10²'},{v:1e4,l:'10⁴'},{v:1e6,l:'10⁶'},{v:1e8,l:'10⁸'}],xl:TR('다이노드 수','number of dynode stages'),yl:TR('증폭률','gain'),T:30});
+  let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(1e6)}" y2="${P.Y(1e6)}" class="lvl2"/>`+T(P.L+6,P.Y(1e6)-6,TR('10⁶ (흔한 PMT 수준, 대략)','10⁶ (typical PMT, approx.)'),'sub');
+  for(let i=1;i<=12;i++)s+=`<circle cx="${P.X(i)}" cy="${P.Y(4**i)}" r="${i===n?6:3}" style="fill:${i===n?'var(--s2)':'var(--s6)'}"/>`;
+  return s},
+ read:[TR('광자가 광음극에 맞으면 광전자 하나가 튀어나온다(광음극 QE 대략 10–30%, 확인 필요).','When a photon hits the photocathode, one photoelectron is emitted (photocathode QE approx. 10–30%, to be verified).'),TR('광전자는 전압으로 가속되어 첫 다이노드에 부딪히고, 전자 몇 개를 새로 떼어 낸다. 이게 단마다 반복된다.','The photoelectron is accelerated by a voltage into the first dynode and knocks out several new electrons. This repeats at every stage.'),TR('세어 보기: 단마다 4배면 10단에서 4¹⁰ ≈ 10⁶배다. 전자 하나가 약 0.17 pC(= 168 fC) 펄스가 되어 광자 하나도 셀 수 있다.','Counting it out: ×4 per stage gives 4¹⁰ ≈ 10⁶ after 10 stages. One electron becomes a pulse of about 0.17 pC (= 168 fC), so even a single photon can be counted.'),TR('응답이 빠르다(대략 ns). 그래서 형광 수명 측정이나 아주 약한 빛에 쓴다.','The response is fast (approx. ns). PMTs are therefore used for fluorescence lifetime measurements and very weak light.'),TR('단점: 화소가 하나라 스펙트럼을 한 번에 못 찍고(모노크로메이터로 스캔, 앞 탭 3단계), 전원이 켜진 상태에서 센 빛을 받으면 망가질 수 있다.','Drawbacks: with a single pixel it cannot record a spectrum at once (scan with a monochromator, previous tab, step 3), and strong light while the voltage is on can damage it.')],
+ q:TR('단마다 3배, 12단이면 증폭률은?','×3 per stage with 12 stages: what is the gain?'),a:'3¹² ≈ 5.3 × 10⁵.'},
+{t:TR('CCD: 화소마다 모아서 한 칸씩 밀어 읽는다','CCD: collect in every pixel, then shift out one pixel at a time'),ec:TR('전하 이동 (화소 8개, 예시)','Charge transfer (8 pixels, example)'),mc:TR('읽어 낸 스펙트럼','Spectrum read out'),
+ slider:{min:0,max:8,step:.02,init:0,label:TR('읽기 진행','Readout progress'),fmt:v=>Math.floor(v)+TR(' / 8칸',' / 8 pixels'),play:1},
+ e:v=>{const q=[.25,.5,.9,1,.7,.4,.3,.15],k=Math.floor(v),fr=v-k;let s='';
+  for(let i=0;i<8;i++){const x=24+i*30;s+=`<rect x="${x}" y="110" width="26" height="80" rx="2" style="fill:var(--soft);stroke:var(--fg)"/>`+T(x+13,206,String(i+1),'sub','middle')}
+  for(let j=0;j<8;j++){const pos=j+k+(j+k<8?fr*.9:0);if(j+k>=8)continue;const x=24+pos*30,h=q[j]*76;s+=`<rect x="${x+3}" y="${188-h}" width="20" height="${h}" style="fill:var(--s2)" fill-opacity=".75"/>`}
+  s+=LN(266,150,284,150,'var(--fg)',{w:1.5,mk:'f'})+`<polygon points="284,132 284,168 306,150" class="dev"/>`+T(296,190,TR('읽기','readout'),'sub','middle')+T(296,204,TR('증폭기','amp'),'sub','middle');
+  return s+T(20,36,TR('① 노출: 화소(우물)마다 광전자를 모은다','① exposure: each pixel (well) collects photoelectrons'),'sub')+T(20,54,TR('② 읽기: 전하를 한 칸씩 오른쪽으로 밀어 끝에서 하나씩 잰다','② readout: charge shifts right and is measured at the end'),'sub')+T(20,236,TR('막대 = 화소에 모인 전하','bar = charge collected in the pixel'),'sub')+T(20,254,TR('가로 = 파장 방향 (분광기 출구 평면)','horizontal = wavelength (spectrograph exit plane)'),'sub')},
+ m:v=>{const q=[.25,.5,.9,1,.7,.4,.3,.15],k=Math.floor(v);const P=plot({x:[.4,8.6],y:[0,1.15],xt:[1,2,3,4,5,6,7,8].map(x=>({v:x,l:String(x)})),xl:TR('화소 번호','pixel number'),yl:TR('신호 (상대)','signal (relative)'),T:30});
+  let s=P.s;for(let j=0;j<8;j++){const read=j>=8-k;s+=read?`<rect x="${P.X(j+1-.35)}" y="${P.Y(q[j])}" width="${P.X(j+1+.35)-P.X(j+1-.35)}" height="${P.B-P.Y(q[j])}" style="fill:var(--s2)"/>`:`<rect x="${P.X(j+1-.35)}" y="${P.Y(.06)}" width="${P.X(j+1+.35)-P.X(j+1-.35)}" height="${P.B-P.Y(.06)}" style="fill:var(--line)"/>`}
+  return s+T(P.R,P.T-12,k>=8?TR('한 장 완성','frame complete'):TR('오른쪽 끝 화소부터 차례로 들어온다','pixels arrive in turn from the right end'),'sub','end')},
+ read:[TR('노출 시간 동안 화소마다 광전자를 모은다. 화소를 전자를 담는 우물로 보면 된다.','During the exposure each pixel collects photoelectrons. A pixel can be pictured as a well that holds electrons.'),TR('노출이 끝나면 전하를 한 칸씩 옆으로 밀어, 끝에 있는 증폭기 하나로 차례로 잰다. 재생을 누르면 오른쪽 끝 화소부터 읽혀 오른쪽 그림이 채워진다.','After the exposure the charge is shifted sideways one pixel at a time and measured in turn by a single amplifier at the end. With Play, pixels are read from the right end and the right panel fills up.'),TR('분광기 출구 평면에 두면 가로가 파장이 되어 스펙트럼 한 장을 한 번에 얻는다(앞 탭 6단계). 실제 분광용 CCD는 세로 방향 화소를 먼저 합친(binning) 뒤 가로로 읽는다.','At the exit plane of a spectrograph the horizontal direction becomes wavelength, and one spectrum is obtained at once (previous tab, step 6). Real spectroscopic CCDs first sum the vertical pixels (binning) and then read out horizontally.'),TR('QE가 높다(뒷면 조사형 대략 최대 90%, 확인 필요). 대신 읽는 데 시간이 걸려 1 kHz 샷마다 한 장씩 읽기는 보통 어렵다(확인 필요).','QE is high (back-illuminated, approx. up to 90%, to be verified). Readout takes time, however, so reading one frame for every 1 kHz shot is usually difficult (to be verified).'),TR('냉각하면 암전류(열 전자, 3단계와 같은 논리)가 준다. Si는 띠 간격이 커서 MCT만큼 세게 식히지 않아도 된다.','Cooling reduces the dark current (thermal electrons, the same logic as step 3). Si has a large band gap, so it does not need to be cooled as hard as MCT.')],
+ q:TR('CCD 노출 중에 셔터 없이 읽기를 시작하면?','What happens if readout starts during a CCD exposure without a shutter?'),a:TR('전하를 미는 동안에도 빛이 들어와 다른 화소 자리에 전하가 더해진다. 스펙트럼이 옆으로 번진다(smear).','Light keeps arriving while the charge is shifted, adding charge at other pixel positions. The spectrum smears sideways (smear).')},
+{t:TR('잡음 세어 보기: 광자가 적을 때와 많을 때','Counting noise: few photons versus many photons'),ec:TR('지금 광자 수에서 신호와 잡음 (전자 개수)','Signal and noise at the current photon number (electrons)'),mc:TR('SNR vs 광자 수 (log-log)','SNR vs photon number (log-log)'),
+ slider:{min:.5,max:4,step:.05,init:2.6,label:TR('광자 수','Photon number'),fmt:v=>Math.round(10**v).toLocaleString('en-US')+TR('개','')},
+ e:v=>{const N=10**v,pS=.25*N,pN=Math.sqrt(pS),cS=.9*N,cN=Math.sqrt(cS+25);
+  const row=(y,lab,S,Nn,k,n)=>{const sc=x=>Math.max(1,Math.min(200,200*Math.log10(1+x)/Math.log10(1+.9e4)));return `<g data-n="${n}">${badge(26,y+10,n,COL[k])}</g>`+T(42,y-6,lab,'lab')
+   +`<rect x="42" y="${y}" width="${sc(S)}" height="12" style="fill:${COL[k]}"/>`+T(48+sc(S),y+10,TR('신호 ','signal ')+S.toFixed(S<10?1:0),'sub')
+   +`<rect x="42" y="${y+18}" width="${sc(Nn)}" height="12" style="fill:${COL[k]}" fill-opacity=".35"/>`+T(48+sc(Nn),y+28,TR('잡음 ','noise ')+Nn.toFixed(1),'sub')+T(42,y+48,'SNR = '+(S/Nn).toFixed(1),'labn','start',COL[k])};
+  return row(50,TR('PMT (QE 25%, 읽기 잡음 무시)','PMT (QE 25%, read noise ignored)'),pS,pN,'s5',1)+row(150,TR('CCD (QE 90%, 읽기 잡음 5 e⁻)','CCD (QE 90%, read noise 5 e⁻)'),cS,cN,'s2',2)+T(20,262,TR('막대 길이는 log 눈금 (보기용)','bar length on a log scale (for illustration)'),'sub')},
+ m:v=>{const N=10**v,sp=n=>Math.sqrt(.25*n),sc=n=>.9*n/Math.sqrt(.9*n+25);const P=plot({x:[3,1e4],y:[.1,100],logx:1,logy:1,xt:[{v:10,l:'10'},{v:100,l:'100'},{v:1e3,l:'10³'},{v:1e4,l:'10⁴'}],yt:[{v:.1,l:'0.1'},{v:1,l:'1'},{v:10,l:'10'},{v:100,l:'100'}],xl:TR('광자 수','photon number'),yl:'SNR',T:30});
+  /* log 축이라 log(광자 수)를 고르게 나눠 그린다 (그냥 나누면 10 근처가 직선으로 뭉개져 교차점이 어긋난다) */
+  const PG={...P,X:u=>P.X(10**u)},lg=f=>u=>f(10**u),u0=Math.log10(3);
+  return P.s+`<g data-n="1">${crv(PG,lg(sp),u0,4,'var(--s5)')}<circle cx="${P.X(N)}" cy="${P.Y(sp(N))}" r="5" style="fill:var(--s5)"/></g><g data-n="2">${crv(PG,lg(sc),u0,4,'var(--s2)')}<circle cx="${P.X(N)}" cy="${P.Y(sc(N))}" r="5" style="fill:var(--s2)"/></g>`
+   +`<line x1="${P.X(10.7)}" x2="${P.X(10.7)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(10.7)+4,P.Y(.2),TR('약 11개에서 역전 (가정 아래)','crossover approx. 11 (assumed)'),'sub')+T(P.X(800),P.Y(4),'PMT','sub','start','var(--s5)')+T(P.X(150),P.Y(25),'CCD','sub','end','var(--s2)')},
+ read:[TR('광자는 무작위로 도착한다. 평균 N개를 받으면 흔들림이 √N이다(shot noise). 전자 100개면 잡음 10, SNR 10이다. 전자 10 000개면 잡음 100, SNR 100이다.','Photons arrive at random. Receiving N on average gives a fluctuation of √N (shot noise). 100 electrons give noise 10 and SNR 10. 10 000 electrons give noise 100 and SNR 100.'),TR('읽기 잡음은 읽을 때마다 더해지는 고정 잡음이다(CCD 대략 수 e⁻, 여기서는 5 e⁻ 가정, 확인 필요). 신호가 작을 때 SNR을 크게 깎는다.','Read noise is a fixed noise added at every readout (CCD approx. a few e⁻, 5 e⁻ assumed here, to be verified). It cuts the SNR strongly when the signal is small.'),TR(`${c(1,'s5')} PMT는 증폭이 커서 읽기 잡음을 거의 무시할 수 있다. 대신 QE가 낮다(25% 가정).`,`${c(1,'s5')} A PMT has so much gain that its read noise is almost negligible. Its QE is low instead (25% assumed).`),TR(`${c(2,'s2')} CCD는 QE가 높다(90% 가정). 신호가 충분하면 읽기 잡음이 묻혀 CCD가 이긴다.`,`${c(2,'s2')} A CCD has a high QE (90% assumed). With enough signal the read noise is buried and the CCD wins.`),TR('이 가정에서는 광자 약 11개 아래에서만 PMT가 유리하다. 실제로는 PMT의 증폭 잡음, 양쪽의 암전류가 더해져 경계가 움직인다(예시 계산).','Under these assumptions the PMT is better only below about 11 photons. In practice the gain noise of the PMT and the dark current of both shift the boundary (example calculation).')],
+ q:TR('광자 400개: PMT(QE 25%)와 CCD(QE 90%, 읽기 잡음 5 e⁻)의 SNR은?','400 photons: what is the SNR of a PMT (QE 25%) and of a CCD (QE 90%, read noise 5 e⁻)?'),a:TR('PMT 전자 100개 → SNR 10. CCD 전자 360개 → √(360 + 25) ≈ 19.6 → SNR 약 18.','PMT: 100 electrons → SNR 10. CCD: 360 electrons → √(360 + 25) ≈ 19.6 → SNR approx. 18.')},
+{t:TR('정리: 어떤 실험에 무엇을 쓰나','Summary: which detector for which experiment'),ec:TR('파장 범위와 읽는 속도 (대략)','Wavelength range and readout speed (approx.)'),mc:TR('비교 표 (대략, 예시)','Comparison table (approx., example)'),
+ e:()=>{const P=plot({x:[.2,20],y:[0,5],logx:1,xt:[{v:.2,l:'0.2'},{v:1,l:'1'},{v:5,l:'5'},{v:20,l:'20'}],xl:'wavelength (µm)',L:20,noy:1,T:30});
+  const it=[[TR('PMT · 화소 1 · ns 응답','PMT · 1 pixel · ns response'),.2,.9,'s5'],[TR('CCD · 배열 · 노출 후 읽기','CCD · array · read after exposure'),.2,1.1,'s2'],[TR('InGaAs 배열 · 근적외선','InGaAs array · near IR'),.9,1.7,'s4'],[TR('MCT 배열 · 1 kHz 샷마다','MCT array · every shot'),2,12,'s1']];
+  return P.s+it.map(([l,a,b,k],i)=>{const y=P.Y(4.4-i*1.05);const lx=i<2?P.X(.2)+26:P.X(a)+14;return `<g data-n="${i+1}">`+badge(lx-14,y-10,i+1,COL[k])+`<rect x="${P.X(a)}" y="${y+2}" width="${P.X(b)-P.X(a)}" height="14" rx="3" style="fill:${COL[k]}" fill-opacity=".45"/></g>`+T(lx,y-6,l,'sub')}).join('')},
+ m:()=>{const rows=[['',TR('화소','pixels'),TR('한 번 읽기','readout'),TR('쓰는 곳 (예시)','used for (ex.)')],['① PMT','1',TR('ns (연속)','ns (cont.)'),TR('형광 수명','fl. lifetime')],['② CCD',TR('수백–수천','100s–1000s'),'ms–s',TR('Raman, 형광','Raman, fl.')],['③ InGaAs',TR('수백','100s'),TR('약 0.1–1 ms','~0.1–1 ms'),TR('근적외선 분광','near-IR spectra')],[TR('④ MCT 배열','④ MCT array'),TR('수십–백여','10s–100+'),TR('1 ms (샷마다)','1 ms (per shot)'),'IR pump-probe']],xs=[8,78,140,226];
+  let s='';rows.forEach((r,i)=>{const y=40+i*34;if(i)s+=`<g data-n="${i}"><line x1="8" x2="316" y1="${y-21}" y2="${y-21}" style="stroke:var(--line)"/></g>`;r.forEach((t,j)=>{s+=T(xs[j],y,t,i?'sub':'lab','start',i&&j===0?COL[['s5','s2','s4','s1'][i-1]]:undefined)})});
+  return s+TM(8,206,[TR('한 번 읽기 = 값 하나(PMT)나 스펙트럼 한 장(배열)을','readout = time to get one value (PMT) or'),TR('얻는 데 걸리는 시간 (대략, 모델마다 다름)','one spectrum (array) (approx., varies by model)'),TR('우리 IR pump-probe: MCT 배열 128화소 (2줄 × 64),','our IR pump-probe: MCT array, 128 pixels (2 × 64),'),TR('LN₂ 77 K, 1 kHz 샷마다 읽기 (논문 3.3, A.4)','LN₂ 77 K, read every 1 kHz shot (thesis 3.3, A.4)')],'sub',undefined,15)},
+ read:[TR(`${c(1,'s5')} PMT: 화소 하나, 빠르고 증폭이 크다. 약한 빛, 단일 파장, 형광 수명에 쓴다. 스펙트럼은 모노크로메이터로 스캔한다.`,`${c(1,'s5')} PMT: one pixel, fast, high gain. Used for weak light, single wavelengths and fluorescence lifetimes. Spectra are scanned with a monochromator.`),TR(`${c(2,'s2')} CCD: QE가 높고 화소가 많다. Raman, 형광 스펙트럼처럼 노출을 길게 주고 한 장씩 찍는 측정에 맞는다.`,`${c(2,'s2')} CCD: high QE and many pixels. Suited to measurements with long exposures recorded one frame at a time, such as Raman and fluorescence spectra.`),TR(`${c(3,'s4')} InGaAs 배열: Si가 못 보는 근적외선(대략 0.9–1.7 µm)용이다.`,`${c(3,'s4')} InGaAs array: for the near infrared (approx. 0.9–1.7 µm) that Si cannot see.`),TR(`${c(4,'s1')} MCT 배열: 중적외선이고 1 kHz 샷마다 읽을 수 있다. 그래서 IR pump-probe와 <a href="2d-spectroscopy.html">2D IR</a>에서 pump-on과 pump-off를 샷마다 비교한다. 샷마다 읽는 방법은 다음 탭(Boxcar)에서 다룬다.`,`${c(4,'s1')} MCT array: mid-infrared, and readable on every 1 kHz shot. IR pump-probe and <a href="2d-spectroscopy.html">2D IR</a> therefore compare pump-on and pump-off shot by shot. Shot-by-shot readout is covered in the next tab (Boxcar).`),TR('"한 번 읽기"는 값이나 스펙트럼 한 장을 얻는 데 걸리는 시간이다. PMT는 출력이 연속이라 ns 단위로 따라가고, CCD는 노출과 읽기를 합쳐 ms–s가 걸린다. MCT 배열은 1 kHz 레이저에 맞춰 1 ms마다 한 장씩 읽는다(값은 대략, 확인 필요).','"Readout" is the time needed to obtain one value or one spectrum. A PMT output is continuous and follows on the ns scale; a CCD takes ms–s for exposure plus readout. The MCT array reads one frame every 1 ms, in step with the 1 kHz laser (approx. values, to be verified).'),TR('고르는 순서: 첫째 파장(재료가 정함) → 둘째 빛의 세기(잡음, 6단계) → 셋째 읽는 시간과 화소 수(한 장씩인가, 샷마다인가). 표의 값은 대략이고 모델마다 다르다(확인 필요).','Order of choice: first the wavelength (set by the material) → second the light level (noise, step 6) → third the readout time and pixel count (one frame at a time, or every shot). Table values are approx. and vary by model (to be verified).')],
+ q:TR('Raman을 785 nm로 재고 Raman shift 3000 cm⁻¹까지 보려면 CCD로 충분한가?','For Raman at 785 nm up to a Raman shift of 3000 cm⁻¹, is a CCD enough?'),a:TR('785 nm에서 3000 cm⁻¹ 떨어진 산란광은 약 1 µm다. Si CCD 한계(약 1.1 µm) 바로 안쪽이라 볼 수는 있지만 QE가 많이 떨어진다. 그래서 785 nm Raman은 근적외선 감도를 높인 CCD를 쓰거나 범위를 줄인다(대략).','Light scattered 3000 cm⁻¹ away from 785 nm is at about 1 µm. That is just inside the Si CCD limit (about 1.1 µm), so it can be seen, but the QE drops a lot. 785 nm Raman therefore uses a CCD with enhanced near-infrared sensitivity or a reduced range (approx.).')}];
+
+/* ======================= Boxcar (gated integrator) ======================= */
+/* 시간 단위 µs. MCT 프리앰프 출력 모양(예시): 트리거 0.7 µs 뒤 빠르게 오르고 약 0.9 µs로 줄어든다.
+   실제 우리 MCT 출력은 아래(−)로 향하지만(논문 그림 A.9) 보기 쉽게 위로 그린다. */
+const BX_T0=.7,BX_MAX=.67;
+const bxW=t=>t<BX_T0?0:(1-Math.exp(-(t-BX_T0)/.12))*Math.exp(-(t-BX_T0)/.9)/BX_MAX;
+const bxR=i=>{const x=Math.sin(i*12.9898+78.233)*43758.5453;return x-Math.floor(x)-.5}; /* 고정된 의사 난수 −0.5..0.5 */
+const bxG=i=>(bxR(i)+bxR(i+101)+bxR(i+202))*1.2; /* 대략 가우시안, 표준편차 약 0.6 */
+const bxInt=(a,b,f=bxW)=>{let s=0;const n=200,h=(b-a)/n;for(let k=0;k<n;k++)s+=f(a+(k+.5)*h)*h;return s};
+const BX_AREA=bxInt(0,20);
+/* 한 샷 파형 + 잡음 (x: 0~xmax µs) */
+function bxShot(P,xmax,off=0,noise=.05,seed=0){let d='';const n=400;for(let k=0;k<=n;k++){const t=xmax*k/n,y=bxW(t)+off+noise*bxR(k+seed);d+=(k?' L':'M')+P.X(t).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:var(--s3)" stroke-width="1.6"/>`}
+/* 게이트 사각형 */
+const bxGate=(P,a,b,col,n,lab)=>`<g${n?` data-n="${n}"`:''}><rect x="${P.X(a)}" y="${P.T}" width="${Math.max(1,P.X(b)-P.X(a))}" height="${P.B-P.T}" style="fill:${col}" fill-opacity=".14" stroke="${col}" stroke-dasharray="4 3"/>${n?badge((P.X(a)+P.X(b))/2,P.T+12,n,col):''}</g>`+(lab?T((P.X(a)+P.X(b))/2,P.T+(n?36:14),lab,'sub','middle',col):'');
+/* 7단계: 레이저와 안 맞는 샘플링 (논문 부록 B 값). 포토다이오드 펄스 약 20 µs */
+const BX_FREP=1000.570,BX_FS=1000,BX_DEL=(1/BX_FS-1/BX_FREP)*1e6; /* 샘플마다 0.57 µs씩 밀림 */
+const bxPD=t=>t<0?0:(1-Math.exp(-t/1.5))*Math.exp(-t/6)/.62;
+
+const BX=[
+{t:TR('문제: 펄스 신호는 짧고, 나머지 시간은 잡음뿐이다','The problem: the pulse signal is short, and the rest of the time is noise'),ec:TR('1 kHz 펄스열 (3 ms 구간, 예시)','1 kHz pulse train (3 ms window, example)'),mc:TR('한 샷 확대 (트리거 뒤 0–5 µs)','One shot zoomed in (0–5 µs after the trigger)'),
+ e:()=>{const P=plot({x:[0,3],y:[-.25,1.2],xt:[0,1,2,3].map(x=>({v:x,l:String(x)})),xl:TR('시간 (ms)','time (ms)'),yl:TR('검출기 출력 (상대)','detector output (relative)'),T:30});
+  let d='';for(let k=0;k<=600;k++){const t=3*k/600;d+=(k?' L':'M')+P.X(t).toFixed(1)+','+P.Y(.06*bxR(k+7)).toFixed(1)}
+  let s=P.s+`<path d="${d}" fill="none" style="stroke:var(--s6)" stroke-width="1"/>`;
+  [.5,1.5,2.5].forEach((t,i)=>{s+=`<g data-n="1">`+LN(P.X(t),P.Y(0),P.X(t),P.Y(1),'var(--s3)',{w:2.5})+(i===0?badge(P.X(t)+14,P.Y(1),1,'var(--s3)'):'')+'</g>'});
+  return s+T(P.L+6,P.T-12,TR('1 ms마다 펄스 하나 (1 kHz), 사이 약 997 µs는 잡음뿐','pulse every 1 ms; approx. 997 µs of noise between'),'sub')},
+ m:()=>{const P=plot({x:[0,5],y:[-.25,1.2],xt:[0,1,2,3,4,5].map(x=>({v:x,l:String(x)})),xl:TR('트리거 뒤 시간 (µs)','time after trigger (µs)'),yl:TR('검출기 출력 (상대)','detector output (relative)'),T:30});
+  return P.s+`<g data-n="1"><rect x="${P.X(.7)}" y="${P.T}" width="${P.X(3.7)-P.X(.7)}" height="${P.B-P.T}" style="fill:var(--s3)" fill-opacity=".08"/>${badge(P.X(2.2),P.T+12,1,'var(--s3)')}</g>`+bxShot(P,5)+T(P.X(2.2),P.T+36,TR('신호가 있는 약 3 µs','approx. 3 µs with signal'),'sub','middle')},
+ read:[TR(`${c(1,'s3')} 1 kHz 레이저면 펄스는 1 ms(= 1000 µs)마다 온다. MCT 출력은 그중 대략 3 µs 동안만 의미가 있다.`,`${c(1,'s3')} With a 1 kHz laser, a pulse arrives every 1 ms (= 1000 µs). The MCT output is meaningful for only approx. 3 µs of that time.`),TR('세어 보기: 3 µs / 1000 µs = 0.3%. 1 ms를 통째로 평균하면 신호는 약 300분의 1로 묽어지고, 잡음은 그 1 ms 내내 쌓인다.','Counting it out: 3 µs / 1000 µs = 0.3%. Averaging the whole 1 ms dilutes the signal about 300-fold, while the noise accumulates over the full 1 ms.'),TR('그래서 신호가 있는 순간만 골라 보는 장치가 필요하다. 이게 boxcar(gated) integrator다. 다음 단계에서 그 "창"을 연다.','A device that looks only at the moments with signal is therefore needed. This is the boxcar (gated) integrator. The next step opens that "window".'),TR('그림의 파형 모양은 예시다. 실제 우리 MCT 프리앰프 출력은 아래(−) 방향이고(논문 그림 A.9), 이 탭에서는 보기 쉽게 위로 그린다.','The waveform shape in the figure is an example. The real output of our MCT preamplifier points downward (−) (thesis Fig. A.9); this tab draws it upward for clarity.')],
+ q:TR('5 kHz 레이저였다면 같은 3 µs 신호가 차지하는 비율은?','For a 5 kHz laser, what fraction would the same 3 µs signal occupy?'),a:TR('펄스 간격이 200 µs라 3 / 200 = 1.5%. 여전히 대부분이 잡음 시간이다.','The pulse spacing is 200 µs, so 3 / 200 = 1.5%. Most of the time is still noise.')},
+{t:TR('게이트: 신호가 있는 순간만 더한다','Gate: add up only the moments with signal'),ec:TR('게이트 창 (폭 1 µs로 고정)','Gate window (width fixed at 1 µs)'),mc:TR('게이트 안 적분값 vs 게이트 위치','Integral within the gate vs gate position'),
+ slider:{min:0,max:4,step:.05,init:.6,label:TR('게이트 지연 Td','Gate delay Td'),fmt:v=>Math.round(v*1000)+' ns',play:1},
+ e:v=>{const P=plot({x:[0,5],y:[-.25,1.2],xt:[0,1,2,3,4,5].map(x=>({v:x,l:String(x)})),xl:TR('트리거 뒤 시간 (µs)','time after trigger (µs)'),yl:TR('검출기 출력 (상대)','detector output (relative)'),T:30});
+  let d='',a=v,b=v+1;for(let k=0;k<=100;k++){const t=a+(b-a)*k/100;d+=(k?' L':'M')+P.X(Math.min(5,t)).toFixed(1)+','+P.Y(bxW(t)).toFixed(1)}
+  return P.s+bxGate(P,a,Math.min(5,b),'var(--s4)',1,'')+`<path d="${d} L${P.X(Math.min(5,b))},${P.Y(0)} L${P.X(a)},${P.Y(0)} Z" style="fill:var(--s4)" fill-opacity=".35"/>`+bxShot(P,5)+T(P.R,P.T-12,TR('칠한 넓이 = 이 샷의 값 하나','shaded area = the one value of this shot'),'sub','end')},
+ m:v=>{const f=td=>bxInt(td,td+1)/BX_AREA;const P=plot({x:[0,4],y:[0,1],xt:[0,1,2,3,4].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:.5,l:'50%'},{v:1,l:'100%'}],xl:TR('게이트 지연 Td (µs)','gate delay Td (µs)'),yl:TR('잡힌 신호 (전체 넓이 대비)','captured signal (of total area)'),T:30});
+  return P.s+crv(P,f,0,4,'var(--fg)')+`<g data-n="1"><circle cx="${P.X(v)}" cy="${P.Y(f(v))}" r="6" style="fill:var(--s4)"/></g>`+T(P.R,P.T-12,TR('지금 잡힌 신호: ','captured now: ')+Math.round(f(v)*100)+'%','labn','end')},
+ read:[TR('boxcar는 검출기 신호에 사각형 창(게이트)을 곱하고 적분한다. 결과는 샷마다 숫자 하나다. 값 = 게이트 안 넓이.','A boxcar multiplies the detector signal by a rectangular window (gate) and integrates. The result is one number per shot. Value = area within the gate.'),TR(`${c(1,'s4')} 게이트 위치는 트리거로부터의 지연 Td로 정한다. 슬라이더로 Td를 옮기면, 창이 펄스 위에 있을 때만 값이 커진다.`,`${c(1,'s4')} The gate position is set by the delay Td from the trigger. As Td moves, the value grows only while the window sits on the pulse.`),TR('창 밖의 999 µs 넘는 잡음은 아예 더하지 않는다. 앞 단계의 "0.3%" 문제가 이렇게 풀린다.','The more than 999 µs of noise outside the window is never added. This solves the "0.3%" problem of the previous step.'),TR('봉우리 하나를 찾는 대신 넓이를 재므로, 펄스 모양이 조금 흔들려도 값이 안정적이다.','Because it measures the area instead of finding a single peak, the value stays stable even when the pulse shape fluctuates slightly.')],
+ q:TR('Td를 너무 늦게 잡으면 어떻게 되나?','What happens if Td is set too late?'),a:TR('펄스 꼬리만 잡혀 값이 작아지고, 상대적으로 잡음 비율이 커진다. 펄스가 거의 지나간 뒤면 잡음만 적분한다.','Only the pulse tail is captured, so the value shrinks and the relative noise grows. Once the pulse has almost passed, only noise is integrated.')},
+{t:TR('게이트 폭: 넓으면 잡음, 좁으면 신호 손실','Gate width: too wide adds noise, too narrow loses signal'),ec:TR('게이트 폭 (Td = 600 ns 고정)','Gate width (Td = 600 ns fixed)'),mc:TR('신호, 잡음, SNR vs 게이트 폭 (각각 최댓값 = 1)','Signal, noise and SNR vs gate width (each maximum = 1)'),
+ slider:{min:.2,max:4,step:.05,init:1,label:TR('게이트 폭 Tw','Gate width Tw'),fmt:v=>Math.round(v*1000)+' ns',play:1},
+ e:v=>{const P=plot({x:[0,5],y:[-.25,1.2],xt:[0,1,2,3,4,5].map(x=>({v:x,l:String(x)})),xl:TR('트리거 뒤 시간 (µs)','time after trigger (µs)'),yl:TR('검출기 출력 (상대)','detector output (relative)'),T:30});
+  const a=.6,b=Math.min(5,.6+v);return P.s+bxGate(P,a,b,'var(--s4)',0,'')+bxShot(P,5,0,.05,31)+T(P.R,P.T-12,`Tw = ${Math.round(v*1000)} ns`,'lab','end')},
+ m:v=>{const S=w=>bxInt(.6,.6+w),Nz=w=>Math.sqrt(w),R=w=>S(w)/Nz(w);let rm=0;for(let w=.2;w<=4;w+=.02)rm=Math.max(rm,R(w));
+  const P=plot({x:[.2,4],y:[0,1.15],xt:[1,2,3,4].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:TR('게이트 폭 Tw (µs)','gate width Tw (µs)'),yl:TR('상대값','relative value'),T:30});
+  const leg=(y,col,lab,dash)=>`<line x1="${P.X(2.6)}" x2="${P.X(2.6)+20}" y1="${P.Y(y)}" y2="${P.Y(y)}" style="stroke:${col}" stroke-width="2"${dash?' stroke-dasharray="5 4"':''}/>`+T(P.X(2.6)+26,P.Y(y)+4,lab,'sub');
+  return P.s+crv(P,w=>S(w)/S(4),.2,4,'var(--s3)')+crv(P,w=>Nz(w)/Nz(4),.2,4,'var(--s6)',{dash:1})+crv(P,w=>R(w)/rm,.2,4,'var(--s5)',{w:2.5})
+   +`<circle cx="${P.X(v)}" cy="${P.Y(R(v)/rm)}" r="5" style="fill:var(--s5)"/>`+leg(.42,'var(--s3)',TR('신호 (넓이)','signal (area)'))+leg(.3,'var(--s6)',TR('잡음 ∝ √Tw','noise ∝ √Tw'),1)+leg(.18,'var(--s5)','SNR')},
+ read:[TR('게이트가 좁으면 펄스 일부를 놓쳐 신호가 작다. 넓히면 신호는 늘다가, 펄스가 창 안에 다 들어온 뒤로는 거의 그대로다.','A narrow gate misses part of the pulse, so the signal is small. Widening it increases the signal until the whole pulse is inside the window; after that it barely changes.'),TR('반면 창 안에 들어오는 잡음은 폭이 넓을수록 계속 쌓인다(흰 잡음이면 √Tw에 비례, 가정).','The noise inside the window, however, keeps accumulating as the width grows (proportional to √Tw for white noise, assumed).'),TR('그래서 SNR은 중간 어딘가에서 가장 높다. 슬라이더로 폭을 바꾸면 보라색 점이 봉우리를 지나간다.','The SNR is therefore highest somewhere in between. As the width changes, the purple dot passes over the peak.'),TR('우리 적분기(FPAS-0144) 설명서 기본값은 Td = 660 ns, Tw = 2494 ns다. MCT 출력이 운반자 수명(0.2–2 µs) 동안 줄어들어 µs 단위 창이 필요하다. 지금 장비에 설정된 값은 확인 필요다.','The manual default of our integrator (FPAS-0144) is Td = 660 ns, Tw = 2494 ns. The MCT output decays over the carrier lifetime (0.2–2 µs), so a µs-scale window is needed. The values currently set on the instrument are to be verified.'),TR('노트에 적힌 "15 ns"는 게이트 폭이 아니라 트리거 펄스의 폭이다(논문 A.5.3).','The "15 ns" written in the notes is not the gate width but the width of the trigger pulse (thesis A.5.3).')],
+ q:TR('펄스가 이미 창 안에 다 들어왔는데 폭을 2배로 늘리면 SNR은?','If the pulse is already fully inside the window and the width is doubled, what happens to the SNR?'),a:TR('신호는 거의 그대로, 잡음은 약 √2배라 SNR은 약 0.7배로 줄어든다.','The signal stays almost the same and the noise grows by about √2, so the SNR drops to about 0.7 times.')},
+{t:TR('여러 샷 평균: N번 평균하면 잡음이 √N로 준다','Averaging shots: averaging N shots reduces noise by √N'),ec:TR('샷마다 값 (처음 60샷, 샷당 흔들림 10% 가정)','Value per shot (first 60 shots, 10% shot-to-shot fluctuation assumed)'),mc:TR('평균값의 흔들림 vs 평균한 샷 수 (log-log)','Fluctuation of the mean vs number of shots averaged (log-log)'),
+ slider:{min:0,max:3,step:.05,init:2,label:TR('평균 샷 수 N','Shots averaged N'),fmt:v=>Math.round(10**v)+TR('샷',' shots')},
+ e:v=>{const N=Math.round(10**v),sd=.1/Math.sqrt(N);const P=plot({x:[0,61],y:[.6,1.4],xt:[1,20,40,60].map(x=>({v:x,l:String(x)})),yt:[{v:.8,l:'0.8'},{v:1,l:'1.0'},{v:1.2,l:'1.2'}],xl:TR('샷 번호','shot number'),yl:TR('샷 값 (상대)','shot value (relative)'),T:30});
+  let s=P.s+`<g data-n="1"><rect x="${P.L}" y="${P.Y(1.1)}" width="${P.R-P.L}" height="${P.Y(.9)-P.Y(1.1)}" style="fill:var(--s6)" fill-opacity=".12"/></g>`;
+  for(let i=1;i<=60;i++)s+=`<circle cx="${P.X(i)}" cy="${P.Y(1+.1*bxG(i)/.6)}" r="2.6" style="fill:var(--s6)"/>`;
+  s+=`<g data-n="2"><rect x="${P.L}" y="${P.Y(1+sd)}" width="${P.R-P.L}" height="${Math.max(2,P.Y(1-sd)-P.Y(1+sd))}" style="fill:var(--s2)" fill-opacity=".35"/></g>`;
+  return s+T(P.L+6,P.T-10,TR(`회색 띠 = 한 샷 ±10%, 파란 띠 = ${N}샷 평균 ±${(sd*100).toFixed(sd<.01?1:0)}%`,`grey = 1 shot ±10%, blue = mean of ${N} ±${(sd*100).toFixed(sd<.01?1:0)}%`),'sub')},
+ m:v=>{const N=10**v;const P=plot({x:[1,1000],y:[.1,20],logx:1,logy:1,xt:[{v:1,l:'1'},{v:10,l:'10'},{v:100,l:'100'},{v:1000,l:'1000'}],yt:[{v:.1,l:'0.1%'},{v:1,l:'1%'},{v:10,l:'10%'}],xl:TR('평균 샷 수 N','shots averaged N'),yl:TR('평균값 흔들림','fluctuation of mean'),T:30});
+  return P.s+crv(P,n=>10/Math.sqrt(n),1,1000,'var(--s2)')+`<g data-n="1"><circle cx="${P.X(1)}" cy="${P.Y(10)}" r="5" style="fill:var(--s6)"/></g>`+T(P.X(1)+10,P.Y(10)-8,TR('1샷 10%','1 shot: 10%'),'sub')
+   +`<g data-n="2"><circle cx="${P.X(N)}" cy="${P.Y(10/Math.sqrt(N))}" r="6" style="fill:var(--s2)"/></g>`+T(P.X(10),P.Y(.45),TR('예: 100샷이면 1%','e.g. 100 shots: 1%'),'sub')+`<line x1="${P.X(200)}" x2="${P.X(200)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(200)-4,P.Y(12),TR('200샷','200 shots'),'sub','end')},
+ read:[TR(`${c(1,'s6')} 한 샷의 값은 레이저 세기 흔들림 등으로 샷마다 달라진다(여기서는 10% 가정).`,`${c(1,'s6')} The value of a single shot changes from shot to shot because of laser intensity fluctuations and the like (10% assumed here).`),TR(`${c(2,'s2')} N샷을 평균하면 흔들림은 1/√N로 준다. 세어 보기: 100샷이면 10% → 1%, 10 000샷이면 0.1%.`,`${c(2,'s2')} Averaging N shots reduces the fluctuation by 1/√N. Counting it out: 100 shots take 10% → 1%, and 10 000 shots give 0.1%.`),TR('잡음을 10배 줄이려면 샷이 100배 필요하다. 1 kHz면 100샷은 0.1 s, 10 000샷은 10 s다. 시간과 정밀도를 맞바꾸는 셈이다.','Reducing the noise 10-fold needs 100 times more shots. At 1 kHz, 100 shots take 0.1 s and 10 000 shots take 10 s. Time is traded for precision.'),TR('우리 프로그램은 지연 한 점에서 200샷을 한 번에 읽는다(LabVIEW 설정, 확인 필요).','Our program reads 200 shots at once at each delay point (LabVIEW setting, to be verified).'),TR('이 계산은 샷끼리 흔들림이 서로 독립이라는 가정이다. 느린 드리프트처럼 이어지는 흔들림은 평균으로 잘 안 준다. 그건 다음 단계의 "빼기"가 맡는다.','This calculation assumes that shot-to-shot fluctuations are independent. Correlated fluctuations such as slow drift do not average down well. That is the job of the "subtraction" in the next step.')],
+ q:TR('흔들림 5%인 신호를 0.5%로 줄이려면 몇 샷?','How many shots reduce a 5% fluctuation to 0.5%?'),a:TR('10배 줄여야 하니 100샷.','A 10-fold reduction, so 100 shots.')},
+{t:TR('기준선 빼기: 게이트 두 개 (신호 − 배경)','Baseline subtraction: two gates (signal − background)'),ec:TR('신호 창과 배경 창 (출력에 느린 오프셋이 얹힘, 예시)','Signal and background windows (slow offset on the output, example)'),mc:TR('샷마다 값 (40샷)','Value per shot (40 shots)'),
+ tg:[{k:'b',l:TR('배경 창 값을 뺀다','subtract the background window'),on:false}],
+ e:(v,tg)=>{const P=plot({x:[0,8],y:[-.1,1.5],xt:[0,2,4,6,8].map(x=>({v:x,l:String(x)})),xl:TR('트리거 뒤 시간 (µs)','time after trigger (µs)'),yl:TR('검출기 출력 (상대)','detector output (relative)'),T:30});
+  return P.s+bxGate(P,.6,3.1,'var(--s4)',1,'')+bxGate(P,5.2,7.7,'var(--s5)',2,'')+bxShot(P,8,.3,.04,57)+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(.3)}" y2="${P.Y(.3)}" class="lvl2"/>`+T(P.R,P.Y(.3)+16,TR('오프셋 (전기 잡음, 기준선)','offset (electrical noise, baseline)'),'sub','end')
+   +T(P.L+6,P.T-10,tg.b?TR('값 = ① 넓이 − ② 넓이 (폭이 같음)','value = area ① − area ② (equal widths)'):TR('값 = ① 넓이 (오프셋도 같이 더해짐)','value = area ① (offset added too)'),'sub')},
+ m:(v,tg)=>{const off=i=>.3+.25*Math.sin(i/5)+.1*Math.sin(i/2.3),A=1.18;const P=plot({x:[0,41],y:[0,2.6],xt:[1,10,20,30,40].map(x=>({v:x,l:String(x)})),yt:[{v:0,l:'0'},{v:1,l:'1'},{v:2,l:'2'}],xl:TR('샷 번호','shot number'),yl:TR('적분값 (상대)','integral (relative)'),T:30});
+  const pts=f=>Array.from({length:40},(_,k)=>[P.X(k+1),P.Y(f(k+1))]);
+  let s=P.s+`<g data-n="1">`+PL(pts(i=>A+1.5*off(i)+.03*bxR(i)),'var(--s4)',{w:1.8})+'</g>';
+  if(tg.b)s+=`<g data-n="2">`+PL(pts(i=>A+.03*bxR(i)+.03*bxR(i+50)),'var(--s3)',{w:2.2})+'</g>'+T(P.X(40),P.Y(A)+18,TR('① − ②: 오프셋이 지워짐','① − ②: offset removed'),'sub','end','var(--s3)');
+  return s+T(P.X(40),P.Y(2.45),TR('① 신호 창만: 오프셋 따라 출렁임','① signal window only: follows the offset'),'sub','end','var(--s4)')},
+ read:[TR('검출기 출력에는 신호 말고도 느리게 변하는 오프셋(전기 잡음, 기준선 흔들림)이 얹힌다. 신호 창만 적분하면 이 오프셋도 같이 더해진다.','Besides the signal, the detector output carries a slowly varying offset (electrical noise, baseline drift). Integrating the signal window alone adds this offset as well.'),TR(`${c(1,'s4')} 신호 창과 ${c(2,'s5')} 같은 폭의 배경 창(펄스가 없는 시간)을 열어, ① − ②를 값으로 쓴다. 체크박스를 켜면 출렁임이 사라진다.`,`A ${c(1,'s4')} signal window and a ${c(2,'s5')} background window of the same width (at a time with no pulse) are opened, and ① − ② is used as the value. With the checkbox on, the wobble disappears.`),TR('우리 적분기는 빛이 없어도 출력을 약 150 mV(약 1966 counts)로 일부러 띄워 둔다. 잡음이 0에서 잘리지 않게 하려는 것이다. 그래서 빛 없는 값(배경)을 따로 재서 뺀다(논문 A.5.3).','Our integrator deliberately lifts its output to about 150 mV (about 1966 counts) even without light, so that the noise is not clipped at zero. The value without light (background) is therefore measured separately and subtracted (thesis A.5.3).'),TR('pump-probe에서 이웃한 두 샷(펌프 켬, 끔)을 서로 나누거나 빼는 것도 같은 생각이다. 두 샷이 1 ms 떨어져 있어 그사이 느린 흔들림이 거의 같다.','In pump-probe, dividing or subtracting two neighbouring shots (pump on, off) follows the same idea. The two shots are 1 ms apart, so slow fluctuations are almost the same in both.')],
+ q:TR('배경 창을 신호 창보다 2배 넓게 잡으면?','What if the background window is twice as wide as the signal window?'),a:TR('오프셋이 2배로 들어가 제대로 안 지워진다. 폭을 같게 하거나, 폭 비율로 나눠서 뺀다.','The offset enters twice and is not removed properly. The widths are made equal, or the background is scaled by the width ratio before subtracting.')},
+{t:TR('트리거와 지연: 레이저 시계에 맞춰 창을 연다','Trigger and delay: opening the window on the laser clock'),ec:TR('한 샷 안의 순서 (그림은 실제 비율이 아님)','Sequence within one shot (not to scale)'),mc:TR('샷 단위 순서 (1 kHz, 초퍼 500 Hz)','Sequence shot by shot (1 kHz, chopper 500 Hz)'),
+ e:()=>{const X=t=>40+t*62;let s='';
+  s+=T(8,48,TR('① 증폭기 TTL','① amplifier TTL'),'lab')+`<g data-n="1"><rect x="${X(0)}" y="56" width="4" height="14" style="fill:var(--fg)"/></g>`+T(X(0)+10,68,TR('트리거 (펄스 폭 15 ns)','trigger (pulse width 15 ns)'),'sub');
+  s+=T(8,108,TR('② 게이트','② gate'),'lab')+`<g data-n="2"><rect x="${X(.66)}" y="114" width="${X(.66+2.494)-X(.66)}" height="16" style="fill:var(--s4)" fill-opacity=".45" stroke="var(--s4)"/></g>`;
+  s+=LN(X(0)+2,140,X(.66),140,'var(--muted)',{w:1,mk:'g'})+T(X(.33),156,'Td','sub','middle')+LN(X(.66),146,X(3.154),146,'var(--muted)',{w:1})+T(X(1.9),162,'Tw','sub','middle');
+  let d='';for(let k=0;k<=120;k++){const t=4*k/120;d+=(k?' L':'M')+X(t).toFixed(1)+','+(244-bxW(t)*44).toFixed(1)}
+  s+=T(8,190,TR('③ MCT 출력','③ MCT output'),'lab')+`<g data-n="3"><path d="${d}" fill="none" style="stroke:var(--s3)" stroke-width="2"/></g>`+`<line x1="${X(0)}" x2="${X(4)}" y1="244" y2="244" class="ax"/>`+T(X(4),262,TR('시간 →','time →'),'sub','end');
+  return s+T(8,24,TR('광로 길이, 케이블, 검출기 응답만큼 늦게 온다','delayed by beam path, cables, detector response'),'sub')},
+ m:()=>{const X=i=>52+i*42;let s='';
+  s+=T(8,22,TR('레이저 펄스','laser pulses'),'sub')+T(8,74,TR('펌프 (초퍼가 한 샷 걸러 통과)','pump (chopper passes every other shot)'),'sub')+T(8,136,TR('게이트 값','gate values'),'sub');
+  for(let i=0;i<6;i++){const on=i%2===0;s+=`<g data-n="1"><rect x="${X(i)}" y="30" width="3" height="16" style="fill:var(--fg)"/></g>`+(on?`<rect x="${X(i)-1}" y="82" width="5" height="16" style="fill:var(--pump)"/>`:'')+T(X(i)+2,116,on?TR('켬','on'):TR('끔','off'),'sub','middle')
+   +`<g data-n="2"><rect x="${X(i)-8}" y="${on?150:144}" width="20" height="${on?70:76}" style="fill:var(--s3)" fill-opacity="${on?.55:.85}"/></g>`}
+  s+=`<line x1="${X(0)-12}" x2="${X(5)+16}" y1="220" y2="220" class="ax"/>`+T(X(0)+2,238,'0','sub','middle')+T(X(1)+2,238,'1 ms','sub','middle')+T(X(5)+2,238,'5 ms','sub','middle');
+  return s+T(8,264,TR('이웃한 켬·끔 두 샷으로 ΔT/T 하나 (값 차이는 예시)','neighbouring on/off pair → one ΔT/T (example values)'),'sub')},
+ read:[TR('boxcar는 혼자 창을 열지 못한다. 증폭기가 펄스마다 내보내는 TTL 신호를 트리거로 받는다.','A boxcar cannot open its window by itself. It takes as its trigger the TTL signal that the amplifier emits with every pulse.'),TR(`${c(1,'f')} 트리거를 받으면 ${c(2,'s4')} 지연 Td 뒤에 폭 Tw의 게이트를 연다. ${c(3,'s3')} MCT 신호는 광로, 케이블, 검출기 응답만큼 늦게 오므로 Td를 그 시간에 맞춘다.`,`On receiving the ${c(1,'f')} trigger, it opens a gate of width Tw after a ${c(2,'s4')} delay Td. The ${c(3,'s3')} MCT signal arrives late by the optical path, the cables and the detector response, so Td is set to match that time.`),TR('우리 FPAS-0144는 채널 144개(배열 위 줄 64 + 아래 줄 64 + 외부 입력 16)가 같은 트리거로 동시에 적분하고, 각 채널의 16-bit ADC가 값을 숫자로 바꾼다. 읽기만 차례로 한다.','Our FPAS-0144 integrates 144 channels (64 in the upper array row + 64 in the lower row + 16 external inputs) simultaneously on the same trigger, and a 16-bit ADC on each channel converts the value to a number. Only the readout is sequential.'),TR('오른쪽: 레이저 1 kHz, 초퍼 500 Hz라 펌프가 한 샷 걸러 들어간다. 게이트 값도 켬·끔이 번갈아 나오고, 이웃한 두 샷으로 신호를 만든다(값 차이는 예시).','Right: with a 1 kHz laser and a 500 Hz chopper, the pump enters every other shot. The gate values also alternate on/off, and two neighbouring shots make one signal (difference in values: example).'),TR('지연을 맞추는 법: 오실로스코프로 트리거와 MCT 출력을 같이 보고, 창이 펄스를 덮도록 Td를 옮긴다. 현재 장비의 Td, Tw는 직렬 명령으로 읽어 확인해야 한다(확인 필요).','Setting the delay: the trigger and the MCT output are viewed together on an oscilloscope, and Td is moved until the window covers the pulse. The current Td and Tw of the instrument have to be read with serial commands (to be verified).')],
+ q:TR('샘플 위치를 바꿔 광로가 30 cm 길어지면 Td를 바꿔야 하나?','If moving the sample lengthens the optical path by 30 cm, does Td need to change?'),a:TR('30 cm는 약 1 ns 늦어질 뿐이라 µs 단위 게이트에는 거의 영향이 없다. 케이블을 수십 m 바꾸는 정도라야 다시 맞출 필요가 생긴다(케이블 1 m 대략 5 ns).','30 cm is only about 1 ns of delay, so it barely affects a µs-scale gate. Readjustment is needed only when cables change by tens of metres (approx. 5 ns per metre of cable).')},
+{t:TR('레이저 시계에 맞춰 읽어야 한다: boxcar, lock-in, 디지타이저','Reading must follow the laser clock: boxcar, lock-in, digitizer'),ec:TR('샘플이 펄스의 어디를 찍나 (레이저 1000.570 Hz, 예시)','Where the samples land on the pulse (laser 1000.570 Hz, example)'),mc:TR('4초 동안 기록된 값','Values recorded over 4 s'),
+ slider:{min:0,max:2,step:1,init:0,label:TR('읽는 방식','Readout mode'),fmt:v=>[TR('내부 시계 1 kSa/s','internal clock 1 kSa/s'),TR('시작 트리거만','start trigger only'),TR('레이저 TTL을 샘플 시계로','laser TTL as sample clock')][Math.round(v)]},
+ e:v=>{const m=Math.round(v),P=plot({x:[-5,40],y:[-.1,1.2],xt:[0,10,20,30,40].map(x=>({v:x,l:String(x)})),xl:TR('레이저 펄스 뒤 시간 (µs)','time after laser pulse (µs)'),yl:TR('포토다이오드 (상대)','photodiode (relative)'),T:30});
+  let s=P.s+crv(P,bxPD,-5,40,'var(--s3)');const ph0=m===2?3:(m===1?-4:-1.2);
+  for(let k=0;k<70;k++){const ph=m===2?ph0:ph0+k*BX_DEL;if(ph>40)break;s+=`<g data-n="1"><circle cx="${P.X(ph)}" cy="${P.Y(bxPD(ph))}" r="2.8" style="fill:var(--s2)"/></g>`}
+  return s+T(P.R,P.T-12,m===2?TR('모든 샘플이 같은 자리 (펄스마다 한 번)','every sample at the same point (once per pulse)'):TR('샘플마다 0.57 µs씩 밀려 펄스를 훑는다','each sample slips 0.57 µs and sweeps the pulse'),'sub','end')},
+ m:v=>{const m=Math.round(v),P=plot({x:[0,4],y:[-.1,1.2],xt:[0,1,2,3,4].map(x=>({v:x,l:x+' s'})),xl:TR('기록 시간','recording time'),yl:TR('기록 값 (상대)','recorded value (relative)'),T:30});
+  const ph0=m===2?3:(m===1?-4:-600);let d='';
+  for(let k=0;k<=4000;k+=2){let ph=m===2?ph0:((ph0+k*BX_DEL)%1000+1000)%1000;if(m!==2&&ph>990)ph-=1000;d+=(k?' L':'M')+P.X(k/1000).toFixed(1)+','+P.Y(bxPD(ph)).toFixed(1)}
+  return P.s+`<g data-n="1"><path d="${d}" fill="none" style="stroke:var(--s2)" stroke-width="1.4"/></g>`+(m<2?T(P.R,P.T-12,TR('약 1.75 s마다 펄스 모양이 다시 나타남','pulse shape reappears approx. every 1.75 s'),'sub','end'):T(P.R,P.T-12,TR('평평: 펄스마다 같은 자리를 읽음','flat: the same point is read on every pulse'),'sub','end'))},
+ read:[TR('펄스 신호를 시계가 레이저와 안 맞는 장치로 찍으면, 샘플 순간이 펄스에 대해 조금씩 밀린다. 1 kSa/s로 1000.570 Hz 레이저를 찍으면 샘플마다 0.57 µs씩 밀린다.','Recording a pulsed signal with a device whose clock is not locked to the laser makes the sampling instant slip slowly relative to the pulse. Sampling a 1000.570 Hz laser at 1 kSa/s shifts each sample by 0.57 µs.'),TR('20 µs 펄스면 기록의 약 98%가 바닥이고, 약 1.75 s마다 펄스 모양이 느리게 다시 그려진다(주기 = 1 / 0.57 Hz). 신호처럼 보이지만 샘플링이 만든 맥놀이다(오실로스코프 aliasing과 같은 원리).','For a 20 µs pulse, about 98% of the record is baseline, and the pulse shape is slowly redrawn approx. every 1.75 s (period = 1 / 0.57 Hz). It looks like a signal, but it is a beat created by the sampling (the same principle as aliasing on an oscilloscope).'),TR('시작 트리거만 주면 첫 샘플만 맞고 그 뒤는 다시 밀린다. 슬라이더 1번과 2번이 같은 모양인 이유다. 해결은 레이저 TTL을 샘플 시계로 쓰는 것(펄스마다 한 번)이다.','With only a start trigger, just the first sample is aligned and the rest slip again. This is why the first two slider settings look the same. The fix is to use the laser TTL as the sample clock (once per pulse).'),TR('비교 (대략): boxcar = 레이저 트리거로 샷마다 창을 열어 적분, 샷별 값이 남는다. lock-in = 초퍼 같은 변조 주파수 성분만 골라 오래 평균한다. 샷별 값은 남지 않는다(확인 필요). 디지타이저 = MS/s로 파형 전체를 찍고 소프트웨어로 펄스마다 적분한다. 같은 결과지만 데이터가 많다(2초에 약 2 × 10⁶점).','Comparison (approx.): boxcar = opens a window on every shot from the laser trigger and integrates; per-shot values remain. Lock-in = picks out only the component at a modulation frequency such as the chopper frequency and averages it for a long time; per-shot values do not remain (to be verified). Digitizer = records the whole waveform at MS/s and integrates each pulse in software; the same result, but much more data (about 2 × 10⁶ points in 2 s).'),TR('우리 IR pump-probe는 FPAS-0144가 샷마다 트리거되고 DIO 카드로 읽혀 이 문제가 없다(논문 부록 B.3).','In our IR pump-probe, the FPAS-0144 is triggered on every shot and read through a DIO card, so this problem does not arise (thesis Appendix B.3).')],
+ case:TR('<b>사례: 1.7초 주기의 수수께끼.</b> 연구실에서 가시광 pump-probe를 개발할 때, 스테이지를 멈추고 산란광만 받아도 기록에 약 1.7초 주기의 느린 파형이 나타났다. 저역 필터를 달고 포토다이오드를 바꿔도 남았다. 나중에 원자료를 다시 분석해 보니 레이저 반복률이 정확히 1000 Hz가 아니라 1000.570 Hz였고, 내부 시계 1 kSa/s로 찍은 샘플이 펄스를 천천히 훑으며 생긴 맥놀이였다. 트리거를 받은 gated integrator를 넣자 흔들림이 20.8%에서 0.41%로 줄었다. 다만 적분기 출력을 다시 내부 시계로 읽어 1.61초마다 한 점씩 떨어지는 값이 남았고, 1 kHz 저역 필터로 없앴다. 교훈: 시작 트리거만으로는 부족하고, 읽는 시계 자체가 레이저와 맞아야 한다(논문 부록 B).','<b>Case: the 1.7-second mystery.</b> During the development of a visible pump-probe setup in the lab, a slow waveform with a period of about 1.7 s appeared in the record even with the stage stopped and only scattered light reaching the detector. It remained after adding a low-pass filter and changing the photodiode. A later reanalysis of the raw data showed that the laser repetition rate was not exactly 1000 Hz but 1000.570 Hz, and that the samples taken with the internal 1 kSa/s clock were slowly sweeping across the pulse, producing a beat. Adding a triggered gated integrator reduced the fluctuation from 20.8% to 0.41%. The integrator output, however, was again read with the internal clock, which left a value dropping by one point every 1.61 s; a 1 kHz low-pass filter removed it. Lesson: a start trigger alone is not enough; the readout clock itself must be locked to the laser (thesis Appendix B).'),
+ q:TR('레이저가 정확히 1000.000 Hz라면 내부 시계 1 kSa/s로도 괜찮나?','If the laser ran at exactly 1000.000 Hz, would the internal 1 kSa/s clock be fine?'),a:TR('밀림이 0이라 매번 같은 자리를 찍지만, 그 자리가 펄스 위인지는 운이고 두 시계가 조금만 달라져도 다시 밀린다. 레이저 TTL을 시계로 쓰거나 적분기를 샷마다 트리거해야 안전하다.','The slip would be zero, so every sample would land at the same point, but whether that point lies on the pulse is luck, and the slightest drift between the two clocks starts the slip again. Using the laser TTL as the clock, or triggering the integrator on every shot, is the safe choice.')}];
+
+const TABS=[
+ {id:'mo',name:TR('모노크로메이터','Monochromator'),sub:'Czerny-Turner',desc:TR('회절격자가 파장을 각도로 펼치고, 거울 둘과 슬릿 둘이 한 색을 고른다. 분해능, blaze, 고차 회절, 보정까지.','A diffraction grating spreads wavelengths into angles, and two mirrors and two slits select one colour. Resolution, blaze, higher orders and calibration.'),steps:MO},
+ {id:'dt',name:TR('검출기','Detectors'),sub:'MCT · CCD · PMT',desc:TR('광자가 전자가 되는 순간부터. 재료가 정하는 파장 한계, 냉각, PMT 증폭, CCD 읽기, 잡음 세어 보기.','From the moment a photon becomes an electron. Wavelength limits set by the material, cooling, PMT gain, CCD readout, and counting noise.'),steps:DT},
+ {id:'bx',name:'Boxcar',sub:TR('샷마다 숫자 하나로','one number per shot'),desc:TR('검출기의 짧은 펄스를 레이저 트리거에 맞춘 창으로 적분한다. 게이트 위치와 폭, 평균, 기준선 빼기, 트리거, 레이저 시계에 맞춰 읽어야 하는 이유.','Integrates the short detector pulse within a window synchronised to the laser trigger. Gate position and width, averaging, baseline subtraction, triggering, and why readout must follow the laser clock.'),steps:BX}];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>
