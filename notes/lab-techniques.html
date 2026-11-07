@@ -18,6 +18,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15
 .hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
 .hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
 .hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
 .status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
 .hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
 .hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
@@ -77,6 +80,11 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 </div>
 
 <script>
+const LANG='ko';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
 /* ---------- SVG 헬퍼 (모든 노트 공통) ----------
    색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
 const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
@@ -163,16 +171,16 @@ const FU=[
  read:['A = εcl. A가 0.1–1 사이일 때 정량이 가장 믿을 만하다.','IR: 진동 흡수는 ε가 작지만(대략 10–1000 M⁻¹cm⁻¹), 용매나 순수 액체는 농도가 수–수십 M이라 A = 1이 μm에서 이미 온다. 그래서 FTIR 투과 셀은 μm급.','UV-Vis: 전자 전이는 ε가 크고(10³–10⁵) 보통 μM–mM 묽은 용액을 재므로 cm급 큐벳이 맞다.','ATR은 셀 두께 대신 침투 깊이 dₚ = λ / (2π n₁ √(sin²θ − (n₂/n₁)²))가 경로를 정한다. dₚ ∝ λ라 저파수 밴드가 상대적으로 세게 보인다(ATR 보정이 필요한 이유).','KBr 펠릿, DRIFTS(분말 확산 반사)도 고체 FTIR에 쓴다.'],
  q:'물 1640 cm⁻¹ 밴드를 A ≈ 1로 보려면 셀 두께는?',a:'약 10 μm. ε ≈ 20 M⁻¹cm⁻¹, c = 55 M로 l = 1/(εc) ≈ 9 μm (대략값).'},
 {t:'장비: 간섭계와 분산형',ec:'FTIR (Michelson 간섭계)',mc:'UV-Vis (이중 빔 분산형)',
- e:()=>box(8,120,46,30,'광원')+LN(54,135,120,135)+`<line x1="110" y1="125" x2="130" y2="145" style="stroke:var(--fg)" stroke-width="2.5"/>`+T(138,160,'빔 분할기','sub')
+ e:()=>box(8,120,46,30,'광원')+LN(54,135,120,135)+`<line x1="110" y1="145" x2="130" y2="125" style="stroke:var(--fg)" stroke-width="2.5"/>`+T(138,160,'빔 분할기','sub')
   +LN(120,135,120,52)+L(100,140,46)+T(146,50,'고정 거울','sub')
   +LN(120,135,222,135)+`<line x1="228" y1="112" x2="228" y2="158" style="stroke:var(--fg)" stroke-width="3"/>`+LN(240,100,266,100,'var(--s1)',{mk:'s1'})+LN(256,100,234,100,'var(--s1)',{mk:'s1'})+T(238,88,'이동 거울','sub')
   +LN(120,135,120,250,'var(--pump)',{mk:'g'})+`<rect x="110" y="190" width="20" height="16" style="fill:var(--s2)" fill-opacity=".35"/>`+T(138,202,'샘플','sub')
   +box(96,252,48,24,'검출기')+T(160,268,'→ 간섭무늬 → FT → 스펙트럼','sub')+T(8,24,'HeNe 레이저가 거울 위치를 기준 잡음','sub'),
- m:()=>box(6,120,50,30,'D₂ · W')+LN(56,135,96,135)+`<rect x="96" y="124" width="10" height="22" class="dev"/>`+T(101,166,'회절격자','sub','middle')
-  +LN(106,135,150,135)+`<line x1="142" y1="127" x2="158" y2="143" style="stroke:var(--fg)" stroke-width="2.5"/>`
-  +PL([[150,135],[150,90],[236,90]],'var(--pump)',{mk:'g'})+PL([[150,135],[150,180],[236,180]],'var(--pump)',{mk:'g'})
-  +`<rect x="186" y="82" width="16" height="16" style="fill:var(--s2)" fill-opacity=".35"/>`+T(194,74,'샘플','sub','middle')+`<rect x="186" y="172" width="16" height="16" class="dev"/>`+T(194,206,'기준 (용매)','sub','middle')
-  +box(240,76,58,28,'검출기')+box(240,166,58,28,'검출기')+T(14,24,'한 파장씩 골라 샘플과 기준을 번갈아 잰다','sub'),
+ m:()=>box(6,120,50,30,'D₂ · W')+LN(56,135,66,135)+box(66,122,56,26,'단색화')+T(94,166,'회절격자로 한 파장','sub','middle')
+  +LN(122,135,150,135)+`<line x1="142" y1="127" x2="158" y2="143" style="stroke:var(--fg)" stroke-width="2.5"/>`+T(150,112,'빔 분할기','sub','middle')
+  +LN(150,135,236,135,'var(--pump)',{mk:'g'})+PL([[150,135],[150,180],[236,180]],'var(--pump)',{mk:'g'})+`<line x1="142" y1="172" x2="158" y2="188" style="stroke:var(--fg)" stroke-width="2.5"/>`+T(140,200,'거울','sub','end')
+  +`<rect x="186" y="127" width="16" height="16" style="fill:var(--s2)" fill-opacity=".35"/>`+T(194,119,'샘플','sub','middle')+`<rect x="186" y="172" width="16" height="16" class="dev"/>`+T(194,206,'기준 (용매)','sub','middle')
+  +box(240,121,58,28,'검출기')+box(240,166,58,28,'검출기')+T(14,24,'한 파장씩 골라 샘플과 기준을 함께 잰다','sub'),
  read:['FTIR은 모든 파장을 한꺼번에 받아 간섭무늬(interferogram)를 찍고 푸리에 변환한다.','장점 셋: 한꺼번에 받으니 잡음에 유리(Fellgett), 슬릿이 없어 빛이 많다(Jacquinot), HeNe 레이저로 파수 정확도가 높다(Connes).','FTIR은 보통 single-beam이라 배경을 따로 찍어 나눈다. 공기 중 H₂O, CO₂가 변하면 그대로 남으므로 퍼지와 배경 갱신이 중요하다.','UV-Vis는 회절격자로 한 파장씩 고르고, 이중 빔이면 샘플과 기준(용매)을 동시에 비교해 램프 흔들림을 지운다.'],
  q:'FTIR 스펙트럼에 2350 cm⁻¹ 근처 위아래로 출렁이는 피크가 생기면?',a:'공기 중 CO₂가 배경을 찍을 때와 달라진 것. 퍼지 상태를 확인하고 배경을 다시 찍는다.'}];
 
@@ -187,7 +195,7 @@ const RA=[
   const nu=1000,n0=18797,r=((n0+nu)/(n0-nu))**4*Math.exp(-1.4388*nu/v);
   return P.s+crv(P,x=>lor(x,1000,18),400,1600,'var(--s3)')+crv(P,x=>r*lor(x,-1000,18),-1600,-400,'var(--s5)')+LN(P.X(0),P.Y(0),P.X(0),P.Y(1.15),'var(--pump)',{w:2.5})
    +`<g data-n="1">${badge(P.X(0)-16,P.Y(.9),1,'var(--pump)')}</g>`+T(P.X(0)-8,P.Y(1.08),'Rayleigh (필터로 제거)','sub','end')
-   +`<g data-n="2">${badge(P.X(1000)+18,P.Y(.85),2,'var(--s3)')}</g>`+T(P.X(1550),P.Y(.75),'Stokes','sub','end')
+   +`<g data-n="2">${badge(P.X(1000)+18,P.Y(.85),2,'var(--s3)')}</g>`+T(P.X(1550),P.Y(.62),'Stokes','sub','end')
    +`<g data-n="3">${badge(P.X(-1000)+20,P.Y(Math.max(r,.1)+.08),3,'var(--s5)')}</g>`+T(P.X(-1550),P.Y(.75),'anti-Stokes','sub')
    +T(P.R,P.T-8,'I(aS)/I(S) = '+r.toFixed(3),'lab','end')},
  read:[`${c(1,'g')} Rayleigh: 들어온 빛과 같은 에너지로 나간다. 압도적으로 세서 필터로 막는다.`,`${c(2,'s3')} Stokes: 분자가 진동 하나(v=0→1)를 가져가 그만큼 낮은 에너지로 나간다.`,`${c(3,'s5')} anti-Stokes: 이미 v=1에 있던 분자가 진동 에너지를 내줘 더 높은 에너지로 나간다. v=1 인구가 적어 약하다.`,'세기 비 I(aS)/I(S) ≈ ((ν₀+ν)/(ν₀−ν))⁴ · exp(−hcν/kT). 슬라이더로 온도를 올려 보면 anti-Stokes가 자란다(532 nm, 1000 cm⁻¹ 가정). 그래서 Raman 온도계로 쓴다.','Raman shift = ω₀ − ω_산란. 레이저를 바꿔도 shift 값은 그대로다.','"가상 상태"는 실제 준위가 아니라 빛과 분자가 잠깐 섞인 상태를 그린 것.'],
@@ -216,7 +224,7 @@ const RA=[
  e:()=>box(6,30,56,26,'레이저')+LN(62,43,150,43,'var(--s3)',{mk:'s3'})+`<line x1="150" y1="33" x2="170" y2="53" style="stroke:var(--fg)" stroke-width="2.5"/>`+T(176,66,'다이크로익 미러','sub')
   +LN(160,43,160,128,'var(--s3)',{mk:'s3'})+`<ellipse cx="160" cy="140" rx="26" ry="6" class="dev"/>`+T(194,144,'대물렌즈','sub')+`<rect x="140" y="160" width="40" height="12" style="fill:var(--s2)" fill-opacity=".35"/>`+T(194,170,'샘플','sub')
   +LN(168,156,168,60,'var(--s5)',{dash:1,mk:'s5'})+T(178,100,'산란광 (180°)','sub')
-  +PL([[160,43],[160,20],[250,20]],'var(--s5)',{dash:1})+`<rect x="250" y="10" width="10" height="20" style="fill:var(--s4)" fill-opacity=".7"/>`+T(244,46,'notch / edge 필터','sub','middle')
+  +PL([[168,60],[168,20],[250,20]],'var(--s5)',{dash:1})+`<rect x="250" y="10" width="10" height="20" style="fill:var(--s4)" fill-opacity=".7"/>`+T(282,46,'notch / edge 필터','sub','end')
   +LN(260,20,290,20,'var(--s5)',{dash:1})+PL([[290,20],[290,200]],'var(--s5)',{dash:1,mk:'s5'})+box(250,200,64,40,'분광기','+ CCD'),
  m:()=>{const P=plot({x:[-1500,1500],y:[0,1.1],xt:[{v:-1000,l:'−1000'},{v:0,l:'0'},{v:1000,l:'+1000'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'Raman shift (cm⁻¹)',yl:'투과율',T:30});
   return P.s+crv(P,x=>Math.abs(x)<150?0:1,-1500,1500,'var(--s4)',{n:600})+crv(P,x=>x<120?0:1,-1500,1500,'var(--s2)',{n:600,dash:1})+`<line x1="${P.X(-1450)}" x2="${P.X(-1450)+26}" y1="${P.Y(.72)}" y2="${P.Y(.72)}" style="stroke:var(--s4)" stroke-width="2"/>`+T(P.X(-1450)+32,P.Y(.72)+4,'notch','sub')+`<line x1="${P.X(-1450)}" x2="${P.X(-1450)+26}" y1="${P.Y(.48)}" y2="${P.Y(.48)}" style="stroke:var(--s2)" stroke-width="2" stroke-dasharray="5 4"/>`+T(P.X(-1450)+32,P.Y(.48)+4,'edge','sub')},
@@ -227,6 +235,7 @@ const RA=[
 function carsE(o={}){let s=L(30,262,250)+T(266,254,'v=0','sub')+(o.nr?L(30,262,212,'lvl2')+T(266,216,'(공명 없음)','sub'):L(30,262,212)+T(266,216,'v=1','sub'))+L(30,262,80,'lvl2')+L(30,262,42,'lvl2')+T(266,46,'가상','sub')+T(266,84,'가상','sub');
  s+=A(70,249,70,83,'s3',1,{dx:-14})+A(95,81,95,210,'s1',2,{dx:14})+A(140,211,140,45,'s3',3,{dx:-14})+A(170,43,170,247,'s2',4,{dx:14});
  if(!o.nr)s+=`<path d="M22,250 H16 V212 H22" fill="none" style="stroke:var(--muted)"/>`+T(12,235,'Ω','sub','end');return s}
+const caExp=x=>{const e=Math.floor(Math.log10(x)),m=x/10**e,sp=String(e).split('').map(ch=>'⁰¹²³⁴⁵⁶⁷⁸⁹'['0123456789'.indexOf(ch)]||'⁻').join('');return Math.abs(e)<2?x.toPrecision(2):m.toFixed(1)+' × 10'+sp};
 const CA=[
 {t:'에너지 그림: 네 개의 빛',ec:'에너지 그림',mc:'빛의 절대 파수 (예: CH 신축)',slider:{min:2700,max:3100,step:5,init:2900,label:'Ω = ω_p − ω_S',fmt:v=>Math.round(v)+' cm⁻¹'},
  e:()=>carsE()+T(40,24,'pump · Stokes · probe(= pump) · anti-Stokes','sub'),
@@ -265,12 +274,12 @@ const CA=[
  read:['χ⁽³⁾ = χ_R(진동 공명) + χ_NR(전자 응답). χ_NR은 진동과 상관없이 늘 있고 주파수에 거의 무관하다. 물, 유리 기판도 낸다.','신호 ∝ |χ|² = χ_NR² + 2χ_NR·Re χ_R + |χ_R|². 가운데 간섭 항 때문에 모양이 비틀린다.','슬라이더로 χ_NR을 키워 보자. 피크는 낮은 Ω 쪽으로 밀리고 높은 쪽에 움푹한 dip이 생긴다(분산형 모양).','약한 진동은 배경 위에 dip으로만 보이거나 묻힐 수 있다.','CARS 피크를 그대로 Raman 피크로 읽으면 위치와 세기가 틀린다. 위상 복원(MEM, Kramers–Kronig)으로 Im χ를 뽑아 비교한다.'],
  q:'χ_NR이 크면 피크 꼭대기는 어느 쪽으로 이동하나?',a:'진동수보다 낮은 Ω 쪽. 높은 쪽에는 dip이 생긴다.'},
 {t:'배경 줄이기: probe를 늦춘다',ec:'펄스 타이밍',mc:'신호 vs probe 지연 τ (log)',slider:{min:-200,max:2500,step:10,init:0,label:'probe 지연 τ',fmt:v=>Math.round(v)+' fs',play:1},
- e:v=>{const P=plot({x:[-400,2600],y:[0,1.2],xt:[{v:0,l:'0'},{v:1000,l:'1 ps'},{v:2000,l:'2 ps'}],xl:'시간',L:20,noy:1,T:40,B:200});const gp=(t0,k,h)=>crv(P,t=>h*Math.exp(-(((t-t0)/60)**2)),t0-250,t0+250,COL[k],{n:120});
+ e:v=>{const P=plot({x:[-400,2600],y:[0,1.2],xt:[{v:0,l:'0'},{v:1000,l:'1'},{v:2000,l:'2'}],xl:'시간 (ps)',L:20,noy:1,T:40,B:200});const gp=(t0,k,h)=>crv(P,t=>h*Math.exp(-(((t-t0)/60)**2)),t0-250,t0+250,COL[k],{n:120});
   return P.s+gp(0,'s3',1)+gp(0,'s1',.8)+gp(v,'s3',.7)+T(P.X(0),P.Y(1.08),'pump + Stokes','sub','middle')+T(P.X(v),P.Y(.8),'probe','sub','middle')+T(20,24,'pump·Stokes가 진동 결맞음을 만들고, probe가 τ 뒤에 읽는다','sub')},
  m:v=>{const P=plot({x:[-300,2500],y:[1e-4,1.2],logy:1,xt:[{v:0,l:'0'},{v:1000,l:'1000'},{v:2000,l:'2000'}],yt:[{v:1e-4,l:'10⁻⁴'},{v:1e-2,l:'10⁻²'},{v:1,l:'1'}],xl:'τ (fs)',yl:'신호',T:26});
   const nr=t=>Math.exp(-((t/85)**2)),rs=t=>.3*Math.exp(-2*Math.max(t,0)/1000)*(t<0?Math.exp(-((t/85)**2)):1);
   return P.s+crv(P,nr,-300,400,'var(--s6)',{clip:[1e-4,1.2]})+crv(P,rs,-300,2500,'var(--s2)',{clip:[1e-4,1.2]})+`<line x1="${P.X(v)}" x2="${P.X(v)}" y1="${P.T}" y2="${P.B}" class="cur" style="stroke:var(--accent)" stroke-dasharray="3 3"/>`
-   +T(P.X(250),P.Y(.004),'NRB','sub','start','var(--s6)')+T(P.X(1600),P.Y(.04),'공명 (T₂ ≈ 1 ps)','sub','start','var(--s2)')+T(P.R,P.T-6,'공명 / NRB = '+(rs(v)/Math.max(nr(v),1e-12)).toExponential(1),'lab','end')},
+   +T(P.X(250),P.Y(.004),'NRB','sub','start','var(--s6)')+T(P.X(1600),P.Y(.04),'공명 (T₂ ≈ 1 ps)','sub','start','var(--s2)')+T(P.R,P.T-6,'공명 / NRB = '+caExp(rs(v)/Math.max(nr(v),1e-12)),'lab','end')},
  read:['비공명 응답은 전자가 즉시 따라오는 것이라 펄스가 겹칠 때만 있다.','진동 결맞음은 dephasing 시간 T₂(C–H 밴드 대략 1 ps) 동안 남는다. 신호는 exp(−2τ/T₂)로 준다.','probe를 늦추면 NRB가 먼저 사라져 공명 / NRB 비가 크게 오른다. 재생해 보자.','대가: 공명 신호도 줄고, 짧은 펄스는 대역이 넓어 스펙트럼 해상도와 맞바뀐다.','다른 방법: 편광 CARS, epi(후방) 검출, heterodyne(간섭계형), 그리고 구조적으로 NRB가 없는 SRS.','이 지연 τ는 2D 페이지의 시간 구간과 같은 개념이다(진동 결맞음을 probe가 읽음).'],
  q:'그림의 T₂ ≈ 1 ps는 Raman 선폭으로 몇 cm⁻¹ 정도인가?',a:'T₂ = 1/(πcΓ)에서 Γ ≈ 1/(π · 3×10¹⁰ cm/s · 10⁻¹² s) ≈ 10 cm⁻¹ (FWHM, 대략).'},
 {t:'광대역 CARS와 기법 비교',ec:'multiplex: 좁은 pump + 넓은 Stokes',mc:'광대역 CARS 스펙트럼 (예시)',
@@ -279,13 +288,13 @@ const CA=[
    +T(P.X(9600),P.Y(1.08),'넓은 Stokes','sub','middle')+T(P.X(12500)+6,P.Y(1.15),'좁은 pump','sub')+T(P.X(15400),P.Y(.8),'넓은 신호','sub','middle')+TM(20,24,['여러 Ω를 한 번에 → 분광기로 스펙트럼 한 장'],'sub')},
  m:()=>{const P=plot({x:[2780,3050],y:[0,3.2],xt:[{v:2850,l:'2850'},{v:2930,l:'2930'},{v:3000,l:'3000'}],xl:'Raman shift (cm⁻¹)',yl:'|χ|² (상대)',T:26});
   const nr=.6,R=x=>{let re=0,im=0;[[2850,1,9],[2930,.6,12]].forEach(([w,a,g])=>{const d=w-x,q=d*d+g*g;re+=a*g*d/q;im+=a*g*g/q});return(nr+re)**2+im*im};
-  return P.s+crv(P,R,2780,3050,'var(--s2)',{n:400})+T(P.X(2850),P.Y(2.9),'CH₂ (지질)','sub','middle')+T(P.X(2935),P.Y(1.9),'CH₃','sub','middle')+T(P.R,P.T-6,'χ_NR = 0.6 가정','sub','end')},
+  return P.s+crv(P,R,2780,3050,'var(--s2)',{n:400})+T(P.X(2850),P.Y(2.15),'CH₂ (지질)','sub','middle')+T(P.X(2928),P.Y(1.02),'CH₃','sub','middle')+T(P.R,P.T-6,'χ_NR = 0.6 가정','sub','end')},
  read:['좁은 pump와 넓은 Stokes를 쓰면 여러 Ω를 동시에 들뜨게 해 분광기로 CARS 스펙트럼 한 장을 받는다(multiplex, 광대역 CARS).','현미경 이미징은 보통 한 Ω(예: 지질 CH₂ 2850 cm⁻¹)에 맞춰 놓고 빠르게 훑는다.','자발 Raman: 약하고 형광에 약하지만, 선형이고 정량이 쉽다.','CARS: 강하고 빠르며 형광에서 자유롭다. 대신 NRB가 있고 N²에 비례해 정량이 까다롭다.','SRS(유도 Raman): CARS처럼 강하면서 NRB가 없고 N에 비례한다. 대신 작은 세기 변화를 lock-in으로 잡아야 한다.'],
  q:'세포 지질 이미지에 2850 cm⁻¹를 고르는 이유는?',a:'CH₂ 대칭 신축이 지질에 빽빽해서 N²로 신호가 매우 크고, 다른 성분과 대비가 좋기 때문.'}];
 
 /* ======================= DEMS · OEMS ======================= */
 const FR={'H₂':{2:100,1:2},'H₂O':{18:100,17:23,16:1},'N₂':{28:100,14:14},'O₂':{32:100,16:11},'CO':{28:100,12:5,16:2},'CO₂':{44:100,28:10,16:10,12:9,45:1},'C₂H₄':{28:100,27:62,26:60,25:12,24:4,14:6}};
-const FK={'H₂':'s6','H₂O':'g','N₂':'f','O₂':'s3','CO':'s4','CO₂':'s1','C₂H₄':'s5'};
+const FK={'H₂':'s6','H₂O':'s2','N₂':'f','O₂':'s3','CO':'s4','CO₂':'s1','C₂H₄':'s5'};
 function chain(){return `<rect x="8" y="108" width="74" height="64" rx="4" class="dev"/>`+LN(30,118,30,160,'var(--fg)',{w:2.5})+LN(58,118,58,160,'var(--fg)',{w:2.5})+T(45,188,'전기화학 셀','sub','middle')
  +LN(82,140,98,140)+box(98,124,40,32,'계면')+LN(138,140,154,140)+`<rect x="154" y="88" width="160" height="104" rx="6" fill="none" style="stroke:var(--muted)" stroke-dasharray="4 3"/>`+T(234,82,'진공 (10⁻⁶ mbar 수준)','sub','middle')
  +box(160,118,46,44,'이온원','70 eV')+[124,134,146,156].map(y=>LN(214,y,262,y,'var(--fg)',{w:2})).join('')+T(238,176,'사중극자','sub','middle')+box(270,118,40,44,'검출')+LN(206,140,214,140)+LN(262,140,270,140)
@@ -294,7 +303,7 @@ const MS=[
 {t:'무엇을 보나: 전류를 기체별로 나누기',ec:'DEMS / OEMS 구성',mc:'전위 주사 중 전류와 이온 전류 (예시)',
  e:()=>chain()+T(8,24,'셀에서 나온 기체 → 계면 → 진공 → 질량 분석','sub'),
  m:()=>{const E=t=>t<50?.4-t*.02:-.6+(t-50)*.02,I=t=>-Math.min(1,Math.exp((-.25-E(t))/.06)*.08);
-  const P1=plot({x:[0,100],y:[-1.1,.1],T:26,B:110,L:44,noy:0,yt:[{v:0,l:'0'}],yl:'전류',ylx:12});const P2=plot({x:[0,100],y:[0,1.1],T:136,B:230,L:44,xt:[{v:0,l:'0'},{v:50,l:'50'},{v:100,l:'100 s'}],xl:'시간',yl:'m/z 2',ylx:12});
+  const P1=plot({x:[0,100],y:[-1.1,.1],T:26,B:110,L:44,noy:0,yt:[{v:0,l:'0'}],yl:'전류 (상대)',ylx:12});const P2=plot({x:[0,100],y:[0,1.1],T:136,B:230,L:44,xt:[{v:0,l:'0'},{v:50,l:'50'},{v:100,l:'100'}],xl:'시간 (s)',yl:'m/z 2 (상대)',ylx:12});
   return P1.s+P2.s+crv(P1,I,0,100,'var(--fg)',{n:300})+crv(P2,t=>-I(t-1.5),0,100,'var(--s6)',{n:300})+`<g data-n="1">${badge(P1.X(50)+22,P1.Y(-.9),1,'var(--fg)')}</g><g data-n="2">${badge(P2.X(50)+22,P2.Y(.9),2,'var(--s6)')}</g>`+T(P1.R,P1.T-6,'음전위로 갔다 돌아오는 주사','sub','end')},
  read:['전기화학 셀에서 나오는 기체(H₂, O₂, CO₂, CO, C₂H₄ 등)를 질량 분석기로 실시간 측정한다.',`${c(1,'f')} 전류는 전극에서 일어나는 모든 반응의 합이라, 무엇이 얼마나 일어났는지는 모른다.`,`${c(2,'s6')} MS는 기체를 질량(m/z)별로 나눠, 예를 들어 이 전류 중 수소 발생(m/z 2)이 얼마인지 알려 준다.`,'배터리에서는 전해질 분해, SEI 형성, 양극 산소 방출 같은 기체 생성 반응을 직접 확인하는 도구다.','DEMS와 OEMS는 셀과 진공을 잇는 "계면"이 다르다. 다음 두 단계에서 비교한다.'],
  q:'전류만 재서는 알 수 없는 것은?',a:'어떤 반응이 몇 %씩 섞여 있는지(Faraday 효율)와 어떤 기체가 나왔는지.'},
@@ -302,7 +311,7 @@ const MS=[
  e:()=>`<rect x="96" y="36" width="200" height="88" style="fill:var(--s2)" fill-opacity=".14"/>`+T(196,84,'전해질','lab','middle')+`<rect x="96" y="124" width="200" height="8" style="fill:var(--fg)" fill-opacity=".75"/>`+T(90,132,'다공성 전극','sub','end')
   +`<rect x="96" y="132" width="200" height="30" style="fill:var(--soft);stroke:var(--line)"/>`+[116,156,196,236,272].map(x=>`<rect x="${x}" y="132" width="6" height="30" style="fill:var(--panel)"/>`).join('')+T(90,152,'PTFE 막','sub','end')
   +T(90,194,'진공 → MS','lab','end')+[119,199,275].map(x=>LN(x,120,x,206,'var(--s6)',{dash:1,mk:'s6'})).join('')+T(14,24,'전극을 막 위에 직접 올려 기체가 수 μm만 이동','sub')+T(14,240,'소수성 막: 액체는 막고 기체는 통과','sub')+T(14,256,'차등 배기(2단 펌프)로 MS 진공 유지','sub'),
- m:()=>{const P=plot({x:[0,10],y:[0,1.15],xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10 s'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'시간',yl:'정규화 신호',T:26});
+ m:()=>{const P=plot({x:[0,10],y:[0,1.15],xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'시간 (s)',yl:'정규화 신호',T:26});
   const st=t=>t>2&&t<7?1:0,ion=t=>t<2?0:t<7?1-Math.exp(-(t-2)/.4):(1-Math.exp(-5/.4))*Math.exp(-(t-7)/.4);
   return P.s+crv(P,st,0,10,'var(--fg)',{n:500})+crv(P,ion,0,10,'var(--s2)',{n:500})+T(P.X(7.4),P.Y(.95),'전류','sub')+T(P.X(.2),P.Y(1.1),'이온 전류 (τ ≈ 0.4 s 가정)','sub','start','var(--s2)')},
  read:['다공성 전극을 소수성 막(PTFE) 위에 직접 올린다. 생성 기체가 수 μm만 지나 바로 진공으로 빠진다.','그래서 응답이 빠르고(대략 1초 안쪽), 이온 전류가 기체 생성 "속도"를 따라간다. 전류와 나란히 비교할 수 있다.','"differential"은 신호가 생성 속도(미분량)에 비례한다는 뜻으로 쓴다. 생성물을 모아 재는 적분형 방식과 대비된다.','막을 통해 들어오는 기체·증기가 많아 차등 배기(두 단 펌프)로 MS 쪽 진공을 지킨다.','수계 전기촉매(HER, OER, CO·메탄올 산화)에서 고전적인 방법. 휘발성 유기 전해질은 증기가 많이 넘어와 그대로 쓰기 어렵다.'],
@@ -312,7 +321,7 @@ const MS=[
   +`<rect x="60" y="150" width="110" height="10" style="fill:var(--fg)" fill-opacity=".7"/><rect x="60" y="164" width="110" height="10" style="fill:var(--s2)" fill-opacity=".3"/><rect x="60" y="178" width="110" height="10" style="fill:var(--fg)" fill-opacity=".7"/>`+T(115,206,'전극 · 분리막 · 전극','sub','middle')
   +PL([[150,74],[150,40],[290,40],[290,100]],'var(--s6)',{w:2,mk:'s6'})+T(220,32,'모세관 (조금씩 샘플링)','sub','middle')+box(260,100,50,30,'MS')
   +PL([[20,100],[44,100]],'var(--pump)',{dash:1,mk:'g'})+T(14,90,'Ar','sub')+T(8,256,'운반 기체(Ar)로 흘리는 방식도 있다 (구조는 연구실마다 다름)','sub'),
- m:()=>{const P=plot({x:[0,10],y:[0,1.1],xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10 h'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'시간',yl:'정규화',T:26});
+ m:()=>{const P=plot({x:[0,10],y:[0,1.1],xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'시간 (h)',yl:'정규화 (상대)',T:26});
   const rate=t=>Math.exp(-(((t-1)/.45)**2))+.6*Math.exp(-(((t-8.5)/.8)**2));let acc=[0],dt=.01;for(let t=dt;t<=10.001;t+=dt)acc.push(acc[acc.length-1]+rate(t)*dt);const tot=acc[acc.length-1];
   return P.s+crv(P,t=>acc[Math.min(acc.length-1,Math.round(t/dt))]/tot,0,10,'var(--s3)',{n:400})+crv(P,t=>rate(t),0,10,'var(--s2)',{n:400,dash:1})+`<g data-n="1">${badge(P.X(6),P.Y(.75),1,'var(--s3)')}</g><g data-n="2">${badge(P.X(1)+20,P.Y(.95),2,'var(--s2)')}</g>`},
  read:['배터리 셀을 닫고, 위쪽 빈 공간(헤드스페이스)에 기체가 쌓이게 둔다. 가는 모세관으로 아주 조금씩 MS로 빼낸다.',`${c(1,'s3')} 신호는 쌓인 양(적분)에 가깝다. ${c(2,'s2')} 시간으로 미분해 생성 속도를 얻는다.`,'배터리는 수 시간 단위로 돌아가므로 초 단위 응답보다 몇 μmol이 나왔는지가 중요하다.','닫힌 셀이라 휘발성 유기 전해질 증기를 MS로 덜 끌어가고, 리튬처럼 반응성 큰 재료도 다룰 수 있다.','샘플링으로 셀 기체가 조금씩 빠지므로 압력·부피 보정이 필요하다. 운반 기체(Ar)를 흘려 속도에 비례하는 신호를 받는 설계도 있다.'],
@@ -323,13 +332,13 @@ const MS=[
   +LN(94,60,94,124,'var(--s4)',{dash:1,mk:'s4'})+T(102,72,'e⁻ 70 eV','sub')+LN(140,140,176,140,'var(--fg)',{mk:'f'})
   +[['CO₂⁺','44',70],['CO⁺','28',110],['O⁺','16',150],['C⁺','12',190]].map(([a,b,y])=>T(190,y,a,'lab')+T(240,y,'m/z '+b,'sub')).join('')+T(14,24,'분자가 이온이 되면서 일부는 쪼개진다','sub')+T(14,250,'한 기체가 여러 m/z에, 한 m/z에 여러 기체가','sub'),
  m:(v,tg)=>{const on=Object.keys(FR).filter(k=>tg[k]);const tot={};on.forEach(k=>Object.entries(FR[k]).forEach(([m,h])=>tot[m]=(tot[m]||0)+h));const ymax=Math.max(100,...Object.values(tot))*1.08;
-  const P=plot({x:[0,48],y:[0,ymax],xt:[2,12,16,28,32,44].map(v=>({v,l:String(v)})),xl:'m/z',yl:'세기 (상대)',T:26});
+  const P=plot({x:[0,48],y:[0,ymax],xt:[2,12,16,18,28,32,44].map(v=>({v,l:String(v)})),xl:'m/z',yl:'세기 (상대)',T:26});
   let s=P.s;const base={};on.forEach(k=>Object.entries(FR[k]).forEach(([m,h])=>{const b=base[m]||0;s+=`<rect x="${P.X(+m)-3}" y="${P.Y(b+h)}" width="6" height="${P.Y(b)-P.Y(b+h)}" style="fill:${COL[FK[k]]}"/>`;base[m]=b+h}));
   s+=on.map((k,i)=>`<rect x="${P.R-56}" y="${30+i*15}" width="9" height="9" style="fill:${COL[FK[k]]}"/>`+T(P.R-43,39+i*15,k,'sub')).join('');return s},
  read:['이온원에서 70 eV 전자가 분자를 이온화한다. 이때 분자가 일부 쪼개져 한 기체가 여러 m/z에 나온다.','아래 체크박스로 기체를 켜고 꺼 보자. m/z 28에 CO, N₂, C₂H₄, CO₂ 조각이 모두 겹친다.','그래서 C₂H₄는 m/z 26·27로, CO₂는 m/z 44로 추적하고, CO는 m/z 28에서 다른 기체 몫을 빼서 구한다.','정량할 때는 각 기체의 조각 비율을 보정 가스로 직접 재서 연립으로 나눈다.','그림의 비율은 NIST 기준 대략값이다. 장비와 이온원 조건마다 조금 다르다.'],
  q:'m/z 28이 늘었는데 m/z 27, 44는 그대로라면?',a:'CO 발생이거나 공기 중 N₂ 누설. m/z 14와 m/z 32(O₂)의 동반 증가로 누설을 구분한다.'},
 {t:'정량: 이온 전류 → 몰 → Faraday 효율',ec:'보정과 계산 흐름',mc:'보정선 (CO₂ 예시)',
- e:()=>box(20,30,130,36,'보정 가스','(농도·유량 알려짐)')+LN(150,48,176,48,'var(--pump)',{mk:'g'})+box(178,30,128,36,'감도 K','(A per mol/s)')
+ e:()=>box(20,30,130,36,'보정 가스','(농도·유량 알려짐)')+LN(150,48,176,48,'var(--pump)',{mk:'g'})+box(178,30,128,36,'감도 K','(A·s/mol)')
   +box(20,100,130,36,'측정 이온 전류','I_ion')+LN(150,118,176,118,'var(--pump)',{mk:'g'})+box(178,100,128,36,'생성 속도','ṅ = I_ion / K')
   +LN(242,136,242,162,'var(--pump)',{mk:'g'})+box(178,164,128,36,'기체가 설명하는 전류','z F ṅ')+LN(242,200,242,226,'var(--pump)',{mk:'g'})+box(178,228,128,36,'Faraday 효율','z F ṅ / I')+LN(242,66,242,98,'var(--pump)',{dash:1}),
  m:()=>{const P=plot({x:[0,1100],y:[0,1.15],xt:[{v:0,l:'0'},{v:500,l:'500'},{v:1000,l:'1000'}],yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:'CO₂ 농도 (ppm)',yl:'m/z 44 (정규화)',T:26});
@@ -342,7 +351,7 @@ const MS=[
  e:()=>T(14,24,'음극 (흑연), 낮은 전위','lab')+TM(14,44,['EC + 2e⁻ + 2Li⁺ → Li₂CO₃ + C₂H₄','(SEI가 만들어지며 C₂H₄ 발생)','미량 수분·양성자 환원 → H₂'],'sub',undefined,16)
   +L(10,310,104,'lvl2')+T(14,130,'양극 (층상 산화물), 높은 전위','lab')+TM(14,150,['고충전 상태에서 격자 산소 방출 → O₂','방출된 산소가 전해질과 반응 → CO₂, CO','전해질 자체 산화 → CO₂'],'sub',undefined,16)
   +T(14,250,'전위·양은 소재와 조건마다 다른 예시','sub'),
- m:(v,tg)=>{const P1=plot({x:[0,10],y:[2.8,4.6],T:26,B:96,L:44,yt:[{v:3,l:'3.0'},{v:4.5,l:'4.5'}],yl:'V',ylx:12});const P2=plot({x:[0,10],y:[0,1.1],T:120,B:230,L:44,xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10 h'}],xl:'시간',yl:'생성 속도',ylx:12});
+ m:(v,tg)=>{const P1=plot({x:[0,10],y:[2.8,4.6],T:26,B:96,L:44,yt:[{v:3,l:'3.0'},{v:4.5,l:'4.5'}],yl:'전압 (V)',ylx:12});const P2=plot({x:[0,10],y:[0,1.1],T:120,B:230,L:44,xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10'}],xl:'시간 (h)',yl:'생성 속도 (상대)',ylx:12});
   const V=t=>t<.3?2.9+t*2:3.5+.95*(t-.3)/9.7+.08*Math.exp(-(((t-.6)/.4)**2));
   const g={'C₂H₄':[t=>Math.exp(-(((t-.8)/.35)**2)),'s5'],'H₂':[t=>.55*Math.exp(-(((t-.9)/.5)**2)),'s6'],'CO₂':[t=>.25*Math.exp(-(((t-.9)/.6)**2))+.8/(1+Math.exp(-(t-8.3)/.35)),'s1'],'O₂':[t=>.5/(1+Math.exp(-(t-8.8)/.3)),'s3']};
   let s=P1.s+P2.s+crv(P1,V,0,10,'var(--fg)',{n:300});Object.entries(g).forEach(([k,[f,col]])=>{if(tg[k])s+=crv(P2,f,0,10,COL[col],{n:300})});
@@ -378,7 +387,7 @@ const SF=[
  m:()=>{const P=plot({x:[0,4],y:[0,1.1],yt:[{v:0,l:'0'},{v:1,l:'1'}],L:40,T:30,B:220});const md=[['CH₃ 대칭',.6,.8],['CH₂ 비대칭',.8,.3],['CO₂ 대칭',0,1],['CO₂ 비대칭',1,0]];
   let s=P.s;md.forEach(([l,ir,ra],i)=>{const x0=P.X(i+.5);[[ir,'s1',-14],[ra,'s3',-4],[ir*ra,'s2',8]].forEach(([h,k,dx])=>s+=`<rect x="${x0+dx-4}" y="${P.Y(h)}" width="9" height="${P.Y(0)-P.Y(h)}" style="fill:${COL[k]}"/>`);s+=T(x0,P.B+16,l,'sub','middle')});
   return s+[['IR','s1'],['Raman','s3'],['곱 → VSFG','s2']].map(([l,k],i)=>`<rect x="${P.X(.1)+i*78}" y="14" width="9" height="9" style="fill:${COL[k]}"/>`+T(P.X(.1)+i*78+13,23,l,'sub')).join('')},
- read:['VSFG 세기는 그 진동의 IR 세기(∂μ/∂Q)와 Raman 세기(∂α/∂Q)의 곱에 비례한다. 하나라도 0이면 안 보인다.','그래서 대칭 중심이 있는 분자(CO₂ 등)는 상호 배제 규칙 때문에 어떤 모드도 VSFG에 안 보인다.','CH₃, CH₂ 신축이나 계면 물의 O–H 신축처럼 IR과 Raman 둘 다 활성인 모드가 대상이다.','그런데 분자 하나가 조건을 만족해도, 분자들이 무작위로 놓이면 더해서 0이 된다. 다음 단계의 조건.','오른쪽 막대 값은 설명용 예시.'],
+ read:['VSFG 진폭 χ⁽²⁾는 ∂μ/∂Q와 ∂α/∂Q의 곱에 비례한다. 세기로 말하면 IR 세기(∝ (∂μ/∂Q)²)와 Raman 세기(∝ (∂α/∂Q)²)의 곱이다. 하나라도 0이면 안 보인다.','그래서 대칭 중심이 있는 분자(CO₂ 등)는 상호 배제 규칙 때문에 어떤 모드도 VSFG에 안 보인다.','CH₃, CH₂ 신축이나 계면 물의 O–H 신축처럼 IR과 Raman 둘 다 활성인 모드가 대상이다.','그런데 분자 하나가 조건을 만족해도, 분자들이 무작위로 놓이면 더해서 0이 된다. 다음 단계의 조건.','오른쪽 막대 값은 설명용 예시.'],
  q:'IR 스펙트럼에서 아주 센 밴드가 VSFG에선 안 보일 수 있나?',a:'있다. Raman 활성이 거의 없으면 곱이 작아 안 보인다. 반대로 분자 배향이 무작위여도 안 보인다.'},
 {t:'왜 계면만 보이나',ec:'벌크 vs 계면',mc:'깊이에 따른 순 χ⁽²⁾ (개념도)',
  e:()=>{let s=`<rect x="20" y="40" width="280" height="40" style="fill:var(--s4)" fill-opacity=".12"/>`+T(26,58,'공기','sub')+L(20,300,80);
@@ -390,10 +399,10 @@ const SF=[
   return P.s+crv(P,z=>Math.exp(-z/.35),0,5,'var(--s2)')+T(P.X(1.2),P.Y(.6),'몇 분자층에서만 0이 아님','sub')},
  read:['대칭 중심이 있는 매질(액체 벌크, 기체, 등방 고체)에서는 전기 쌍극자 근사에서 χ⁽²⁾ = 0이다. 무작위 배향이 서로 상쇄된다.','계면에서는 위(공기)와 아래(물)가 달라 대칭이 깨지고, 분자가 한쪽으로 정렬한 몇 분자층에서만 신호가 나온다.','그래서 VSFG는 "계면만 골라 보는" 진동 분광이다.','벌크 사극자 기여처럼 작은 예외가 있어 정량 해석에서는 주의가 필요하다.'],
  q:'ATR-FTIR과 VSFG 둘 다 표면 근처를 본다. 차이는?',a:'ATR은 약 500–2000 nm(0.5–2 μm) 깊이 전체를 평균한다(벌크 포함). VSFG는 대칭이 깨진 약 1 nm 안팎(몇 분자층)만 본다. 대략 1000배 차이다.'},
-{t:'배치와 편광',ec:'반사 배치',mc:'편광 조합 (SF, 가시광, IR 순)',
+{t:'배치와 편광',ec:'반사 배치 (입사면을 옆에서 본 그림)',mc:'편광 조합 (SF, 가시광, IR 순)',
  e:()=>{const O=[170,200];return `<rect x="20" y="200" width="290" height="60" style="fill:var(--s2)" fill-opacity=".12"/>`+L(20,310,200)+T(26,250,'샘플 (계면)','sub')
   +LN(30,110,O[0]-4,O[1]-4,'var(--s3)',{w:2.5,mk:'s3'})+T(20,100,'가시광','sub','start','var(--s3)')+LN(90,40,O[0]-2,O[1]-6,'var(--s1)',{w:2.5,mk:'s1'})+T(96,34,'IR','sub','start','var(--s1)')
-  +LN(O[0]+4,O[1]-4,292,70,'var(--s2)',{w:2.5,mk:'s2'})+T(292,62,'SFG','sub','end','var(--s2)')+LN(O[0]+4,O[1]-4,300,96,'var(--s3)',{dash:1})+T(226,124,'반사된 가시광','sub','end')
+  +LN(O[0]+4,O[1]-4,290,98,'var(--s2)',{w:2.5,mk:'s2'})+T(286,88,'SFG','sub','end','var(--s2)')+LN(O[0]+4,O[1]-4,300,115,'var(--s3)',{dash:1})+T(234,182,'반사된 가시광','sub')
   +T(26,274,'SFG 방향: 계면 방향 운동량의 합','sub')},
  m:()=>{const rows=[['ssp','s','s','p','대칭 신축이 주로 크게'],['ppp','p','p','p','여러 성분이 섞임'],['sps','s','p','s','비대칭 신축이 주로 보임']];
   let s=T(20,30,'조합','sub')+T(80,30,'SF','sub','middle')+T(116,30,'가시광','sub','middle')+T(156,30,'IR','sub','middle')+L(10,310,40,'lvl2');
@@ -402,12 +411,13 @@ const SF=[
  read:['보통 반사 배치: 가시광과 IR을 계면 한 점에 겹쳐 쏘고, 반사 방향 근처로 나오는 SFG를 모은다.','편광은 SF, 가시광, IR 순으로 적는다. ssp면 SF s, 가시광 s, IR p.','조합마다 χ⁽²⁾의 다른 성분을 본다. 여러 조합의 세기 비로 분자가 계면에서 기울어진 각도를 추정한다.','"어느 조합에서 어느 모드가 큰가"는 모드 대칭과 배향에 따라 달라 오른쪽은 대표 경향일 뿐이다.'],
  q:'ssp에서 IR만 p 편광인 이유는?',a:'계면 수직 방향(z) 성분을 가진 IR로 수직 방향 쌍극자 변화를 들뜨게 하기 위해서. p 편광만 z 성분을 갖는다.'},
 {t:'비공명 배경과 분자 방향',ec:'분자가 위를 볼 때 / 아래를 볼 때',mc:'측정 모양 |χ|² 와 Im χ',slider:{min:0,max:1,step:.05,init:.3,label:'χ_NR 크기',fmt:v=>v.toFixed(2)},tg:[{k:'flip',l:'분자 뒤집기',on:false}],
- e:(v,tg)=>{const up=!tg.flip;let s=`<rect x="20" y="140" width="280" height="100" style="fill:var(--s2)" fill-opacity=".12"/>`+L(20,300,140)+T(26,232,'물','sub')+T(26,120,'공기','sub');
-  for(let i=0;i<7;i++){const x=50+i*36;s+=`<circle cx="${x}" cy="${up?152:128}" r="7" style="fill:var(--s1)" fill-opacity=".8"/>`+LN(x,up?145:135,x,up?118:162,'var(--fg)',{w:2,mk:'f'})}
-  return s+T(26,40,up?'O–H가 위(공기 쪽)를 향함':'O–H가 아래(물 쪽)를 향함','lab')+T(26,60,'체크박스로 뒤집어 보자','sub')},
+ e:(v,tg)=>{const up=!tg.flip;let s=`<rect x="20" y="140" width="280" height="100" style="fill:var(--s2)" fill-opacity=".12"/>`+L(20,300,140)+T(26,232,'물','sub')+T(26,96,'공기','sub');
+  for(let i=0;i<7;i++){const x=50+i*36;s+=`<circle cx="${x}" cy="156" r="7" style="fill:var(--s1)" fill-opacity=".8"/>`+LN(x,up?149:163,x,up?120:192,'var(--fg)',{w:2,mk:'f'})}
+  return s+T(26,40,up?'O–H가 위(공기 쪽)를 향함':'O–H가 아래(물 쪽)를 향함','lab')+T(26,60,'원 = O 원자, 화살표 = O–H 방향','sub')},
  m:(v,tg)=>{const sg=tg.flip?-1:1,G=12,md=[[3200,.9],[3450,.6]];const X=w=>{let re=v,im=0;md.forEach(([q,a])=>{const d=w-q,den=d*d+G*G*4;re+=sg*a*2*G*(-d)/den*1;im+=sg*a*2*G*(2*G)/den});return[re,im]};
-  const P=plot({x:[3000,3700],y:[-1,1.6],xt:[{v:3200,l:'3200'},{v:3450,l:'3450'},{v:3700,l:'3700'}],yt:[{v:0,l:'0'}],xl:'IR wavenumber (cm⁻¹)',T:26});
-  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`+crv(P,w=>{const[a,b]=X(w);return a*a+b*b},3000,3700,'var(--s2)',{n:400,clip:[-1,1.6]})+crv(P,w=>X(w)[1],3000,3700,'var(--s5)',{n:400,dash:1,clip:[-1,1.6]})
+  let mx=1.6;for(let w=3000;w<=3700;w+=2){const[a,b]=X(w);mx=Math.max(mx,(a*a+b*b)*1.1)}
+  const P=plot({x:[3000,3700],y:[-1,mx],xt:[{v:3200,l:'3200'},{v:3450,l:'3450'},{v:3700,l:'3700'}],yt:[{v:0,l:'0'}],xl:'IR wavenumber (cm⁻¹)',yl:'상대값',T:26});
+  return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`+crv(P,w=>{const[a,b]=X(w);return a*a+b*b},3000,3700,'var(--s2)',{n:400,clip:[-1,mx]})+crv(P,w=>X(w)[1],3000,3700,'var(--s5)',{n:400,dash:1,clip:[-1,mx]})
    +T(P.R,P.T-6,'실선 |χ|² (보통 측정) · 점선 Im χ (HD-VSFG)','sub','end')},
  read:['χ⁽²⁾ = χ_NR + Σ A_q / (ω_IR − ω_q + iΓ_q). CARS처럼 비공명 배경과 간섭해 모양이 비틀린다.','A_q의 부호는 분자가 위를 보는지 아래를 보는지에 따라 바뀐다.','보통 VSFG는 |χ|²(세기)만 재서 이 부호를 잃는다. 체크박스로 뒤집어 보면 실선은 NR이 0일 때 그대로지만, 점선(Im χ)은 부호가 통째로 바뀐다.','위상까지 재는 heterodyne VSFG(HD-VSFG)로 Im χ를 얻으면 계면 물이 "위를 보는지 아래를 보는지"를 직접 읽는다.','그림의 밴드 위치(물 O–H 약 3200, 3450 cm⁻¹)와 폭은 설명용 예시.'],
  q:'χ_NR이 0이면 |χ|²만으로 분자 방향을 알 수 있나?',a:'없다. |χ|²는 A의 부호를 뒤집어도 같다. 방향을 알려면 위상(HD-VSFG)이나 NR과의 간섭 같은 기준이 필요하다.'},
@@ -415,7 +425,7 @@ const SF=[
  e:()=>box(6,30,70,30,'fs 레이저')+LN(76,45,110,45)+box(110,30,60,30,'OPA·DFG','→ 넓은 IR')+LN(76,45,90,45)+PL([[90,45],[90,110],[110,110]])+box(110,96,60,30,'에탈론','800 nm')
   +PL([[170,45],[230,160]],'var(--s1)',{w:2,mk:'s1'})+PL([[170,111],[226,162]],'var(--s3)',{w:2,mk:'s3'})+`<rect x="206" y="166" width="50" height="10" style="fill:var(--s2)" fill-opacity=".35"/>`+T(231,192,'샘플','sub','middle')
   +PL([[236,160],[284,110],[284,70]],'var(--s2)',{w:2,mk:'s2'})+box(254,40,60,30,'분광기','+ CCD')+T(6,240,'넓은 IR로 여러 진동을 한 번에, 좁은 가시광 폭 = 해상도','sub')+T(6,256,'기준: z-cut 석영이나 금 (비공명, 평평한 응답)','sub'),
- m:()=>{const P=plot({x:[2700,3100],y:[0,1.15],xt:[{v:2800,l:'2800'},{v:2900,l:'2900'},{v:3000,l:'3000'}],xl:'IR wavenumber (cm⁻¹)',L:30,noy:1,T:30});
+ m:()=>{const P=plot({x:[2700,3100],y:[0,1.45],xt:[{v:2800,l:'2800'},{v:2900,l:'2900'},{v:3000,l:'3000'}],xl:'IR wavenumber (cm⁻¹)',L:30,noy:1,T:30});
   const ir=w=>Math.exp(-(((w-2890)/90)**2)),res=w=>{const G=8;let re=.2,im=0;[[2880,1],[2940,.6]].forEach(([q,a])=>{const d=w-q,den=d*d+G*G;re+=a*G*(-d)/den;im+=a*G*G/den});return re*re+im*im};
   return P.s+crv(P,ir,2700,3100,'var(--s1)',{dash:1})+crv(P,w=>ir(w)*res(w)/1.45,2700,3100,'var(--s6)')+crv(P,w=>res(w)/1.45,2700,3100,'var(--s2)')+TM(P.L+4,P.T+6,['점선: IR 펄스 모양 (기준 시료로 측정)','회색: 측정한 SFG','파랑: 나눈 결과 (정규화)'],'sub')},
  read:['광대역 방식: 넓은 fs IR(OPA·DFG로 만듦)과 좁은 대역 가시광(에탈론 등으로 좁힌 800 nm)을 계면에 겹친다. 분광기 앞에는 800 nm를 막는 필터를 두어 SFG만 받는다.','SF 주파수 = IR + 가시광이라, 가시광 폭이 그대로 스펙트럼 해상도가 된다. 넓은 IR은 여러 진동을 한 번에 들뜨게 한다(CARS의 multiplex와 같은 아이디어).','측정 SFG에는 IR 펄스 모양이 곱해져 있다. z-cut 석영이나 금처럼 응답이 평평한 기준 시료로 IR 모양을 재서 나눈다.','펌프 펄스를 하나 더 넣으면 시간 분해(pump–VSFG)로 계면 동역학도 볼 수 있다. 랩의 IR pump-probe 경험과 바로 이어진다.'],
@@ -441,12 +451,12 @@ const FP=[
   return P.s+it.map(([l,a,b,k],i)=>{const y=70+i*56;return `<g data-n="${i+1}"><rect x="${P.X(a)}" y="${y}" width="${P.X(b)-P.X(a)}" height="16" rx="3" style="fill:${COL[k]}" fill-opacity=".55"/></g>`+T(P.L,y-8,l,'sub')}).join('')},
  read:['반응을 끝난 뒤가 아니라 진행 중에 재면 속도, 중간체, 반응이 멈춘 시점을 알 수 있다. 공정 분석(PAT)도 같은 생각이다.','문제는 용기다. 유리·금속 벽은 중적외선 대부분을 막는다. 특히 이중 결합과 지문 영역(대략 2000 cm⁻¹ 아래, 경계 파수 확인 필요)이 벽에 가린다.',`${c(1,'s6')} 액체를 꺼내 셀로 보내면 옮기는 시간만큼 늦어서 빠른 반응을 놓치고, 순환 회로가 공기나 압력·온도를 바꿀 수 있다.`,`${c(2,'s4')} ATR 탐침은 결정 표면의 소멸파만 쓴다. 보는 두께가 약 1 µm라 약한 띠가 묻히고, 띠 세기가 파장에 따라 일그러지고, 결정에 막이나 거품이 붙으면 그것만 보인다(FTIR 탭 샘플링 단계와 같은 논리).`,`${c(3,'s3')} 투과 탐침은 용기 안에서 보통 투과 측정을 한다. 경로 길이를 실험자가 정하니 Beer–Lambert 법칙을 그대로 쓴다.`],
  q:'ATR 탐침보다 투과 탐침이 유리한 경우는?',a:'묽은 성분이나 약한 띠를 볼 때, 그리고 농도를 정량할 때. 투과 탐침은 틈을 넓혀 흡광도를 키울 수 있고 띠 세기가 파장 때문에 일그러지지 않는다.'},
-{t:'속 빈 광섬유: 빛을 공기 속으로 보낸다',ec:'속 빈 광섬유 (단면, 보기 쉽게 과장)',mc:'광섬유 투과 (모양만 예시)',
+{t:'속 빈 광섬유: 빛을 공기 속으로 보낸다',ec:'속 빈 광섬유 (위: 길이 방향 단면, 아래: 가로 단면, 보기 쉽게 과장)',mc:'광섬유 투과 (모양만 예시)',
  e:()=>{let s=`<rect x="20" y="70" width="280" height="12" style="fill:var(--soft);stroke:var(--fg)"/><rect x="20" y="150" width="280" height="12" style="fill:var(--soft);stroke:var(--fg)"/>`+`<rect x="20" y="82" width="280" height="3" style="fill:var(--s6)"/><rect x="20" y="147" width="280" height="3" style="fill:var(--s6)"/>`;
   s+=PL([[24,95],[70,144],[118,88],[166,144],[214,88],[262,144],[296,110]],'var(--s1)',{w:1.6,mk:'s1'});
   s+=`<rect x="14" y="85" width="6" height="62" style="fill:var(--s2);fill-opacity:.35;stroke:var(--s2)"/><rect x="300" y="85" width="6" height="62" style="fill:var(--s2);fill-opacity:.35;stroke:var(--s2)"/>`;
   s+=T(20,60,'플라스틱 관','sub')+T(300,60,'끝은 창으로 막는다','sub','end')+T(20,198,'가운데 = 공기 심 (빛이 지나는 곳)','sub')+T(20,182,'안쪽 벽 = 은 반사층 + 얇은 보호층(유전체)','sub');
-  s+=`<circle cx="70" cy="234" r="22" style="fill:var(--soft);stroke:var(--fg)"/><circle cx="70" cy="234" r="16" style="fill:#fff;stroke:var(--s6)" stroke-width="3"/>`+T(100,230,'단면: 바깥 관, 은 반사층,','sub')+T(100,246,'가운데는 비어 있다 (예: 구멍 약 1.5 mm)','sub');
+  s+=`<circle cx="70" cy="234" r="22" style="fill:var(--soft);stroke:var(--fg)"/><circle cx="70" cy="234" r="16" style="fill:#fff;stroke:var(--s6)" stroke-width="3"/>`+T(100,230,'가로 단면: 바깥 관, 은 반사층,','sub')+T(100,246,'가운데는 비어 있다 (예: 구멍 약 1.5 mm)','sub');
   return s},
  m:()=>{const P=plot(fpIrX({y:[0,1.05],yt:[{v:0,l:'0'},{v:1,l:'1'}],yl:'투과 (상대)',T:30}));
   const sil=x=>1/(1+Math.exp(-(x-3200)/120)),hol=x=>.55+.05*Math.sin(x/300);
@@ -464,7 +474,7 @@ const FP=[
   s+=`<rect x="122" y="${ym-6}" width="26" height="6" style="fill:var(--s2);fill-opacity:.5;stroke:var(--s2)"/>`;
   s+=`<rect x="100" y="${yw}" width="120" height="66" style="fill:var(--soft);stroke:var(--fg)"/><rect x="122" y="${yw}" width="26" height="6" style="fill:var(--s2);fill-opacity:.5;stroke:var(--s2)"/>`;
   s+=`<g data-n="1"><rect x="100" y="${ym}" width="70" height="${g}" style="fill:var(--s2);fill-opacity:.35"/>${badge(158,ym+g/2,1,'var(--s2)')}</g>`;
-  s+=`<g data-n="2"><polygon points="124,${yw+22} 146,${yw+22} 146,${yw+44}" style="fill:var(--s4);fill-opacity:.7"/><polygon points="176,${yw+22} 198,${yw+22} 176,${yw+44}" style="fill:var(--s4);fill-opacity:.7"/>${badge(240,yw+40,2,'var(--s4)')}</g>`;
+  s+=`<g data-n="2"><polygon points="124,${yw+22} 146,${yw+44} 124,${yw+44}" style="fill:var(--s4);fill-opacity:.7"/><polygon points="198,${yw+22} 198,${yw+44} 176,${yw+44}" style="fill:var(--s4);fill-opacity:.7"/>${badge(240,yw+40,2,'var(--s4)')}</g>`;
   s+=PL([[135,24],[135,yw+33],[187,yw+33],[187,24]],'var(--s1)',{w:1.8,mk:'s1'});
   s+=`<g data-n="3"><rect x="226" y="40" width="20" height="26" rx="3" style="fill:var(--line);stroke:var(--fg)"/>${badge(262,53,3,'var(--fg)')}</g>`+T(226,84,'마이크로미터','sub');
   s+=T(96,30,'보내는 쪽','sub','end')+T(224,104,'돌려받는 쪽','sub')+T(96,ym-12,'움직이는 창','sub','end')+T(96,yw+16,'고정 창','sub','end')+T(226,146,`d = ${Math.round(v)} µm`,'sub');
@@ -489,10 +499,10 @@ const FP=[
 {t:'Beer–Lambert 점검: 직선인가, 0을 지나나',ec:'틈을 바꾸며 재기 (예시)',mc:'농도를 바꾸며 재기 (예시)',
  e:()=>{const P=plot({x:[0,1000],y:[0,1.2],xt:[0,250,500,750,1000].map(v=>({v,l:String(v)})),yt:[{v:0,l:'0'},{v:.5,l:'0.5'},{v:1,l:'1'}],xl:'눈금으로 읽은 틈 (µm)',yl:'흡광도 A',T:30});
   const off=100,f=x=>(x+off)*1e-3;let s=P.s+crv(P,f,0,1000,'var(--s3)',{dash:1})+[0,200,400,600,800,1000].map(x=>`<circle cx="${P.X(x)}" cy="${P.Y(f(x)+.02*Math.sin(x))}" r="4" style="fill:var(--s3)"/>`).join('');
-  s+=`<g data-n="1">${LN(P.X(0)+2,P.Y(f(0)),P.X(0)+2,P.Y(0),'var(--s1)',{w:2})}${badge(P.X(0)+20,P.Y(f(0)/2),1,'var(--s1)')}</g>`+T(P.X(80),P.Y(.12),'눈금 0에서도 A가 남는다','sub');
+  s+=`<g data-n="1">${LN(P.X(0)+2,P.Y(f(0)),P.X(0)+2,P.Y(0),'var(--s1)',{w:2})}${badge(P.X(0)+20,P.Y(f(0)/2),1,'var(--s1)')}</g>`+T(P.X(150),P.Y(.06),'눈금 0에서도 A가 남는다','sub');
   return s+T(P.R,P.T-12,'유효 경로 = 눈금 + 남는 틈 (예시 100 µm)','sub','end')},
  m:()=>{const P=plot({x:[0,10],y:[0,3],xt:[0,2,4,6,8,10].map(v=>({v,l:String(v)})),yt:[0,1,2,3].map(v=>({v,l:String(v)})),xl:'농도 (상대)',yl:'흡광도 A',T:30});
-  const ideal=x=>.3*x,meas=x=>{const a=.3*x;return a<1.6?a:1.6+(a-1.6)*.45};
+  const ideal=x=>.3*x,meas=x=>{const a=.3*x;return a<2?a:2+(a-2)*.45};
   let s=P.s+`<rect x="${P.L}" y="${P.T}" width="${P.R-P.L}" height="${P.Y(2)-P.T}" style="fill:var(--s6);fill-opacity:.1"/>`+crv(P,ideal,0,10,'var(--muted)',{dash:1,w:1.2})+crv(P,meas,0,10,'var(--s2)');
   s+=`<g data-n="2">${badge(P.X(8.4),P.Y(meas(8.4))+18,2,'var(--s2)')}</g>`+T(P.X(.4),P.Y(2.75),'A > 2: 직선에서 벗어난다','sub')+T(P.X(5.2),P.Y(.6),'점선 = 직선 기대값','sub');
   return s},
@@ -517,7 +527,7 @@ const FP=[
   return P.s+`<g data-n="1">${PL(r.ts.map((t,i)=>[P.X(t),P.Y(r.a[i])]),'var(--s3)',{w:2})}</g><g data-n="2">${PL(r.ts.map((t,i)=>[P.X(t),P.Y(r.b[i])]),'var(--s5)',{w:2,dash:1})}</g>`
    +`<line x1="${P.X(820)}" x2="${P.X(860)}" y1="${P.Y(.3)}" y2="${P.Y(.3)}" style="stroke:var(--s3)" stroke-width="2"/>`+T(P.X(870),P.Y(.3)+4,'① 띠','sub')+`<line x1="${P.X(820)}" x2="${P.X(860)}" y1="${P.Y(.15)}" y2="${P.Y(.15)}" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="4 3"/>`+T(P.X(870),P.Y(.15)+4,'② 띠','sub')},
  m:v=>{const r=fpCos(400,400+v),m=fpCos(400,400).phi,ph=r.phi/m,ps=r.psi/m,y0=150,sc=95;
-  const bar=(x,val,lab)=>{const h=Math.abs(val)*sc,col=val>=0?'var(--s1)':'var(--s2)';return `<rect x="${x}" y="${val>=0?y0-h:y0}" width="56" height="${Math.max(1,h)}" style="fill:${col}"/>`+T(x+28,y0+(val>=0?18:-h-8)+0,lab,'lab','middle')+T(x+28,val>=0?y0-h-8:y0+h+16,(val>=0?'+':'')+val.toFixed(2),'sub','middle')};
+  const bar=(x,val,lab)=>{const h=Math.abs(val)*sc,col=val>=0?'var(--s1)':'var(--s2)';return `<rect x="${x}" y="${val>=0?y0-h:y0}" width="56" height="${Math.max(1,h)}" style="fill:${col}"/>`+T(x+28,y0+(val>=0?18:-h-8)+0,lab,'lab','middle')+T(x+28,val>=0?y0-h-8:y0+h+16,(val>=0?'+':'−')+Math.abs(val).toFixed(2),'sub','middle')};
   const verdict=Math.abs(ps)<.02?'Ψ ≈ 0: 같이 변한다':(ps>0?'Φ, Ψ 부호가 같다 → ① 띠가 먼저':'Φ, Ψ 부호가 다르다 → ② 띠가 먼저');
   return `<line x1="40" x2="300" y1="${y0}" y2="${y0}" class="ax"/>`+bar(80,ph,'Φ 동시')+bar(190,ps,'Ψ 비동시')+T(160,20,verdict,'labn','middle')+T(160,272,'빨강 = +, 파랑 = − (Φ 최대값으로 나눔)','sub','middle')},
  read:['2D 상관 분석(2D-COS)은 시간에 따라 쌓인 스펙트럼들에서 "두 파수의 세기가 어떻게 함께 변하나"를 본다. 2D IR(2D 분광 노트)과 이름만 비슷하고 다른 방법이다.','먼저 각 스펙트럼에서 평균 스펙트럼을 빼 변화분만 남긴다(동적 스펙트럼).','동시 상관 Φ는 두 파수의 변화가 같은 방향(+)인지 반대 방향(−)인지 알려 준다. 비동시 상관 Ψ는 변화의 시점이 어긋났는지 알려 준다.','Noda 규칙: Φ와 Ψ의 부호가 같으면 ① 띠가 먼저, 다르면 ② 띠가 먼저 변한다. Ψ가 0에 가까우면 같이 변한다. 슬라이더로 ② 띠의 늦음을 바꾸면 Ψ 부호가 뒤집힌다.','자세한 단계(평균 빼기, Φ·Ψ 지도, 겹친 띠, 함정)는 <a href="analysis.html">데이터 분석 노트</a>의 2D-COS 탭에 있다.','주의: 순서가 곧 반응 단계 순서는 아니다. 섞임, 띠 겹침, 흡광도 비선형성도 시점 차이를 만든다. Ψ/Φ가 작으면 순서도 불확실하다.'],
@@ -540,7 +550,8 @@ const TABS=[{id:'fu',name:'FTIR · UV-Vis',sub:'선형 흡수 분광',desc:'샘�
        title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
      NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
        key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
-   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl. */
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
 let tab=0,idx=0,V=0,TG={},raf=0;
 const $=id=>document.getElementById(id);
 if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
@@ -556,26 +567,30 @@ function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf
  const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
  $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
  $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
- const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent='재생';
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
  if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
  TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
  $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
- $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${i+1}단계" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
  [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
  if(NOTE.onRender)NOTE.onRender(s);
- draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}}
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
 function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
 $('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
 $('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
 $('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
 $('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
-$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent='재생';return}
- const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent='정지';
- const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent='재생'}};raf=requestAnimationFrame(step)};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
 const stage=$('stage'),notes=document.querySelector('.notes');
 function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
 [stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
 try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
 render();
 </script>

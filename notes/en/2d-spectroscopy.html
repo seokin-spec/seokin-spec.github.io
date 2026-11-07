@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>2D Spectroscopy Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+/* 2D 노트 전용 스타일 */
+:root{--gsb:var(--s1);--esa:var(--s2)} /* ΔT/T 부호색 별칭: GSB/SE = 빨강(+), ESA = 파랑(−) */
+.beam2{fill:none;stroke:var(--pump);stroke-width:1.5;stroke-dasharray:4 4}.beam3{fill:none;stroke:var(--accent);stroke-width:1.5;stroke-dasharray:5 3}
+.curve{fill:none;stroke:var(--fg);stroke-width:2}.harm{fill:none;stroke:var(--muted);stroke-width:1.2;stroke-dasharray:4 4}
+.box{fill:none;stroke:var(--line)}.diag{stroke:var(--muted);stroke-dasharray:4 4}.tk{stroke:var(--muted)}
+.axisnote{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 16px;font-size:14px;color:var(--muted)}.axisnote summary{cursor:pointer;color:var(--fg);font-weight:500}.axisnote p{margin:8px 0 2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · 2D spectroscopy</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../2d-spectroscopy.html" href="../2d-spectroscopy.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 2D 분광 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 2D 분광 노트
+// @status 검토 중
+// @lang ko en
+// @title.en 2D Spectroscopy Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · 2D spectroscopy
+// @status.en Under review
+/* 2D 분광 노트: 2D IR, 2DES, 셋업. 그림 헬퍼 중 이 노트만 쓰는 것(MAP, pk, br, nt, P, CIR)은 여기 둔다. */
+const AXIS_NOTE=TR('3차 신호는 빛과 세 번 상호작용하고, 그 사이 시간 구간이 셋이다. t₁(첫 두 상호작용 사이, 결맞음), t₂ = T(대기), t₃(마지막 상호작용 뒤 신호 방출, 결맞음). t₁과 t₃를 푸리에 변환한 것이 ω₁(pump 축)과 ω₃(probe 축)이다. T는 보통 시간 그대로 두고 T마다 2D 맵을 한 장씩 보므로 ω₂ 축이 없다. T 동안의 beat를 따로 푸리에 변환하면 ω₂가 나온다(beat map). IR pump-probe는 펌프 한 펄스 안에서 두 번 상호작용해 t₁ ≈ 0이라 ω₁ 축 없이 ω₃(probe) 축만 있다. 2D IR에서 모드 두 개를 다룰 때는 축 이름과 겹치지 않게 모드 A, B(ω_A, ω_B)로 쓴다. 이 내용은 2D IR과 2DES에 공통이다.','A third-order signal comes from three interactions with light, separated by three time intervals: t₁ (between the first two interactions, a coherence), t₂ = T (waiting time), and t₃ (signal emission after the last interaction, a coherence). Fourier transforming t₁ and t₃ gives ω₁ (pump axis) and ω₃ (probe axis). T is usually kept in the time domain, with one 2D map per T, so there is no ω₂ axis. Fourier transforming the beats during T gives ω₂ (a beat map). In IR pump-probe, two interactions happen within one pump pulse, so t₁ ≈ 0 and only the ω₃ (probe) axis remains. When 2D IR treats two modes, they are called modes A and B (ω_A, ω_B) so that the names do not clash with the axis labels. This box applies to both 2D IR and 2DES.');
+const CIR=['','①','②','③','④'];
+const P=(cx,vy,D,a=.012)=>{const h=a*D*D;return `<path class="curve" d="M${cx-D},${vy-h} Q${cx},${vy+h} ${cx+D},${vy-h}"/>`};
+function MAP(rng,ticks,items){const[lo,hi]=rng,X=v=>50+(v-lo)/(hi-lo)*250,Y=v=>270-(v-lo)/(hi-lo)*250;
+ let s=`<rect x="50" y="20" width="250" height="250" class="box"/><line x1="50" y1="270" x2="300" y2="20" class="diag"/>`;
+ (ticks.x||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="270" y2="276" class="tk"/>`+T(X(t.v),290,t.l,'sub','middle'));
+ (ticks.y||[]).forEach(t=>s+=`<line x1="44" x2="50" y1="${Y(t.v)}" y2="${Y(t.v)}" class="tk"/>`+T(40,Y(t.v)+4,t.l,'sub','end'));
+ s+=T(175,308,'pump wavenumber ω₁ (cm⁻¹)','lab','middle')+`<text x="-18" y="145" class="lab" text-anchor="middle" transform="rotate(-90 -18 145)">probe wavenumber ω₃ (cm⁻¹)</text>`;
+ return s+items.map(f=>f(X,Y)).join('')}
+function pk(v1,v3,k,o={}){return(X,Y)=>{const col=COL[k],x=X(v1),y=Y(v3),rx=o.rx??(o.el?20:12),ry=o.ry??(o.el?9:12);
+ let s=`<g${o.n?` data-n="${o.n}"`:''}><ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" transform="rotate(${o.el?-45:0} ${x} ${y})" style="fill:${o.dash?'none':col};fill-opacity:${o.o??.75};stroke:${col};stroke-opacity:${o.so??1}"${o.dash?' stroke-dasharray="4 3" stroke-width="1.5"':''}/>`;
+ if(o.n)s+=badge(o.br?x+Math.max(rx,ry)+(o.bo??12):x-Math.max(rx,ry)-12,y,o.n,col);
+ if(o.lab)s+=T(x+(o.lx??(Math.max(rx,ry)+(o.br?26:6))),y+(o.ly??4),o.lab,'sub');
+ return s+'</g>'}}
+function br(v1,a,b,lab,dx=24){return(X,Y)=>{const x=X(v1)+dx,y1=Y(a),y2=Y(b);return `<path d="M${x-4},${y1} H${x} V${y2} H${x-4}" fill="none" style="stroke:var(--muted)"/>`+T(x+4,(y1+y2)/2+4,lab,'sub')}}
+const nt=(x,y,s,a='middle')=>()=>T(x,y,s,'sub',a);
+
+/* ---------- 2D IR: Morse ---------- */
+const De=4.17,r0=1.4,xr=r=>30+(r-.75)*62,yE=E=>270-E*55;
+const mV=r=>De*(1-Math.exp(-(r-r0)))**2;
+const morse=(()=>{let d='';for(let r=.78;r<=5.01;r+=.04){const y=Math.max(18,yE(mV(r)));d+=(d?' L':'M')+xr(r).toFixed(1)+','+y.toFixed(1)}return `<path class="curve" d="${d}"/>`})();
+const harm=(()=>{let d='';for(let r=.42;r<=2.381;r+=.04){d+=(d?' L':'M')+xr(r).toFixed(1)+','+yE(De*(r-r0)**2).toFixed(1)}return `<path class="harm" d="${d}"/>`})();
+const tp=(E,h)=>{const s=Math.sqrt(E/De);return h?[r0-s,r0+s]:[r0-Math.log(1+s),r0-Math.log(1-s)]};
+const EV=[.485,1.365,2.125,2.765],EH=[.5,1.5,2.5];
+const lev=(E,h,lab,cls)=>{const[a,b]=tp(E,h);return L(xr(a),xr(b),yE(E),cls||(h?'lvl2':'lvl'))+(lab?T(xr(b)+6,yE(E)+4,lab,'sub'):'')};
+const morseLv=()=>morse+EV.map((E,i)=>lev(E,0,'v='+i)).join('');
+const yM=E=>285-E*95;
+function twoMode(coupled){const E={a:1,b:1.3,aa:1.88,ab:coupled?2.23:2.3,bb:2.48};
+ let s=L(30,290,yM(0))+T(30,yM(0)-6,'|00⟩','sub')+T(75,18,TR('모드 A 사다리','mode A ladder'),'sub','middle')+T(160,18,TR('둘 다 1개','one each'),'sub','middle')+T(245,18,TR('모드 B 사다리','mode B ladder'),'sub','middle')
+ +L(40,110,yM(E.a))+T(40,yM(E.a)-6,'|10⟩','sub')+L(40,110,yM(E.aa))+T(40,yM(E.aa)-6,'|20⟩','sub')
+ +L(210,280,yM(E.b))+T(250,yM(E.b)-6,'|01⟩','sub')+L(210,280,yM(E.bb))+T(250,yM(E.bb)-6,'|02⟩','sub')
+ +L(125,195,yM(E.ab))+T(126,yM(E.ab)+15,'|11⟩','sub')+L(110,170,yM(E.a),'lvl2');
+ if(coupled)s+=L(125,195,yM(2.3),'lvl2')+T(198,yM(2.3)+4,'Δ_AB','sub');else s+=T(198,yM(2.3)+4,'Δ_AB = 0','sub');s+=T(282,118,coupled?TR('②가 ① 보다 Δ_AB 짧다','② shorter by Δ_AB'):TR('① ② 길이가 같다','① and ② equal length'),'sub','end');
+ s+=A(60,yM(0)-2,60,yM(E.a)+3,'g',0,{at:'end',t:'pump',tx:-44,ty:20})+A(245,yM(0)-2,245,yM(E.b)+3,'b',1,{dx:-14})+A(160,yM(E.a),160,yM(E.ab)+3,'r',2,{dx:-14});
+ return s}
+const irTick={x:[{v:1,l:'ω₀₁'}],y:[{v:1,l:'ω₀₁'}]};
+const tmTick={x:[{v:1,l:'ω_A'},{v:1.3,l:'ω_B'}],y:[{v:1,l:'ω_A'},{v:1.3,l:'ω_B'}]};
+function tmPeaks(coupled){const d=coupled?.07:0,s={rx:9,ry:9};
+ const p=[pk(1,1,'b',{...s,lab:TR('모드 A','mode A'),lx:-58}),pk(1,.88,'r',s),pk(1.3,1.3,'b',{...s,lab:TR('모드 B','mode B')}),pk(1.3,1.18,'r',s),br(1,1,.88,'Δ_A',14)];
+ if(coupled)p.push(pk(1,1.3,'b',{...s,n:1}),pk(1,1.3-d,'r',{...s,n:2}),pk(1.3,1,'b',s),pk(1.3,1-d,'r',s),br(1,1.3,1.23,'Δ_AB',14));
+ else p.push(pk(1,1.3,'b',{rx:11,ry:11,o:.35,n:1}),pk(1,1.3,'r',{rx:11,ry:11,o:.35,n:2,br:1,lab:TR('합 = 0','sum = 0')}),pk(1.3,1,'b',{rx:11,ry:11,o:.35}),pk(1.3,1,'r',{rx:11,ry:11,o:.35,lab:'0'}));
+ return p}
+
+const IR=[
+{t:TR('퍼텐셜과 FTIR','Potential and FTIR'),
+ e:()=>harm+EH.map(E=>lev(E,1)).join('')+morseLv()+A(66,yE(.485)-2,66,yE(1.365)+3,'b',1,{dx:14})+T(116,223,'FTIR','sub')+T(150,30,TR('점선: 조화  ·  실선: Morse','dashed: harmonic  ·  solid: Morse'),'sub'),
+ m:()=>MAP([.75,1.25],irTick,[nt(175,150,TR('pump 전: 2D 신호 없음','before pump: no 2D signal'))]),
+ read:[TR('점선(조화): 준위가 등간격이고 v=0은 바닥에서 간격의 절반 높이.','Dashed (harmonic): the levels are equally spaced, and v=0 sits half a spacing above the bottom.'),TR('실선(Morse): 위로 갈수록 간격이 일정하게 좁아짐. 오른쪽은 해리 한계로 눕는다.','Solid (Morse): the spacing shrinks by a constant amount going up. On the right the curve flattens toward the dissociation limit.'),TR(`${c(1,'b')} FTIR은 v=0→1만 본다. v=1이 비어 있어 1→2는 안 보인다.`,`${c(1,'b')} FTIR sees only v=0→1. v=1 is empty, so 1→2 is not seen.`)],
+ q:TR('준위 간격이 위로 갈수록 넓어지게 그리면 어떤 퍼텐셜인가?','If the level spacing is drawn to widen going up, which potential is it?'),a:TR('어느 쪽도 아니다. 조화는 등간격, 비조화는 좁아진다. 처음 화이트보드 그림에서 고친 부분.','Neither. Harmonic means equal spacing; anharmonic means shrinking spacing. This was the correction to the first whiteboard sketch.')},
+{t:TR('pump가 만든 GSB','GSB created by the pump'),
+ e:()=>morseLv()+A(56,yE(.485)-2,56,yE(1.365)+3,'g',0)+T(62,187,'pump','sub','middle')+A(78,yE(.485)-2,78,yE(1.365)+3,'b',1,{dx:14}),
+ m:()=>MAP([.75,1.25],irTick,[pk(1,1,'b',{n:1,el:1,lab:'GSB+SE'})]),
+ read:[TR('pump(회색)가 일부 분자를 v=1로 올린다.','The pump (gray) lifts some molecules to v=1.'),TR(`${c(1,'b')} probe의 0→1 흡수가 줄어든다: GSB. v=1→0 SE도 같은 자리.`,`${c(1,'b')} The probe 0→1 absorption decreases: GSB. The v=1→0 SE appears at the same position.`),TR('2D 맵에서는 pump ω₀₁, probe ω₀₁, 즉 대각선 위. 투과가 늘어나므로 ΔT/T &gt; 0(빨강).','On the 2D map this is pump ω₀₁, probe ω₀₁, that is, on the diagonal. Transmission increases, so ΔT/T &gt; 0 (red).'),TR('부호 규약: 이 페이지는 ΔT/T로 쓴다. 빨강 = +, 파랑 = −. 작은 신호에서 ΔT/T ≈ −ln10 · ΔA라 ΔA로 그린 그림과는 색이 반대다.','Sign convention: this page uses ΔT/T. Red = +, blue = −. For small signals ΔT/T ≈ −ln10 · ΔA, so the colors are opposite to plots drawn in ΔA.')],
+ q:TR('SE는 왜 GSB와 같은 자리에 찍히나?','Why does SE appear at the same position as GSB?'),a:TR('진동 전이는 Stokes shift가 거의 없어서 v=1→0 방출 주파수가 0→1 흡수와 같다. 2DES에서는 이 전제가 깨진다(2DES 5단계).','Vibrational transitions have almost no Stokes shift, so the v=1→0 emission frequency equals the 0→1 absorption. In 2DES this assumption breaks (2DES step 5).')},
+{t:TR('ESA와 Δ','ESA and Δ'),
+ e:()=>morseLv()+A(56,yE(.485)-2,56,yE(1.365)+3,'g',0)+T(62,187,'pump','sub','middle')+A(72,yE(.485)-2,72,yE(1.365)+3,'b',1,{dx:14,dy:8})+A(88,yE(1.365)-2,88,yE(2.125)+3,'r',2,{dx:14}),
+ m:()=>MAP([.75,1.25],{x:irTick.x,y:[{v:1,l:'ω₀₁'},{v:.88,l:'ω₁₂'}]},[pk(1,1,'b',{n:1,el:1}),pk(1,.88,'r',{n:2,el:1}),br(1,1,.88,'Δ',30)]),
+ read:[TR(`${c(2,'r')} v=1에 올라간 분자가 1→2를 새로 흡수: ESA. 투과가 줄어드므로 ΔT/T &lt; 0(파랑).`,`${c(2,'r')} Molecules lifted to v=1 newly absorb 1→2: ESA. Transmission decreases, so ΔT/T &lt; 0 (blue).`),TR('Morse라 ② 화살표가 ① 보다 짧다 → probe에서 Δ만큼 아래.','Because the potential is Morse, arrow ② is shorter than ① → it lies Δ lower on the probe axis.'),TR('Δ = ω₀₁ − ω₁₂ = 2x (x는 비조화 상수).','Δ = ω₀₁ − ω₁₂ = 2x (x is the anharmonicity constant).')],
+ q:TR('축을 바꿔 가로를 probe로 두면 ESA는 GSB의 어느 쪽에 오나?','If the axes are swapped so that the probe is horizontal, on which side of the GSB does the ESA appear?'),a:TR('같은 pump(같은 높이)에서 GSB의 왼쪽.','To the left of the GSB, at the same pump (same height).')},
+{t:TR('조화라면 상쇄','Harmonic means cancellation'),
+ e:()=>harm.replace('harm','curve')+EH.map((E,i)=>lev(E,1,'v='+i,'lvl')).join('')+A(62,yE(.5)-2,62,yE(1.5)+3,'b',1)+A(82,yE(1.5)-2,82,yE(2.5)+3,'r',2,{dx:14})+T(150,30,TR('① ② 길이가 같다','① and ② equal length'),'sub'),
+ m:()=>MAP([.75,1.25],irTick,[pk(1,1,'b',{n:1,o:.35,rx:16,ry:16}),pk(1,1,'r',{n:2,o:.35,rx:16,ry:16,br:1,lab:TR('합 = 0','sum = 0')})]),
+ read:[TR(`조화면 ${c(1,'b')} ${c(2,'r')}가 같은 길이라 같은 자리에 찍힌다.`,`In the harmonic case ${c(1,'b')} and ${c(2,'r')} have equal length, so they land at the same position.`),TR('μ₂₁ = √2·μ₁₀ 이라 ESA 세기 2 = GSB 1 + SE 1.','Since μ₂₁ = √2·μ₁₀, the ESA strength 2 = GSB 1 + SE 1.'),TR('부호가 반대라 정확히 상쇄, 신호 0. 비조화성 Δ가 있어야 2D IR 신호가 생긴다.','The signs are opposite, so they cancel exactly and the signal is 0. A 2D IR signal needs anharmonicity Δ.')],
+ q:TR('ESA 경로 세기는 왜 2배인가?','Why is the ESA pathway twice as strong?'),a:TR('조화 진동자의 행렬 요소가 √(v+1)이라 |μ₂₁|² = 2|μ₁₀|².','The harmonic-oscillator matrix element scales as √(v+1), so |μ₂₁|² = 2|μ₁₀|².')},
+{t:TR('모드 2개를 따로 그리기','Drawing two modes separately'),
+ e:()=>T(80,18,TR('모드 A (ω_A)','mode A (ω_A)'),'sub','middle')+T(240,18,TR('모드 B (ω_B)','mode B (ω_B)'),'sub','middle')+`<line x1="160" y1="30" x2="160" y2="280" class="lvl2"/>`
+  +L(40,120,285)+L(40,120,yM(1))+L(40,120,yM(1.88))+T(124,289,'v=0','sub')+T(124,yM(1)+4,'v=1','sub')+T(124,yM(1.88)+4,'v=2','sub')
+  +L(195,275,285)+L(195,275,yM(1.3))+L(195,275,yM(2.48))+T(279,289,'v=0','sub')+T(279,yM(1.3)+4,'v=1','sub')+T(279,yM(2.48)+4,'v=2','sub')
+  +A(65,283,65,yM(1)+3,'b',1)+A(95,yM(1)-2,95,yM(1.88)+3,'r',2,{dx:14})+A(220,283,220,yM(1.3)+3,'b',3)+A(250,yM(1.3)-2,250,yM(2.48)+3,'r',4,{dx:14}),
+ m:()=>MAP([.75,1.45],tmTick,[pk(1,1,'b',{rx:10,ry:10,n:1,br:1,lab:TR('모드 A','mode A')}),pk(1,.88,'r',{rx:10,ry:10,n:2,br:1}),pk(1.3,1.3,'b',{rx:10,ry:10,n:3,lab:TR('모드 B','mode B')}),pk(1.3,1.18,'r',{rx:10,ry:10,n:4}),nt(139,60,TR('(ω_A, ω_B) 자리: 비어 있음','(ω_A, ω_B): empty'))]),
+ read:[TR('새로운 건 없다. 3단계 사다리(0→1 GSB, 1→2 ESA)를 모드마다 하나씩, 두 번 그린 것.','Nothing new. The step-3 ladder (0→1 GSB, 1→2 ESA) is drawn twice, once per mode.'),TR(`모드 A: ${c(1,'b')} ${c(2,'r')} → 대각 (ω_A, ω_A) 쌍. 모드 B: ${c(3,'b')} ${c(4,'r')} → 대각 (ω_B, ω_B) 쌍.`,`Mode A: ${c(1,'b')} ${c(2,'r')} → diagonal (ω_A, ω_A) pair. Mode B: ${c(3,'b')} ${c(4,'r')} → diagonal (ω_B, ω_B) pair.`),TR('두 사다리가 서로 모르는 사이라면(예: 다른 분자 두 종류를 섞은 용액) 2D 맵 = 대각 쌍 두 개뿐. cross peak 자리는 비어 있다.','If the two ladders know nothing of each other (for example, a solution mixing two different molecules), the 2D map has only the two diagonal pairs. The cross-peak positions are empty.'),TR('free carbonate와 Li⁺-bound carbonate의 C=O가 이 경우다. 같은 진동이 환경만 다른 두 집단이라 바닥을 공유하지 않는다. 그래서 T = 0에는 cross peak가 없다(시간이 지나면 생기는 일은 9단계).','The C=O of free and Li⁺-bound carbonate is such a case. They are two populations of the same vibration in different environments, so they do not share a ground state. There is therefore no cross peak at T = 0 (what happens later is step 9).')],
+ q:TR('왜 굳이 모드를 2개로 늘리나?','Why add a second mode at all?'),a:TR('2D IR의 핵심 질문이 "두 진동이 서로 연결돼 있나"이기 때문. 그 답이 대각선 밖(cross peak)에 나타난다. 연결을 보려면 최소 둘이 필요하다.','Because the key question of 2D IR is "are two vibrations connected?". The answer appears off the diagonal (cross peaks). Seeing a connection needs at least two.')},
+{t:TR('같은 분자라 바닥이 하나','Same molecule, one ground state'),
+ e:()=>T(75,18,TR('모드 A 쪽','mode A side'),'sub','middle')+T(245,18,TR('모드 B 쪽','mode B side'),'sub','middle')
+  +L(30,290,285)+T(30,299,TR('|00⟩ : 두 모드 모두 v=0, 바닥은 하나','|00⟩ : both modes v=0, one ground state'),'sub')
+  +L(40,110,yM(1))+T(40,yM(1)-6,TR('|10⟩ 모드 A만 v=1','|10⟩ only mode A v=1'),'sub')+L(210,280,yM(1.3))+T(186,yM(1.3)-6,TR('|01⟩ 모드 B만 v=1','|01⟩ only mode B v=1'),'sub')
+  +A(60,283,60,yM(1)+3,'g',0,{at:'end',t:'pump',tx:-44,ty:20})+A(245,283,245,yM(1.3)+3,'b',1,{at:'end',t:TR('흡수 감소','absorbs less'),tx:6,ty:-20})
+  +T(150,246,TR('pump가 바닥을 비우면','the pump empties the ground state,'),'sub','middle')+T(150,262,TR('모드 B 흡수도 줄어든다','so mode B absorbs less too'),'sub','middle'),
+ m:()=>MAP([.75,1.45],tmTick,[pk(1,1,'b',{rx:9,ry:9,lab:TR('모드 A','mode A')}),pk(1,.88,'r',{rx:9,ry:9}),pk(1.3,1.3,'b',{rx:9,ry:9,lab:TR('모드 B','mode B')}),pk(1.3,1.18,'r',{rx:9,ry:9}),pk(1,1.3,'b',{rx:10,ry:10,n:1,lab:'cross GSB'}),pk(1.3,1,'b',{rx:10,ry:10})]),
+ read:[TR('이름표: |n₁ n₂⟩ = (모드 A 양자 수, 모드 B 양자 수). 모드 A의 v=1은 |10⟩, 모드 B의 v=1은 |01⟩.','Labels: |n₁ n₂⟩ = (quanta in mode A, quanta in mode B). v=1 of mode A is |10⟩; v=1 of mode B is |01⟩.'),TR('두 진동이 같은 분자 안에 있으면 두 사다리의 v=0이 같은 상태 |00⟩ 하나로 합쳐진다.','When both vibrations sit in the same molecule, the v=0 levels of the two ladders merge into one state, |00⟩.'),TR(`pump(ω_A)로 모드 A을 올리면 |00⟩ 분자가 줄어 ${c(1,'b')} 모드 B(ω_B) 흡수도 줄어든다 → (ω_A, ω_B)에 cross GSB.`,`Pumping mode A (ω_A) depletes |00⟩, so ${c(1,'b')} the mode B (ω_B) absorption also decreases → cross GSB at (ω_A, ω_B).`),TR('cross GSB에는 SE가 없다. 모드 A가 들뜬 분자는 ω_A로 방출하기 때문.','The cross GSB has no SE, because molecules with mode A excited emit at ω_A.'),TR('예: Rh(CO)₂(acac) 한 분자 안의 카보닐(C≡O) 두 개. 대칭 신축(약 2015 cm⁻¹)과 비대칭 신축(약 2084 cm⁻¹)이 모드 A, B. 분자 하나에 붙은 진동이라 바닥이 하나다(값은 용매에 따라 조금 다름).','Example: the two CO groups in one Rh(CO)₂(acac) molecule. The symmetric stretch (approx. 2015 cm⁻¹) and the asymmetric stretch (approx. 2084 cm⁻¹) are modes A and B. Both belong to one molecule, so there is one ground state (values vary slightly with solvent).')],
+ q:TR('이 그림의 cross GSB는 "바닥이 하나"라는 이유만으로 생겼다. 그럼 같은 분자 안의 두 모드는 coupling이 없어도 항상 cross peak가 보일까?','The cross GSB here arises only because "there is one ground state". Do two modes in the same molecule then always show a cross peak, even without coupling?'),a:TR('아니다. 다음 단계: 모드 A가 들뜬 분자도 모드 B를 흡수할 수 있어서 ESA가 생기고, coupling이 없으면 이 ESA가 cross GSB를 정확히 지운다.','No. Next step: molecules with mode A excited can still absorb mode B, which gives an ESA, and without coupling this ESA cancels the cross GSB exactly.')},
+{t:TR('|11⟩ 추가: coupling이 없으면 상쇄','Adding |11⟩: no coupling means cancellation'),
+ e:()=>twoMode(0),m:()=>MAP([.75,1.45],tmTick,tmPeaks(0)),
+ read:[TR('분자 100개로 세어 보자. pump 전에는 100개 모두 |00⟩이고, ω_B 빛을 100개가 흡수한다.','Counting with 100 molecules: before the pump, all 100 are in |00⟩ and all 100 absorb ω_B light.'),TR('pump(ω_A)로 10개를 |10⟩(모드 A만 들뜸)으로 올린다.','The pump (ω_A) lifts 10 of them to |10⟩ (only mode A excited).'),TR(`남은 90개는 |00⟩→|01⟩로 ω_B를 흡수한다. 6단계에서 본 ${c(1,'b')} cross GSB는 "100개 → 90개"로 줄어든 이 부분.`,`The remaining 90 absorb ω_B via |00⟩→|01⟩. The ${c(1,'b')} cross GSB of step 6 is this drop from 100 to 90.`),TR(`그런데 들뜬 10개도 모드 B는 그대로 흡수할 수 있다(|10⟩→|11⟩, ${c(2,'r')}). coupling이 없으면 모드 B는 모드 A가 들떴는지 모르므로 진동수도 세기도 그대로 ω_B.`,`But the 10 excited molecules can still absorb mode B (|10⟩→|11⟩, ${c(2,'r')}). Without coupling, mode B does not know whether mode A is excited, so its frequency and strength stay at ω_B.`),TR('결국 ω_B 흡수는 90 + 10 = 100개로 pump 전과 같다. 변화가 0이니 cross peak 없음. 에너지 그림에서 ① ② 화살표 길이가 같은 것이 이 뜻.','In the end, ω_B absorption is 90 + 10 = 100, the same as before the pump. The change is 0, so there is no cross peak. That is what the equal lengths of arrows ① and ② mean in the energy diagram.')],
+ q:TR('이때 대각 피크는 어떻게 되나?','What happens to the diagonal peaks?'),a:TR('그대로. 대각 쌍 간격은 Δ_A, Δ_B(각 모드 자기 비조화성)라 coupling과 무관하다.','Nothing changes. The diagonal pair spacings are Δ_A and Δ_B (each mode’s own anharmonicity), which do not depend on coupling.')},
+{t:TR('coupling이 있으면 Δ_AB만큼 밀림','With coupling, a shift by Δ_AB'),
+ e:()=>twoMode(1),m:()=>MAP([.75,1.45],tmTick,tmPeaks(1)),
+ read:[TR('coupling(두 진동이 서로 영향을 주는 것)이 있으면 모드 A가 들떠 있을 때 모드 B 진동수가 Δ_AB만큼 바뀐다(연결된 스프링).','With coupling (the two vibrations affect each other), the mode B frequency changes by Δ_AB while mode A is excited (connected springs).'),TR('다시 100개로 세면: 90개는 ω_B를 흡수하고, 들뜬 10개는 ω_B − Δ_AB를 흡수한다. ω_B에서는 100 → 90으로 줄고(흡수 감소, 빨강), ω_B − Δ_AB에서는 0 → 10으로 새로 생긴다(흡수 증가, 파랑).','Counting 100 again: 90 absorb at ω_B, and the 10 excited ones absorb at ω_B − Δ_AB. At ω_B the count drops 100 → 90 (less absorption, red); at ω_B − Δ_AB it rises 0 → 10 (more absorption, blue).'),TR('에너지 그림에서는 |11⟩이 Δ_AB만큼 낮아져 ② 화살표가 ① 보다 짧다. E(1,1) = E(1,0) + E(0,1) − Δ_AB.','In the energy diagram |11⟩ is lowered by Δ_AB, so arrow ② is shorter than ①. E(1,1) = E(1,0) + E(0,1) − Δ_AB.'),TR(`${c(2,'r')} ESA가 ω_B − Δ_AB로 밀려 ${c(1,'b')} cross GSB와 상쇄가 깨진다 → cross peak 쌍이 보인다.`,`${c(2,'r')} The ESA shifts to ω_B − Δ_AB, breaking its cancellation with the ${c(1,'b')} cross GSB → a cross-peak pair appears.`),TR('3, 4단계(Δ가 없으면 상쇄, Δ 덕분에 대각 쌍이 보임)와 똑같은 논리. 최종 피크: 대각 4개 + cross 4개 = 8개.','Same logic as steps 3 and 4 (without Δ they cancel; Δ makes the diagonal pair visible). Final peaks: 4 diagonal + 4 cross = 8.')],
+ q:TR('두 cross peak의 Δ_AB는 같은가?','Is Δ_AB the same for the two cross peaks?'),a:TR('같다. 어느 모드를 먼저 들뜨게 하든 |11⟩ 에너지는 하나뿐이다.','Yes. Whichever mode is excited first, there is only one |11⟩ energy.')},
+{t:TR('T가 지나면: 둥글어지는 피크와 교환 cross peak','As T grows: rounding peaks and exchange cross peaks'),slider:{min:0,max:20,step:.1,init:0,label:'T',fmt:v=>v.toFixed(1)+' ps',play:1},tl:TR('T 슬라이더','T slider'),
+ e:Tf=>T(80,18,'Li⁺-bound (ω_bound)','sub','middle')+T(240,18,'free (ω_free)','sub','middle')+`<line x1="160" y1="30" x2="160" y2="280" class="lvl2"/>`
+  +L(40,120,285)+L(40,120,yM(1))+L(40,120,yM(1.88))+T(124,289,'v=0','sub')+T(124,yM(1)+4,'v=1','sub')+T(124,yM(1.88)+4,'v=2','sub')
+  +L(195,275,285)+L(195,275,yM(1.3))+L(195,275,yM(2.48))+T(279,289,'v=0','sub')+T(279,yM(1.3)+4,'v=1','sub')+T(279,yM(2.48)+4,'v=2','sub')
+  +A(235,283,235,yM(1.3)+3,'g',0,{at:'end',t:'pump',tx:6,ty:30})
+  +`<path d="M198,${yM(1.3)+4} Q160,${yM(1.3)-30} 124,${yM(1)-4}" fill="none" style="stroke:var(--pump)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#mg)"/>`+T(160,yM(1.3)-34,TR('교환 (T 동안)','exchange (during T)'),'sub','middle')
+  +A(65,yM(1)+2,65,283,'b',1,{dash:1})+A(95,yM(1)-2,95,yM(1.88)+3,'r',2,{dx:14})+[-5,5].map(o=>L(44,116,yM(1)+o,'lvl2')+L(199,271,yM(1.3)+o,'lvl2')).join('')+T(24,300,'T = '+Tf.toFixed(1)+' ps','lab')+T(300,300,TR('점선: 분자마다 조금씩 다른 v=1 (불균일)','dashed: v=1 spread (inhomogeneous)'),'sub','end'),
+ m:Tf=>{const d=Math.exp(-Tf/8),a=.5*(1-Math.exp(-Tf/5)),od=.15+.7*d*(1-a),oc=.85*d*a,s={rx:9,ry:9},f=Math.exp(-Tf/2),e={el:1,rx:9+9*f,ry:9-3*f};
+  const it=[pk(1,1,'b',{...e,o:od,lab:'bound',lx:-66}),pk(1,.88,'r',{...e,o:od}),pk(1.3,1.3,'b',{...e,o:od,lab:'free',lx:-56}),pk(1.3,1.18,'r',{...e,o:od}),nt(296,262,TR('대각 피크 기울기(CLS) ≈ ','diagonal peak slope (CLS) ≈ ')+f.toFixed(2),'end'),
+   pk(1.3,1,'b',{...s,o:oc,so:Math.min(1,oc*3),n:a<.05?0:1}),pk(1.3,.88,'r',{...s,o:oc,so:Math.min(1,oc*3),n:a<.05?0:2}),pk(1,1.3,'b',{...s,o:oc,so:Math.min(1,oc*3)}),pk(1,1.18,'r',{...s,o:oc,so:Math.min(1,oc*3)})];
+  if(a<.05)it.push(nt(175,44,TR('T = 0: cross peak 자리 비어 있음','T = 0: cross-peak positions empty')));
+  return MAP([.75,1.45],{x:[{v:1,l:'ω_bound'},{v:1.3,l:'ω_free'}],y:[{v:1,l:'ω_bound'},{v:1.3,l:'ω_free'}]},it)},
+ read:[TR('이 단계부터 T &gt; 0이다. 슬라이더로 T(ps)를 늘리면 두 가지가 동시에 일어난다.','From this step on, T &gt; 0. Increasing T (ps) with the slider makes two things happen at once.'),TR('<b>첫째, 피크 모양: 대각선 타원 → 원.</b> 같은 C=O라도 주변 환경이 분자마다 달라 진동수가 조금씩 다르다(불균일 넓어짐, 에너지 그림의 점선).','<b>First, peak shape: diagonal ellipse → circle.</b> Even for the same C=O, the surroundings differ from molecule to molecule, so the frequencies differ slightly (inhomogeneous broadening, the dashed lines in the energy diagram).'),TR('T가 짧으면 분자가 pump 때의 자기 진동수를 아직 기억한다. ω₁에서 들뜬 분자는 ω₃도 같은 값에서 probe되니, 피크가 대각선 방향으로 길쭉하다.','At short T, each molecule still remembers its frequency at the time of the pump. A molecule excited at ω₁ is probed at the same ω₃, so the peak is stretched along the diagonal.'),TR('T가 길어지면 환경이 요동치며 진동수가 바뀌어 기억을 잃는다(spectral diffusion). pump 진동수와 probe 진동수가 무관해져 피크가 둥글어진다.','At longer T, the environment fluctuates, the frequency changes, and the memory is lost (spectral diffusion). The pump and probe frequencies become uncorrelated, and the peak becomes round.'),TR('정량: 타원 기울기(center line slope, CLS)가 진동수 상관 함수 C(T) ∝ exp(−T/τ_c)를 따라 1에서 0으로 줄어든다. 끝까지 남는 둥근 폭은 균일 선폭(빠른 요동, T₂).','Quantitatively: the ellipse slope (center line slope, CLS) follows the frequency correlation function C(T) ∝ exp(−T/τ_c) and falls from 1 to 0. The round width that remains at the end is the homogeneous linewidth (fast fluctuations, T₂).'),TR('<b>둘째, cross peak: 교환.</b> 5단계의 free / Li⁺-bound 경우. T 동안 Li⁺가 붙었다 떨어지면, free 위치에서 pump한 분자가 bound 위치에서 probe된다.','<b>Second, cross peaks: exchange.</b> The free / Li⁺-bound case of step 5. If Li⁺ binds or unbinds during T, a molecule pumped at the free position is probed at the bound position.'),TR(`${c(1,'b')} ${c(2,'r')} cross peak 쌍이 T에 따라 자란다. ESA가 bound 자신의 Δ만큼 아래라 상쇄되지 않는다.`,`The ${c(1,'b')} ${c(2,'r')} cross-peak pair grows with T. The ESA lies below by the bound species’ own Δ, so it does not cancel.`),TR('교환은 양방향이라 두 cross peak가 대칭으로 자란다(2DES 에너지 전달은 내리막 쪽이 큼).','Exchange goes both ways, so the two cross peaks grow symmetrically (in 2DES energy transfer, the downhill one is larger).'),TR('동시에 진동 수명 T₁으로 전체 신호가 줄어든다. 교환이 T₁보다 느리면 cross peak가 자라기 전에 사라진다.','At the same time, the whole signal decays with the vibrational lifetime T₁. If exchange is slower than T₁, the cross peaks vanish before they can grow.'),TR('그림 값(τ_c 2 ps, 교환 5 ps, T₁ 8 ps)은 설명용 가정.','The figure values (τ_c 2 ps, exchange 5 ps, T₁ 8 ps) are assumed for illustration.')],
+ q:TR('8단계(coupling) cross peak와 교환 cross peak는 어떻게 구분하나? 그리고 피크가 처음부터 둥글면 무슨 뜻인가?','How are step-8 (coupling) cross peaks told apart from exchange cross peaks? And what does a peak that is round from the start mean?'),a:TR('coupling cross peak는 T = 0부터 있고 T에 따라 줄기만 한다. 교환 cross peak는 T = 0에 없고 T에 따라 자란다. 처음부터 둥글면 불균일 넓어짐이 작거나, 기억을 잃는 속도가 측정 가능한 가장 짧은 T보다 빠르다는 뜻.','Coupling cross peaks are present from T = 0 and only decay with T. Exchange cross peaks are absent at T = 0 and grow with T. A peak that is round from the start means either little inhomogeneous broadening, or memory loss faster than the shortest measurable T.')}];
+
+/* ---------- 2DES: displaced oscillators ---------- */
+const yg=x=>285-.012*(x-120)**2,ye=x=>165-.012*(x-170)**2,yf=x=>55-.012*(x-195)**2;
+const ax=`<line x1="20" y1="296" x2="300" y2="296" class="tk"/>`+T(300,292,TR('핵 좌표 Q','nuclear coordinate Q'),'sub','end');
+const GE=()=>ax+P(120,285,80)+T(28,214,'g')+P(170,165,75)+T(248,102,'e');
+const relax=`<path d="M124,140 Q148,163 165,165" fill="none" style="stroke:var(--pump)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#mg)"/>`;
+const vib=()=>{const d=y=>Math.sqrt((285-y)/.012),de=y=>Math.sqrt((165-y)/.012);
+ return L(120-d(277),120+d(277),277)+L(120-d(255),120+d(255),255,'lvl2')+L(170-de(157),170+de(157),157)+L(170-de(135),170+de(135),135,'lvl2')
+ +T(90,282,'0','sub','end')+T(66,259,'1','sub','end')+T(212,161,"0′",'sub')+T(234,139,"1′",'sub')};
+const esTick1={x:[{v:.62,l:'E_abs'}],y:[{v:.62,l:'E_abs'}]};
+const esTick2={x:esTick1.x,y:[{v:.62,l:'E_abs'},{v:.42,l:'E_SE'}]};
+const arrMap=(v1,a,b,lab)=>(X,Y)=>`<line x1="${X(v1)+30}" y1="${Y(a)}" x2="${X(v1)+30}" y2="${Y(b)}" style="stroke:var(--pump)" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#mg)"/>`+T(X(v1)+36,(Y(a)+Y(b))/2+4,lab,'sub');
+
+const yf2=x=>55-.012*(x-175)**2;
+/* 2D 맵 probe 위치 = 화살표 길이: 60 px = 0.2 (E_abs 150 px → .62). ESA도 같은 눈금이라 화살표가 흡수보다 짧으면 대각선 아래. */
+function wp(Tf){const x=170-50*Math.cos(2*Math.PI*Tf/120)*Math.exp(-Tf/250);const gap=yg(x)-ye(x),gf=ye(x)-yf2(x);return{x,E:.42+(gap-90)/60*.2,gap,Ef:.62+(gf-150)/300}}
+function fsE(Tf,esa){const w=wp(Tf);let tr='';for(let t=0;t<=Math.min(Tf,1000);t+=5){const p=wp(t);tr+=(tr?' L':'M')+p.x.toFixed(1)+','+(ye(p.x)-7).toFixed(1)}
+ let s=GE()+`<path d="${tr}" fill="none" style="stroke:var(--gsb)" stroke-opacity=".3"/>`+`<g opacity=".35">${A(120,283,120,ye(120)+3,'b',0)}</g>`
+  +`<circle cx="${w.x}" cy="${ye(w.x)-7}" r="7" style="fill:var(--gsb)" fill-opacity=".75"/>`+A(w.x,ye(w.x)+2,w.x,yg(w.x)-3,'b',2,{dash:1,dx:16})
+  +T(14,24,'T = '+Math.round(Tf)+' fs','lab')+T(14,40,TR('빨간 점: e 위의 파속','red dot: wavepacket'),'sub');
+ if(esa)s+=P(175,55,66)+T(248,14,'f')+A(w.x,ye(w.x)-16,w.x,yf2(w.x)+3,'r',3,{dx:16});
+ return s}
+const ES=[
+{t:TR('밀린 포물선과 흡수','Displaced parabolas and absorption'),
+ e:()=>GE()+A(120,283,120,ye(120)+3,'b',1,{at:'end',t:TR('흡수','absorption')})+L(112,178,165,'lvl2')+T(104,154,'λ','sub'),
+ m:()=>MAP([0,1],esTick1,[pk(.62,.62,'b',{n:1,el:1,lab:'GSB+SE'})]),
+ read:[TR('가로축은 핵 좌표 Q. e 포물선이 g보다 옆으로 밀려 있다.','The horizontal axis is the nuclear coordinate Q. The e parabola is displaced sideways from g.'),TR(`${c(1,'b')} 빛은 핵보다 빨라 수직으로 올라간다(Franck–Condon). E_abs = E₀₀ + λ.`,`${c(1,'b')} Light is faster than the nuclei, so the transition goes straight up (Franck–Condon). E_abs = E₀₀ + λ.`),TR('T ≈ 0에는 아직 이완 전이라 GSB와 SE가 같은 자리. 불균일 선폭 때문에 대각선 방향 타원.','At T ≈ 0 nothing has relaxed yet, so GSB and SE share a position. Inhomogeneous broadening makes the peak a diagonal ellipse.')],
+ q:TR('두 포물선의 곡률을 다르게 그려도 되나?','Can the two parabolas be drawn with different curvatures?'),a:TR('가능하지만 입문 그림은 같은 곡률(같은 진동수)로 둔다. 곡률이 다르면 흡수와 방출 선모양이 비대칭이 된다.','Yes, but introductory figures use the same curvature (same frequency). Different curvatures make the absorption and emission line shapes asymmetric.')},
+{t:TR('진동 구조 (vibronic)','Vibrational structure (vibronic)'),
+ e:()=>GE()+vib()+A(145,276,145,159,'b',1,{at:'end',dx:14,t:'0–0',tx:4,ty:-30})+A(125,276,125,137,'b',2,{at:'end',dx:-14,t:'0–1′',tx:-36,ty:-44}),
+ m:()=>MAP([0,1],{x:[{v:.45,l:'E(0–0)'},{v:.7,l:'E(0–1′)'}],y:[{v:.45,l:'E(0–0)'},{v:.7,l:'E(0–1′)'}]},[pk(.45,.45,'b',{n:1,el:1}),pk(.7,.7,'b',{n:2,el:1}),pk(.45,.7,'b',{rx:10,ry:10,o:.5,lab:'vibronic',lx:-24,ly:26}),pk(.7,.45,'b',{rx:10,ry:10,o:.5,lab:'vibronic',lx:-24,ly:26}),br(.7,.7,.45,'ω_v',40)]),
+ read:[TR('포물선 안에 진동 준위를 넣는다(g: 0, 1 / e: 0′, 1′).','Vibrational levels are added inside the parabolas (g: 0, 1 / e: 0′, 1′).'),TR(`${c(1,'b')} 0–0 전이, ${c(2,'b')} 0–1′ 전이 → 대각 피크 둘, 간격 ω_v.`,`${c(1,'b')} the 0–0 transition and ${c(2,'b')} the 0–1′ transition → two diagonal peaks, spaced by ω_v.`),TR('둘이 같은 바닥(v=0)을 공유하므로 T = 0에서도 cross peak가 생긴다. 2D IR 6단계(바닥이 하나)와 같은 이유.','Both share the same ground level (v=0), so cross peaks appear even at T = 0. Same reason as 2D IR step 6 (one ground state).'),TR('(이 cross peak가 T에 따라 출렁이는 이야기는 이 노트에서 다루지 않는다. 공통 상자의 beat map이 그 출렁임을 본다.)','(How these cross peaks oscillate with T is not covered in this note. The beat map in the shared box looks at those oscillations.)')],
+ q:TR('이 cross peak는 두 분자 사이 coupling의 증거인가?','Is this cross peak evidence of coupling between two molecules?'),a:TR('아니다. 한 분자 안의 진동 구조에서 나온다. 2DES 해석에서 흔한 함정.','No. It comes from vibrational structure within one molecule. A common pitfall in 2DES interpretation.')},
+{t:TR('ESA 위치','ESA position'),
+ e:()=>GE()+P(175,55,66)+T(248,14,'f')+A(120,283,120,ye(120)+3,'b',1)+A(130,ye(130)-2,130,yf2(130)+3,'r',2,{dx:14}),
+ m:()=>MAP([0,1],esTick1,[pk(.62,.62,'b',{n:1,el:1,lab:'GSB+SE'}),pk(.62,.48,'r',{n:2,el:1,lab:'ESA'}),pk(.62,.86,'r',{dash:1,lab:TR('또는 여기','or here')})]),
+ read:[TR('f(이중 들뜸: Sₙ, 바이엑시톤 등)를 추가.','f (doubly excited: Sₙ, biexciton, etc.) is added.'),TR(`T = 0에는 파속이 아직 Franck–Condon 지점에 있으므로, ${c(2,'r')} ESA도 그 자리에서 수직으로 f까지 올라간다.`,`At T = 0 the wavepacket is still at the Franck–Condon point, so the ${c(2,'r')} ESA also goes straight up to f from there.`),TR('probe 위치는 그 지점의 E_f − E_e. 이 그림에서는 ② 화살표가 ① 보다 짧아 대각선 아래에 온다.','Its probe position is E_f − E_e at that point. In this figure arrow ② is shorter than ①, so the ESA lies below the diagonal.'),TR('2D IR처럼 "GSB 바로 아래 Δ"로 고정되지는 않는다. f가 더 높아 ② 화살표가 ① 보다 길면 대각선 위(점선 자리)에 온다.','Unlike 2D IR, it is not fixed at "Δ just below the GSB". If f lies higher and arrow ② is longer than ①, the ESA falls above the diagonal (dashed position).'),TR('QD 바이엑시톤이면 ESA가 Δ_XX만큼 이동: 2D IR Δ의 전자판.','For a QD biexciton the ESA shifts by Δ_XX: the electronic version of the 2D IR Δ.')],
+ q:TR('ESA가 GSB와 같은 자리에 오면?','What if the ESA lands on the GSB?'),a:TR('부호가 반대라 부분 상쇄돼 피크가 약해지거나 사라져 보인다. 피크 개수만 세서 상태 수를 추정하면 틀릴 수 있다.','The signs are opposite, so they partly cancel and the peak looks weak or missing. Counting peaks alone to estimate the number of states can go wrong.')},
+{t:TR('두 발색단과 coupling J','Two chromophores and coupling J'),
+ e:()=>L(25,295,282)+T(25,298,TR('g : coupling된 두 발색단의 바닥은 하나','g : coupled chromophores share one ground state'),'sub')+L(35,125,110)+T(35,103,'A')+L(185,295,160)+T(285,153,'B')
+  +`<line x1="125" y1="110" x2="185" y2="160" style="stroke:var(--pump)" stroke-dasharray="3 3"/>`+T(150,128,'J','sub')
+  +A(70,280,70,113,'g',0,{at:'end',t:'pump',ty:30})+A(235,280,235,163,'b',1,{at:'end',t:TR('흡수 감소','absorbs less'),ty:-10})
+  +T(TR(150,158),236,TR('바닥을 비우면','ground state emptied'),'sub','middle')+T(TR(150,158),252,TR('B 흡수도 줄어든다','also lowers B absorption'),'sub','middle'),
+ m:()=>MAP([0,1],{x:[{v:.42,l:'E_B'},{v:.72,l:'E_A'}],y:[{v:.42,l:'E_B'},{v:.72,l:'E_A'}]},[pk(.72,.72,'b',{el:1,lab:'A'}),pk(.42,.42,'b',{el:1,lab:'B'}),pk(.72,.42,'b',{n:1,rx:11,ry:11,o:.55,lab:'coupling',lx:-26,ly:28}),pk(.42,.72,'b',{rx:11,ry:11,o:.55,lab:'coupling',lx:-26,ly:28})]),
+ read:[TR('coupling J가 있으면 A, B의 들뜬 상태가 섞여(엑시톤) 바닥을 공유한다.','With coupling J, the excited states of A and B mix (excitons) and share a ground state.'),TR(`pump E_A로 바닥을 비우면 ${c(1,'b')} E_B 흡수도 줄어든다 → T = 0부터 대칭 cross peak.`,`Emptying the ground state with a pump at E_A also lowers the ${c(1,'b')} E_B absorption → symmetric cross peaks from T = 0.`),TR('2D IR 6~8단계와 같은 논리. coupling이 없으면 이중 들뜸 상태로 가는 ESA와 상쇄되고, coupling이 있으면 그 ESA가 밀려서 cross peak가 살아남는다(엑시톤판 Δ_AB). ESA는 그림을 단순하게 하려고 생략.','Same logic as 2D IR steps 6–8. Without coupling, the ESA to the doubly excited state cancels it; with coupling, that ESA shifts and the cross peak survives (the exciton version of Δ_AB). The ESA is omitted to keep the figure simple.'),TR('T = 0에서 두 cross peak는 대칭. 비대칭이 생기면 T 동안 무언가 일어난 것(뒷장).','At T = 0 the two cross peaks are symmetric. An asymmetry means something happened during T (later steps).')],
+ q:TR('coupling 없는 두 발색단을 섞은 용액이면 T = 0 cross peak는?','In a solution mixing two uncoupled chromophores, is there a cross peak at T = 0?'),a:TR('없다. 바닥을 공유하지 않기 때문. 2D IR 5단계(free / Li⁺-bound)와 같은 경우.','No, because they do not share a ground state. Same case as 2D IR step 5 (free / Li⁺-bound).')},
+{t:TR('이완과 SE','Relaxation and SE'),tl:TR('T &gt; 0 (이완 후)','T &gt; 0 (after relaxation)'),
+ e:()=>GE()+A(120,283,120,ye(120)+3,'b',1)+relax+A(170,167,170,yg(170)-3,'b',2,{at:'end',dash:1,dx:14,t:'SE'})+L(112,178,165,'lvl2')+L(120,180,285,'lvl2')+T(104,154,'λ','sub')+T(176,274,'λ','sub'),
+ m:()=>MAP([0,1],esTick2,[pk(.62,.62,'b',{n:1,el:1,rx:15,ry:10,lab:'GSB'}),arrMap(.62,.58,.46,'T↑, 2λ'),pk(.62,.42,'b',{n:2,dash:1,lab:'SE'})]),
+ read:[TR('이 단계부터 T &gt; 0이다.','From this step on, T &gt; 0.'),TR('T 동안 e 위의 파속이 최저점으로 미끄러진다(용매화, 구조 이완).','During T, the wavepacket on e slides to the minimum (solvation, structural relaxation).'),TR(`${c(2,'b')} SE는 최저점에서 수직으로 내려온다. E_SE = E₀₀ − λ.`,`${c(2,'b')} SE goes straight down from the minimum. E_SE = E₀₀ − λ.`),TR(`${c(1,'b')} GSB는 바닥의 구멍이라 E_abs에 그대로 남는다.`,`${c(1,'b')} GSB is a hole in the ground state, so it stays at E_abs.`),TR('SE만 probe 아래로 2λ 이동(Stokes shift). 동시에 타원이 둥글어진다(spectral diffusion).','Only SE moves down the probe axis by 2λ (Stokes shift). At the same time the ellipse becomes round (spectral diffusion).')],
+ q:TR('2D IR에서는 왜 이 단계가 없었나?','Why was there no such step for 2D IR?'),a:TR('진동 전이는 재배열 에너지 λ가 매우 작아 Stokes shift를 무시할 수 있다. 그래서 GSB와 SE가 같은 자리였다.','Vibrational transitions have a very small reorganization energy λ, so the Stokes shift is negligible. That is why GSB and SE shared a position.')},
+{t:TR('에너지 전달: 자라는 cross peak','Energy transfer: a growing cross peak'),tl:TR('T &gt; 0 (전달 후)','T &gt; 0 (after transfer)'),
+ e:()=>L(25,295,282)+T(25,276,'g','sub')+L(35,125,110)+T(35,103,'A')+L(185,295,160)+T(285,153,'B')+L(205,295,176,'lvl2')+T(300,194,TR('이완','relaxed'),'sub','end')+L(240,295,85)+T(285,78,'f')
+  +`<line x1="125" y1="110" x2="185" y2="160" style="stroke:var(--pump)" stroke-dasharray="3 3"/>`+T(150,150,'J','sub')
+  +`<path d="M128,118 q10,-14 20,0 t20,0 t20,0 t14,10" fill="none" style="stroke:var(--pump)" stroke-width="1.5" marker-end="url(#mg)"/>`+T(130,92,TR('에너지 전달 (T)','energy transfer (T)'),'sub')
+  +A(70,280,70,113,'g',0,{at:'end',t:'pump',ty:30})+A(205,280,205,163,'b',1,{dx:-14})+A(238,178,238,279,'b',2,{dash:1,dx:14})+A(275,158,275,88,'r',3,{dx:14}),
+ m:()=>MAP([0,1],{x:[{v:.42,l:'E_B'},{v:.72,l:'E_A'}],y:[{v:.42,l:'E_B'},{v:.72,l:'E_A'}]},[pk(.72,.72,'b',{o:.3,lab:'A'}),pk(.42,.42,'b',{o:.7,lab:'B'}),pk(.72,.42,'b',{n:1,rx:14,ry:13,o:.9,lab:TR('자람','grows')}),pk(.72,.3,'b',{n:2,dash:1,rx:10,ry:9}),pk(.72,.13,'r',{n:3,rx:11,ry:8}),pk(.42,.72,'b',{o:.18,lab:TR('약함','weak')})]),
+ read:[TR('A(높음)와 B(낮음), coupling J. pump가 A를 올리고 T 동안 에너지가 B로 넘어간다.','A (high) and B (low), coupling J. The pump excites A, and energy moves to B during T.'),TR(`${c(1,'b')} pump E_A, probe E_B: 내리막 cross peak가 T에 따라 자란다.`,`${c(1,'b')} pump E_A, probe E_B: the downhill cross peak grows with T.`),TR(`${c(2,'b')} B의 SE는 이완된 준위에서 내려와 더 낮은 probe.`,`${c(2,'b')} B’s SE comes down from the relaxed level, at a lower probe energy.`),TR(`${c(3,'r')} B→f ESA도 같은 열(pump E_A)에 따라온다. 이 예시에서는 ③ 화살표가 ① 보다 짧아 probe가 E_B보다 낮다.`,`${c(3,'r')} The B→f ESA follows in the same column (pump E_A). In this example arrow ③ is shorter than ①, so its probe energy is below E_B.`),TR('오르막 cross peak(왼쪽 위)는 볼츠만 인자 때문에 약하다.','The uphill cross peak (upper left) is weak because of the Boltzmann factor.')],
+ q:TR('T = 0에 cross peak가 이미 있으면 무엇을 뜻하나?','What does a cross peak already present at T = 0 mean?'),a:TR('에너지 전달이 아니라 coupling(엑시톤 혼합)이나 공통 바닥 상태. 전달은 T에 따라 자라는 것으로 구분한다.','Not energy transfer but coupling (exciton mixing) or a common ground state. Transfer is identified by growth with T.')},
+{t:TR('T가 fs일 때','When T is in fs'),slider:{min:0,max:1000,step:5,init:0,label:'T',fmt:v=>v.toFixed(0)+' fs',play:1},tl:TR('T 슬라이더','T slider'),
+ e:Tf=>fsE(Tf,0),
+ m:Tf=>{const w=wp(Tf),f=Math.exp(-Tf/300);const it=[pk(.62,.62,'b',{n:1,el:1,rx:12+10*f,ry:12-3*f,lab:'GSB',lx:-10,ly:-26}),pk(.62,Math.max(.12,Math.min(.92,w.E)),'b',{n:2,dash:1,br:1,bo:22,lab:'SE',lx:-8,ly:30})];
+  if(Tf<40)it.push(nt(175,44,TR('펄스 겹침: coherent artifact 구간','pulse overlap: coherent-artifact region')));return MAP([0,1],esTick2,it)},
+ read:[TR('슬라이더로 T를 0부터 늘리며 2D 맵이 어떻게 바뀌는지 본다.','Increasing T from 0 with the slider shows how the 2D map changes.'),TR('0–수십 fs: 펄스가 겹쳐 coherent artifact와 비공명 용매 신호가 섞인다.','0 to a few tens of fs: the pulses overlap, mixing in the coherent artifact and nonresonant solvent signal.'),TR(`수십–수백 fs: 파속이 e 위에서 진동해 ${c(2,'b')} SE 위치가 ω_v 주기로 출렁인다. 감쇠하며 최저점(E_SE)에 정착.`,`Tens to hundreds of fs: the wavepacket oscillates on e, so the ${c(2,'b')} SE position swings with the ω_v period. It damps and settles at the minimum (E_SE).`),TR(`같은 시간에 관성 용매화가 시작돼 ${c(1,'b')} 타원이 둥글어진다.`,`Over the same time, inertial solvation starts and the ${c(1,'b')} ellipse becomes rounder.`),TR('ESA는 그림을 단순하게 하려고 이 단계에서 뺐다(다음 단계).','The ESA is left out of this step to keep the figure simple (next step).'),TR('그림의 값(주기 120 fs ≈ 280 cm⁻¹, 감쇠 250 fs)은 설명용 가정.','The figure values (period 120 fs ≈ 280 cm⁻¹, damping 250 fs) are assumed for illustration.')],
+ q:TR('2D IR에서 T = 수십 fs를 보기 어려운 이유는?','Why is T of a few tens of fs hard to see in 2D IR?'),a:TR('중적외 펄스가 보통 100 fs 안팎이라 펄스 겹침 구간이 길고, 관심 동역학(진동 이완, 스펙트럼 확산)이 주로 수백 fs–ps 영역이다. 정확한 펄스 폭은 장비마다 다르다.','Mid-IR pulses are typically around 100 fs, so the pulse-overlap region is long, and the dynamics of interest (vibrational relaxation, spectral diffusion) lie mainly in the hundreds of fs to ps range. The exact pulse width depends on the setup.')},
+{t:TR('T가 fs일 때: ESA까지','When T is in fs: with ESA'),slider:{min:0,max:1000,step:5,init:0,label:'T',fmt:v=>v.toFixed(0)+' fs',play:1},tl:TR('T 슬라이더','T slider'),
+ e:Tf=>fsE(Tf,1),
+ m:Tf=>{const w=wp(Tf),f=Math.exp(-Tf/300);const it=[pk(.62,.62,'b',{n:1,el:1,rx:12+10*f,ry:12-3*f}),pk(.62,Math.max(.12,Math.min(.92,w.E)),'b',{n:2,dash:1,br:1,bo:22}),pk(.62,w.Ef,'r',{n:3})];
+  if(Tf<40)it.push(nt(175,262,TR('펄스 겹침: coherent artifact 구간','pulse overlap: coherent-artifact region')));return MAP([0,1],esTick2,it)},
+ read:[TR('앞 단계 그림에 f(이중 들뜸)와 ESA를 더한 것.','The previous figure with f (doubly excited) and the ESA added.'),TR(`${c(3,'r')} ESA는 파속이 지금 있는 자리에서 f로 수직으로 올라간다(3단계 규칙과 같음).`,`${c(3,'r')} The ESA goes straight up to f from wherever the wavepacket is now (same rule as step 3).`),TR(`그래서 파속이 출렁이면 ${c(2,'b')} SE와 함께 ${c(3,'r')} ESA 위치도 같은 주기로 출렁인다. 이 그림은 f와 e 포물선의 기울기 차이가 작아 ESA의 출렁임 폭이 작고, ③ 화살표가 흡수 화살표보다 짧아 대각선 아래에 있다(3단계와 같은 자리).`,`So when the wavepacket swings, the ${c(3,'r')} ESA position swings with the same period as the ${c(2,'b')} SE. In this figure the slopes of the f and e parabolas differ little, so the ESA swing is small, and arrow ③ is shorter than the absorption arrow, so the ESA lies below the diagonal (same position as in step 3).`),TR(`${c(1,'b')} GSB는 바닥의 구멍이라 자리를 지킨다. 출렁이는 피크 = 들뜬 상태 쪽 신호.`,`${c(1,'b')} GSB is a hole in the ground state and stays put. Oscillating peaks = excited-state signals.`),TR('ESA가 GSB나 SE와 겹치는 순간에는 부호가 반대라 서로 지워져 약하게 보일 수 있다.','When the ESA overlaps GSB or SE, their opposite signs cancel and the peaks can look weak.')],
+ q:TR('GSB 위치도 T에 따라 출렁일 수 있나?','Can the GSB position also oscillate with T?'),a:TR('있다. pump가 바닥 상태에도 진동 파속(구멍의 파속)을 만들 수 있어서, GSB도 바닥 상태 진동수로 출렁일 수 있다. 이 그림에서는 단순하게 하려고 생략했다.','Yes. The pump can also create a vibrational wavepacket in the ground state (a hole wavepacket), so the GSB can oscillate at the ground-state frequency. This figure leaves it out for simplicity.')}];
+
+/* ---------- 셋업 탭 ---------- */
+const VP=.5,TA=[180,340,600];
+const seg=(a,b)=>Math.hypot(b[0]-a[0],b[1]-a[1]);
+function along(pts,d){for(let i=1;i<pts.length;i++){const L=seg(pts[i-1],pts[i]);if(d<=L){const r=d/L;return[pts[i-1][0]+(pts[i][0]-pts[i-1][0])*r,pts[i-1][1]+(pts[i][1]-pts[i-1][1])*r]}d-=L}return null}
+function pulsePos(inPts,exitPts,arr,Tf){const d=(arr-Tf)*VP;if(d>=0)return along([...inPts].reverse(),d);return exitPts?along(exitPts,-d):null}
+const poly=(pts,cls='beam',ex='')=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" class="${cls}"${ex}/>`;
+function dot(p,col,lab,av,low){if(!p)return'';if(av&&av.some(([x,y,w,h])=>p[0]>x-6&&p[0]<x+w+6&&p[1]>y-6&&p[1]<y+h+6))return'';return `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="5.5" style="fill:${col}"/>`+(lab?T(p[0]+8,p[1]+(low?16:-6),lab,'sub'):'')}
+function boxL(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+function phase(Tf){return Tf<TA[0]?TR('펄스들이 샘플로 가는 중','pulses on the way to the sample'):Tf<TA[1]?TR('1번 지남 → 결맞음 구간 t₁','after 1 → coherence period t₁'):Tf<TA[2]?TR('2번 지남 → 대기 구간 T','after 2 → waiting time T'):TR('3번 지남 → 신호 방출 구간 t₃','after 3 → signal emission t₃')}
+function timeline(Tf,labs,mini){const X=t=>t*.3,Y0=210;let s='';
+ const bump=t=>{let d='';for(let u=-60;u<=60;u+=5){const y=Y0-55*Math.exp(-(u*u)/(2*18*18));d+=(d?' L':'M')+X(t+u).toFixed(1)+','+y.toFixed(1)}return `<path d="${d}" fill="none" style="stroke:var(--pump)" stroke-width="2"/>`};
+ let sig='';for(let t=600;t<=1000;t+=4){const y=Y0-30*Math.exp(-(t-600)/170)*(1+Math.cos(2*Math.PI*(t-600)/45))/2;sig+=(sig?' L':'M')+X(t).toFixed(1)+','+y.toFixed(1)}
+ s+=`<line x1="0" y1="${Y0}" x2="305" y2="${Y0}" class="tk" marker-end="url(#mg)"/>`+T(305,Y0+30,TR('시간','time'),'sub','end');
+ s+=TA.map((t,i)=>bump(t)+T(X(t),Y0+18,labs[i],'sub','middle')).join('');
+ s+=`<path d="${sig}" fill="none" style="stroke:var(--accent)" stroke-width="1.6"/>`+T(X(800),Y0+18,TR('신호','signal'),'sub','middle');
+ const brk=(a,b,y,l)=>`<path d="M${X(a)},${y+6} V${y} H${X(b)} V${y+6}" fill="none" style="stroke:var(--muted)"/>`+T((X(a)+X(b))/2,y-6,l,'lab','middle');
+ s+=brk(TA[0],TA[1],128,'t₁')+brk(TA[1],TA[2],128,'t₂ = T')+brk(TA[2],960,128,'t₃');
+ s+=T(X((TA[0]+TA[1])/2),110,'→ ω₁','sub','middle')+T(X((TA[1]+TA[2])/2),110,TR('시간 그대로','stays in time'),'sub','middle')+T(X(780),110,'→ ω₃','sub','middle');
+ if(!mini){s+=`<line x1="${X(Tf)}" y1="60" x2="${X(Tf)}" y2="${Y0+4}" class="cur" style="stroke:var(--accent)" stroke-dasharray="3 3"/>`+T(150,48,TR('지금: ','now: ')+phase(Tf),'lab','middle')}
+ return s}
+/* 위에서 본 빔 경로. 빔 분할기(66,160, "\")가 probe를 아래로 반사하고 pump는 투과. 꺾이는 곳마다 거울을 그린다(각도는 반사 법칙에 맞춤). */
+const PP={pump:[[54,160],[84,160],[84,92],[180,92],[215,160]],pexit:[[215,160],[249,226]],probe:[[54,160],[66,160],[66,228],[180,228],[215,160]],prexit:[[215,160],[252,88]]};
+const mir=(x,y,dx,dy)=>`<line x1="${x-dx}" y1="${y-dy}" x2="${x+dx}" y2="${y+dy}" style="stroke:var(--fg)" stroke-width="2"/>`;
+function ppE(Tf){let s=poly(PP.pump)+poly(PP.pexit,'beam2')+poly(PP.probe)+poly(PP.prexit)
+ +`<rect x="6" y="146" width="48" height="28" rx="4" class="dev"/>`+T(30,164,TR('광원','source'),'sub','middle')
+ +mir(66,160,6,6)+mir(84,160,6,-6)+mir(84,92,6,-6)+mir(66,228,6,6)+mir(180,92,7.1,4.3)+mir(180,228,7.1,-4.3)
+ +boxL(95,74,70,36,'pulse shaper',TR('(t₁ 조절)','(sets t₁)'))+boxL(95,210,70,36,TR('지연 스테이지','delay stage'),TR('(T 조절)','(sets T)'))
+ +`<circle cx="215" cy="160" r="9" class="dev"/>`+T(190,148,TR('샘플','sample'),'sub','end')
+ +boxL(234,50,72,38,TR('분광기','spectrometer'),'→ ω₃')+T(252,246,'beam dump','sub','middle')
+ +T(14,30,'T = '+Math.round(Tf)+' fs','lab');
+ const avP=[[95,74,70,36],[95,210,70,36],[206,151,18,18],[234,50,72,38],[166,138,26,14]];s+=dot(pulsePos(PP.pump,PP.pexit,TA[0],Tf),'var(--pump)','1',avP)+dot(pulsePos(PP.pump,PP.pexit,TA[1],Tf),'var(--pump)','2',avP)+dot(pulsePos(PP.probe,PP.prexit,TA[2],Tf),'var(--fg)','3',avP);
+ if(Tf>TA[2])s+=dot(along(PP.prexit.map(p=>[p[0]+5,p[1]+3]),(Tf-TA[2])*VP*.97),'var(--accent)',TR('신호','signal'),avP,1);
+ return s}
+/* 옆에서 본 그림: 샘플은 렌즈 축(y=228) 위의 초점. 결합기는 아래에서 오는 LO를 신호 방향으로 반사하도록 기울인다. */
+const BX={y:[205,228,252],S:[215,228]};
+const bxIn=i=>[[30,BX.y[i]],[150,BX.y[i]],BX.S],bxSig=[BX.S,[276,200]];
+function bxE(Tf){let s=T(14,22,TR('빔 단면 (진행 방향에서 본 모습)','beam cross-section (viewed along the beams)'),'sub')
+ +`<rect x="75" y="40" width="70" height="70" fill="none" style="stroke:var(--line)" stroke-dasharray="3 3"/>`
+ +[[145,40,'k₁'],[75,40,'k₂'],[145,110,'k₃']].map(([x,y,l])=>`<circle cx="${x}" cy="${y}" r="7" style="fill:var(--pump)"/>`+T(x+(x>100?12:-12),y+(y<60?-4:16),l,'sub',x>100?'start':'end')).join('')
+ +`<circle cx="75" cy="110" r="7" style="fill:none;stroke:var(--accent)" stroke-width="2"/>`+T(63,126,TR('k_s (신호)','k_s (signal)'),'sub','end')
+ +T(178,62,'k_s = −k₁ + k₂ + k₃','lab')+T(178,80,TR('네 번째 꼭짓점으로 나감','exits at the fourth corner'),'sub')+T(178,96,TR('(다른 빔이 없는 방향)','(no other beam there)'),'sub')
+ +`<line x1="10" y1="150" x2="310" y2="150" class="lvl2"/>`+T(14,170,TR('옆에서 본 모습 (보기 쉽게 세 빔을 펼쳐 그림)','side view (three beams spread out for clarity)'),'sub')
+ +[0,1,2].map(i=>poly(bxIn(i))).join('')+poly(bxSig,'beam3')
+ +`<ellipse cx="150" cy="228" rx="5" ry="34" class="dev"/>`+T(150,282,TR('렌즈','lens'),'sub','middle')
+ +`<circle cx="215" cy="228" r="8" class="dev"/>`+T(215,256,TR('샘플','sample'),'sub','middle')
+ +`<line x1="248" y1="292" x2="248" y2="219" style="stroke:var(--accent)" stroke-dasharray="4 3" marker-end="url(#mg)"/>`+`<line x1="243.1" y1="220.6" x2="252.9" y2="205.4" style="stroke:var(--fg)" stroke-width="2"/>`+T(254,290,'LO','sub')+T(256,262,TR('빔 결합기','combiner'),'sub')
+ +boxL(276,180,38,30,TR('검출','det.'),'')+T(14,300,'T = '+Math.round(Tf)+' fs','lab');
+ const avB=[[144,192,12,72],[205,218,20,20],[276,180,38,30]];s+=[0,1,2].map(i=>dot(pulsePos(bxIn(i),null,TA[i],Tf),i===2?'var(--fg)':'var(--pump)',String(i+1),avB)).join('');
+ if(Tf>TA[2])s+=dot(along(bxSig,(Tf-TA[2])*VP),'var(--accent)',TR('신호','signal'),avB,1);
+ return s}
+const SU=[
+{t:TR('pump-probe 배치 + pulse shaper','Pump-probe geometry + pulse shaper'),slider:{min:0,max:1000,step:5,init:0,label:'T',fmt:v=>v.toFixed(0)+' fs',play:1},tl:TR('점선 = 지금 시각','dashed line = current time'),ec:TR('빔 배치 (위에서 본 모습)','beam layout (top view)'),
+ e:Tf=>ppE(Tf),m:Tf=>timeline(Tf,['pump 1','pump 2','probe']),
+ read:[TR('재생을 누르면 펄스가 시간 순서대로 샘플에 도착한다. 오른쪽 시간 축의 점선이 지금 시각.','With Play, the pulses reach the sample in time order. The dashed line on the right time axis marks the current time.'),TR('IR pump-probe 배치에 pulse shaper를 더한 구조. shaper가 펌프를 두 펄스(1, 2)로 쪼개고 간격 t₁을 바꾼다. t₁을 스캔해 푸리에 변환하면 ω₁(pump 축).','An IR pump-probe geometry with a pulse shaper added. The shaper splits the pump into two pulses (1, 2) and varies their spacing t₁. Scanning t₁ and Fourier transforming gives ω₁ (pump axis).'),TR('지연 스테이지가 펌프와 probe 사이 T를 정한다.','The delay stage sets T between pump and probe.'),TR('probe(3)가 세 번째 상호작용. 신호는 probe와 같은 방향(k_s = k₃)으로 나가고 probe가 기준(LO) 역할을 해서, 분광기가 바로 ω₃를 읽는다. t₃는 스캔하지 않는다.','The probe (3) is the third interaction. The signal leaves in the probe direction (k_s = k₃) and the probe acts as the reference (LO), so the spectrometer reads ω₃ directly. t₃ is not scanned.'),TR('shaper를 빼면 펌프 두 상호작용이 한 펄스 안(t₁ ≈ 0)에서 일어나 ω₁ 축이 없어진다. 그게 IRPP.','Without the shaper, both pump interactions occur within one pulse (t₁ ≈ 0) and the ω₁ axis disappears. That is IRPP.'),TR('rephasing과 non-rephasing 신호가 같은 방향으로 나가 합쳐지므로, 바로 흡수형(absorptive) 2D 스펙트럼이 된다.','Rephasing and non-rephasing signals leave in the same direction and add, giving an absorptive 2D spectrum directly.')],
+ q:TR('pulse shaper 없이 ω₁ 축을 얻는 방법은?','How can the ω₁ axis be obtained without a pulse shaper?'),a:TR('좁은 대역 펌프(예: Fabry–Pérot 에탈론)로 펌프 주파수를 하나씩 바꿔 가며 찍는 주파수 영역 방식. 펌프 대역이 좁을수록 ω₁ 해상도는 좋아지지만 펌프 펄스가 길어져 시간 분해능이 나빠진다.','The frequency-domain method: a narrowband pump (for example, from a Fabry–Pérot etalon) is stepped one frequency at a time. A narrower pump band improves ω₁ resolution but lengthens the pump pulse and worsens time resolution.')},
+{t:TR('BOXCARS 배치','BOXCARS geometry'),slider:{min:0,max:1000,step:5,init:0,label:'T',fmt:v=>v.toFixed(0)+' fs',play:1},tl:TR('점선 = 지금 시각','dashed line = current time'),ec:TR('빔 배치','beam layout'),
+ e:Tf=>bxE(Tf),m:Tf=>timeline(Tf,['k₁','k₂','k₃']),
+ read:[TR('세 빔을 직사각형 상자의 세 꼭짓점에 맞춰 렌즈로 샘플에 모은다.','The three beams are placed on three corners of a rectangle and focused onto the sample with a lens.'),TR('신호는 위상 정합 조건 k_s = −k₁ + k₂ + k₃ 방향, 즉 네 번째 꼭짓점으로 나간다. 다른 빔이 없는 방향이라 배경이 없다.','The signal leaves along the phase-matching direction k_s = −k₁ + k₂ + k₃, that is, at the fourth corner. No other beam travels there, so it is background-free.'),TR('이 순서(k₁이 먼저)는 rephasing(photon echo) 신호. k₁과 k₂의 도착 순서를 바꾸면 non-rephasing.','This order (k₁ first) gives the rephasing (photon echo) signal. Swapping the arrival order of k₁ and k₂ gives non-rephasing.'),TR('신호가 약하고 위상 정보도 필요해서, local oscillator(LO)를 신호에 겹쳐 분광기에서 간섭시켜 읽는다(heterodyne). 그래서 ω₃는 여기서도 분광기가 바로 준다.','The signal is weak and its phase is needed, so a local oscillator (LO) is overlapped with it and the interference is read in the spectrometer (heterodyne detection). So here too the spectrometer gives ω₃ directly.'),TR('t₁과 T는 각 빔의 지연으로 조절한다. 2DES에서는 회절 광학 소자로 네 빔을 한 번에 만드는 경우가 많다.','t₁ and T are set by the delay of each beam. In 2DES, a diffractive optic often creates all four beams at once.')],
+ q:TR('BOXCARS는 왜 rephasing과 non-rephasing을 따로 볼 수 있나?','Why can BOXCARS separate rephasing and non-rephasing?'),a:TR('두 신호가 서로 다른 방향(−k₁+k₂+k₃와 +k₁−k₂+k₃)으로 나가기 때문. pump-probe 배치는 k₁ = k₂라 두 방향이 같아 합쳐져 나온다.','Because the two signals leave in different directions (−k₁+k₂+k₃ and +k₁−k₂+k₃). In the pump-probe geometry k₁ = k₂, so the two directions coincide and the signals add.')}];
+
+/* ---------- Feynman 다이어그램 (DSFD) ----------
+   규약(논문 부록 C): 왼쪽 선 = ket, 오른쪽 선 = bra, 시간은 위로. 선으로 들어오는 화살표 = 올림, 선에서 나가는 화살표 = 내림.
+   마지막 점선 화살표(ket 쪽) = 신호. 부호 = (−1)^(bra 쪽 상호작용 수). 회색 = pump, 초록 = probe. */
+const FD_W=58;
+function fdArr(x,y,sd,up,k){const xb=x+FD_W;let a;
+ if(sd==='k')a=up?[x-26,y+10,x-3,y]:[x-3,y,x-26,y-10];else a=up?[xb+26,y+10,xb+3,y]:[xb+3,y,xb+26,y-10];
+ return LN(a[0],a[1],a[2],a[3],COL[k],{w:2,mk:k})}
+/* o: ys = [아래 끝, 상호작용들..., 신호, 위 끝], it = [[쪽 'k'|'b', 올림?, 색 키], ...], rho = 구간마다 밀도 행렬 원소, sig = 신호 색 키, name/sub = 아래 글자, n = 번호, hi = 강조할 구간 */
+function fdDiag(x,o){const ys=o.ys||[256,228,200,138,88,56],xb=x+FD_W,xm=x+FD_W/2,top=ys[ys.length-1],ni=o.it.length;
+ let s=`<line x1="${x}" x2="${x}" y1="${ys[0]}" y2="${top}" style="stroke:var(--fg)" stroke-width="1.5"/><line x1="${xb}" x2="${xb}" y1="${ys[0]}" y2="${top}" style="stroke:var(--fg)" stroke-width="1.5"/>`;
+ o.it.forEach(([sd,up,k],i)=>{s+=fdArr(x,ys[i+1],sd,up,k)});
+ const ye=ys[ni+1];s+=`<line x1="${x-3}" y1="${ye}" x2="${x-26}" y2="${ye-10}" style="stroke:${COL[o.sig]}" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#m${o.sig})"/>`+T(x-24,ye-18,TR('신호','signal'),'sub','middle',COL[o.sig]);
+ o.rho.forEach((r,i)=>{s+=T(xm,(ys[i]+ys[i+1])/2+4,r,'sub','middle',o.hi===i?'var(--fg)':undefined)});
+ if(o.name)s+=T(xm,ys[0]+18,o.name,'labn','middle');
+ if(o.sub)s+=T(xm,ys[0]+33,o.sub,'sub','middle');
+ if(o.n)s+=`<g data-n="${o.n}">${badge(xm-(o.name?o.name.length*4+16:0),ys[0]+14,o.n,COL[o.sig])}</g>`;
+ return s}
+const FD_GSB={it:[['k',1,'g'],['k',0,'g'],['k',1,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'};
+const FD_SE={it:[['k',1,'g'],['b',1,'g'],['b',0,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|e⟩⟨e|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'};
+const FD_ESA={it:[['k',1,'g'],['b',1,'g'],['k',1,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|e⟩⟨e|','|f⟩⟨e|','|e⟩⟨e|'],sig:'r'};
+const FD_GSBR={it:[['b',1,'g'],['b',0,'g'],['k',1,'s3']],rho:['|g⟩⟨g|','|g⟩⟨e|','|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'};
+const fdKey=(x,y)=>LN(x,y,x+20,y,'var(--pump)',{w:2})+T(x+26,y+4,'pump','sub')+LN(x+64,y,x+84,y,'var(--s3)',{w:2})+T(x+90,y+4,'probe','sub')+`<line x1="${x+136}" x2="${x+156}" y1="${y}" y2="${y}" style="stroke:var(--fg)" stroke-width="2" stroke-dasharray="4 3"/>`+T(x+162,y+4,TR('신호','signal'),'sub');
+const fdLor=(w,w0,g=12)=>g*g/((w-w0)**2+g*g);
+const FD_W0=2500; /* 예시 ω_eg (cm⁻¹) */
+function fdSpec(D,show){const P=plot({x:[2380,2560],y:[-2.4,2.4],xt:[{v:2400,l:'2400'},{v:2450,l:'2450'},{v:2500,l:'2500'},{v:2550,l:'2550'}],yt:[{v:2,l:'+'},{v:0,l:'0'},{v:-2,l:'−'}],xl:'probe wavenumber ω₃ (cm⁻¹)',yl:TR('ΔT/T (상대)','ΔT/T (rel.)'),T:30});
+ let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`;
+ const gs=w=>2*fdLor(w,FD_W0),es=w=>-2*fdLor(w,FD_W0-D);
+ if(show==='gse'){s+=crv(P,gs,2380,2560,'var(--s1)',{n:300})+crv(P,w=>fdLor(w,FD_W0),2380,2560,'var(--s1)',{n:300,dash:1,w:1.2})+T(P.R,P.T-12,TR('실선 = GSB + SE, 점선 = 하나씩','solid = GSB + SE, dashed = each'),'sub','end')}
+ else{s+=crv(P,gs,2380,2560,'var(--s1)',{n:300,dash:1,w:1.3})+crv(P,es,2380,2560,'var(--s2)',{n:300,dash:1,w:1.3})+crv(P,w=>gs(w)+es(w),2380,2560,'var(--fg)',{n:400})
+  +`<g data-n="3">${badge(P.X(FD_W0-D)-16,P.Y(-2)+4,3,'var(--s2)')}</g>`+T(P.R,P.T-12,D===0?TR('조화(Δ = 0): 완전히 상쇄 → 신호 0','harmonic (Δ = 0): full cancellation → signal 0'):TR('실선 = 합, 점선 = 성분','solid = sum, dashed = parts'),'sub','end')}
+ s+=`<g data-n="1">${badge(P.X(FD_W0)-14,P.Y(2)-14,1,'var(--s1)')}</g><g data-n="2">${badge(P.X(FD_W0)+14,P.Y(2)-14,2,'var(--s1)')}</g>`;
+ return s}
+/* 직접 그려 보기: 체크박스 조합 → 경로 판정.
+   상호작용 ①② = pump(+k 하나, −k 하나), ③ = probe(+k₃: ket 올림 또는 bra 내림), 그 뒤 ket 쪽에서 신호.
+   +k = ket 올림 또는 bra 내림, −k = ket 내림 또는 bra 올림 (오른쪽 화살표 = +k). ①은 바닥에서 시작하니 항상 올림. */
+const FD_LV=['g','e','f'];
+function fdBuild(tg){const it=[[tg.b1?'b':'k',1],[tg.b2?'b':'k',tg.d2?0:1],[tg.b3?'b':'k',tg.d3?0:1]];
+ let a=0,b=0;const rho=['|g⟩⟨g|'],kk=[];let err='';
+ const kSign=(sd,up)=>(sd==='k')===!!up?1:-1;
+ for(let i=0;i<3;i++){const[sd,up]=it[i];kk.push(kSign(sd,up));
+  if(sd==='k')a+=up?1:-1;else b+=up?1:-1;
+  if(a<0||b<0){err=TR(`${'①②③'[i]}에서 g보다 아래로 내려간다. g 아래 준위는 없다.`,`${'①②③'[i]} goes below g. There is no level below g.`);break}
+  if(a>2||b>2){err=TR(`${'①②③'[i]}에서 f보다 위로 올라간다 (여기서는 g, e, f 세 준위만 둔다).`,`${'①②③'[i]} goes above f (only the three levels g, e, f are kept here).`);break}
+  rho.push(`|${FD_LV[a]}⟩⟨${FD_LV[b]}|`);
+  if(i===1&&kk[0]===kk[1]){err=TR(`pump 두 번이 모두 ${kk[0]>0?'+k':'−k'}다. ±2k 방향으로 나가 probe 방향 신호가 아니다 (지금 ${rho[2]}, 집단이 아님).`,`Both pump interactions are ${kk[0]>0?'+k':'−k'}. The signal goes along ±2k, not the probe direction (now ${rho[2]}, not a population).`);break}
+  if(i===2&&kk[2]<0){err=TR('③이 −k₃다(ket 내림이나 bra 올림). 신호가 probe 방향(+k₃)으로 나가지 않는다.','③ is −k₃ (ket down or bra up). The signal does not leave in the probe direction (+k₃).');break}}
+ if(!err&&a!==b+1)err=TR(`③ 뒤가 ${rho[3]}다. ket이 bra보다 한 칸 위인 결맞음이어야 ket 쪽에서 신호가 나온다.`,`After ③ the state is ${rho[3]}. Only a coherence with the ket one level above the bra emits on the ket side.`);
+ const nb=it.filter(x=>x[0]==='b').length,name=err?'':(a===1&&b===0?(rho[2]==='|g⟩⟨g|'?'GSB':'SE'):'ESA');
+ return{it,rho,err,nb,kk,name,sign:nb%2?-1:1,reph:it[0][0]==='b',w:a===2?'ω_fe':'ω_eg'}}
+const FD_ALL=[['GSB','non-rephasing','k↑ k↓ k↑'],['GSB','rephasing','b↑ b↓ k↑'],['SE','non-rephasing','k↑ b↑ b↓'],['SE','rephasing','b↑ k↑ b↓'],['ESA','non-rephasing','k↑ b↑ k↑'],['ESA','rephasing','b↑ k↑ k↑']];
+const FD=[
+{t:TR('밀도 행렬: 집단과 결맞음','Density matrix: populations and coherences'),ec:TR('밀도 행렬 (두 준위 g, e)','density matrix (two levels g, e)'),mc:TR('시간에 따라 하는 일 (예시)','behavior over time (example)'),
+ e:()=>{const C=(x,y,n,a,b,k)=>`<g data-n="${n}"><rect x="${x}" y="${y}" width="70" height="60" rx="4" style="fill:${COL[k]};fill-opacity:.15;stroke:${COL[k]}"/>`+T(x+35,y+26,a,'labn','middle')+T(x+35,y+44,b,'sub','middle')+'</g>';
+  return T(150,40,'⟨g|','lab','middle')+T(220,40,'⟨e|','lab','middle')+T(100,84,'|g⟩','lab','end')+T(100,144,'|e⟩','lab','end')+T(TR(255,240),40,TR('← bra (열)','← bra (column)'),'sub')+T(26,114,TR('ket (행)','ket (row)'),'sub')
+   +C(115,50,1,'ρ_gg',TR('집단','population'),'s3')+C(185,50,2,'ρ_ge',TR('결맞음','coherence'),'s5')+C(115,110,2,'ρ_eg',TR('결맞음','coherence'),'s5')+C(185,110,1,'ρ_ee',TR('집단','population'),'s3')
+   +TM(20,206,[TR('밀도 행렬 = |ket⟩⟨bra|. 대각선은 각 상태에 있는 분자 비율,','Density matrix = |ket⟩⟨bra|. Diagonal: the share of'),TR('비대각선은 두 상태가 같이 섞여 위상이 맞는 정도다.','molecules in each state. Off-diagonal: how strongly two'),TR('Feynman 다이어그램은 ket(왼쪽)과 bra(오른쪽)를','states mix with a fixed phase. A Feynman diagram'),TR('따로 그린 이 행렬의 변화 기록이다.','tracks this matrix, drawing ket (left) and bra (right).')],'sub')},
+ m:()=>{const P1=plot({x:[0,10],y:[0,1.1],T:30,B:118,L:40,noy:1,xt:[]}),P2=plot({x:[0,10],y:[-1.1,1.1],T:150,B:262,L:40,noy:1,xt:[{v:0,l:'0'},{v:5,l:'5'},{v:10,l:'10'}],xl:TR('시간 (임의 단위)','time (arb. units)')});
+  return P1.s+P2.s+`<g data-n="1">${crv(P1,t=>.8*Math.exp(-t/40),0,10,'var(--s3)')}${badge(P1.L-18,P1.Y(.8),1,'var(--s3)')}</g>`+T(P1.L,22,TR('집단 ρ_ee: 진동하지 않고 천천히 준다','population ρ_ee: no oscillation, slow decay'),'sub')
+   +`<line x1="${P2.L}" x2="${P2.R}" y1="${P2.Y(0)}" y2="${P2.Y(0)}" class="lvl2"/><g data-n="2">${crv(P2,t=>Math.cos(2*Math.PI*1.2*t)*Math.exp(-t/3.5),0,10,'var(--s5)',{n:500,w:1.5})}${badge(P2.L-18,P2.Y(.6),2,'var(--s5)')}</g>`+T(P2.L,142,TR('결맞음 ρ_eg: ω_eg로 진동하며 빛을 낸다','coherence ρ_eg: oscillates at ω_eg and radiates'),'sub')},
+ read:[TR('분자 집합의 상태를 밀도 행렬 ρ = |ket⟩⟨bra|로 쓴다. 행이 ket, 열이 bra다.','The state of the molecular ensemble is written as a density matrix ρ = |ket⟩⟨bra|. Rows are ket, columns are bra.'),TR(`${c(1,'s3')} 대각선(ρ_gg, ρ_ee)은 집단(population)이다. 각 상태에 분자가 몇 %인지 나타내고, 진동하지 않는다.`,`${c(1,'s3')} The diagonal (ρ_gg, ρ_ee) holds populations. They give the percentage of molecules in each state and do not oscillate.`),TR(`${c(2,'s5')} 비대각선(ρ_eg, ρ_ge)은 결맞음(coherence)이다. 두 상태 에너지 차이 ω_eg로 진동하고, 이 진동이 빛을 낸다. 그래서 신호는 결맞음에서 나온다.`,`${c(2,'s5')} The off-diagonal (ρ_eg, ρ_ge) holds coherences. They oscillate at the energy difference ω_eg, and this oscillation radiates light. So the signal comes from a coherence.`),TR('빛과 한 번 상호작용할 때마다 ket이나 bra 중 한쪽 지표만 바뀐다. 이 규칙을 그림으로 그린 것이 이중 Feynman 다이어그램(DSFD)이다.','Each interaction with light changes only one index, either ket or bra. Drawing this rule gives the double-sided Feynman diagram (DSFD).')],
+ q:TR('pump-probe에서 지연 T 동안 시료는 집단과 결맞음 중 어느 상태에 있나?','In pump-probe, is the sample in a population or a coherence during the delay T?'),a:TR('집단(|e⟩⟨e| 또는 |g⟩⟨g|). 그래서 pump-probe는 집단 동역학을 잰다(5단계).','A population (|e⟩⟨e| or |g⟩⟨g|). That is why pump-probe measures population dynamics (step 5).')},
+{t:TR('그리는 규칙: 선형 흡수(FTIR) 하나로 연습','Drawing rules: practice with linear absorption (FTIR)'),ec:TR('1차 다이어그램','first-order diagram'),mc:TR('결맞음의 감쇠(FID) → 흡수선','coherence decay (FID) → absorption line'),
+ e:()=>fdDiag(120,{ys:[250,206,112,60],it:[['k',1,'s3']],rho:['|g⟩⟨g|','|e⟩⟨g|','|g⟩⟨g|'],sig:'b'})+`<g data-n="1">${badge(206,159,1,'var(--s5)')}</g>`+T(218,163,TR('결맞음 구간','coherence period'),'sub')
+   +`<g data-n="2">${badge(70,94,2,'var(--s1)')}</g>`+T(200,202,TR('왼쪽 초록 화살표:','left green arrow:'),'sub')+T(200,218,TR('빛이 ket을 올림','light raises the ket'),'sub')+T(20,24,TR('시간 ↑ (아래에서 위로)','time ↑ (bottom to top)'),'sub')+fdKey(20,284),
+ m:()=>{const P1=plot({x:[0,10],y:[-1.1,1.1],T:30,B:118,L:40,noy:1,xt:[{v:0,l:'0'},{v:10,l:TR('시간 →','time →')}]}),P2=plot({x:[2400,2600],y:[0,1.1],T:166,B:262,L:40,noy:1,xt:[{v:2450,l:'2450'},{v:2500,l:'2500'},{v:2550,l:'2550'}],xl:'wavenumber (cm⁻¹)'});
+  return P1.s+P2.s+`<line x1="${P1.L}" x2="${P1.R}" y1="${P1.Y(0)}" y2="${P1.Y(0)}" class="lvl2"/><g data-n="1">${crv(P1,t=>Math.cos(2*Math.PI*1.2*t)*Math.exp(-t/2.5),0,10,'var(--s5)',{n:500,w:1.5})}${badge(P1.L-18,P1.Y(.7),1,'var(--s5)')}</g>`
+   +T(P1.L,22,TR('자유 유도 감쇠 (FID)','free induction decay (FID)'),'sub')+LN(160,124,160,152,'var(--muted)',{w:1.5,mk:'g'})+T(168,142,TR('푸리에 변환','Fourier transform'),'sub')
+   +`<g data-n="2">${crv(P2,w=>fdLor(w,2500,14),2400,2600,'var(--fg)')}${badge(P2.X(2500)+22,P2.Y(1)+4,2,'var(--s1)')}</g>`+T(P2.R,P2.Y(.6),TR('흡수선','absorption line'),'sub','end')+T(P2.L,P2.T-4,TR('감쇠가 빠를수록 선이 넓다 (예시)','faster decay, broader line (example)'),'sub')},
+ read:[TR('두 세로선 중 왼쪽이 ket, 오른쪽이 bra다. 시간은 아래에서 위로 흐른다. 선 사이에 그 구간의 밀도 행렬 원소를 적는다.','Of the two vertical lines, the left is the ket and the right is the bra. Time runs from bottom to top. The density-matrix element of each interval is written between the lines.'),TR('화살표 하나 = 빛과 한 번의 상호작용. 선으로 들어오는 화살표는 그 쪽 상태를 올리고, 선에서 나가는 화살표는 내린다.','One arrow = one interaction with light. An arrow pointing into a line raises that side; an arrow pointing away lowers it.'),TR(`마지막 점선 화살표는 시료가 내보내는 ${c(2,'s1')} 신호다. 신호가 나간 뒤에는 집단(대각선)으로 끝나야 한다.`,`The last dashed arrow is the ${c(2,'s1')} signal emitted by the sample. After the signal leaves, the diagram must end in a population (diagonal).`),TR(`FTIR은 가장 단순한 1차 다이어그램이다. 빛이 한 번 ket을 올려 ${c(1,'s5')} 결맞음 |e⟩⟨g|를 만들고, 이 결맞음이 줄어들며 내는 빛(FID)을 푸리에 변환하면 흡수선이 된다.`,`FTIR is the simplest, first-order diagram. One interaction raises the ket and creates the ${c(1,'s5')} coherence |e⟩⟨g|; Fourier transforming the light it emits while decaying (FID) gives the absorption line.`),TR('부호 규칙: bra 쪽 상호작용이 하나 늘 때마다 부호가 바뀐다. 부호 = (−1)^(bra 쪽 수). 다음 단계부터 쓴다.','Sign rule: each additional bra-side interaction flips the sign. Sign = (−1)^(number on the bra side). Used from the next step on.')],
+ q:TR('FID가 더 빨리 사라지면 흡수선은?','If the FID dies out faster, what happens to the absorption line?'),a:TR('더 넓어진다. 결맞음이 빨리 깨지는 것(dephasing)이 선 폭을 정한다.','It gets broader. How fast the coherence is lost (dephasing) sets the linewidth.')},
+{t:TR('GSB와 SE: bra 쪽이 짝수 번 → +','GSB and SE: even number on the bra side → +'),ec:TR('pump-probe 경로 두 개 (non-rephasing)','two pump-probe pathways (non-rephasing)'),mc:TR('probe 스펙트럼 (ω_eg = 2500 cm⁻¹ 예시)','probe spectrum (ω_eg = 2500 cm⁻¹, example)'),
+ e:()=>fdDiag(48,{...FD_GSB,name:'GSB',sub:TR('bra 0번 → +','bra ×0 → +'),n:1})+fdDiag(204,{...FD_SE,name:'SE',sub:TR('bra 2번 → +','bra ×2 → +'),n:2,hi:2})+fdKey(40,20),
+ m:()=>fdSpec(0,'gse'),
+ read:[TR('pump-probe에서는 처음 두 상호작용이 pump 한 펄스에서, 세 번째가 probe에서 온다. 신호는 probe 방향으로 나와 probe와 함께 검출된다.','In pump-probe, the first two interactions come from one pump pulse and the third from the probe. The signal leaves in the probe direction and is detected together with the probe.'),TR(`${c(1,'s1')} GSB: pump 두 번이 ket만 올렸다 내려, 바닥 상태에 "구멍"을 남긴다(|g⟩⟨g|). probe가 다시 |e⟩⟨g|를 만들고 ω_eg에서 신호가 나온다. bra 쪽 0번이라 부호 +.`,`${c(1,'s1')} GSB: the two pump interactions raise and lower the ket only, leaving a "hole" in the ground state (|g⟩⟨g|). The probe creates |e⟩⟨g| again and the signal appears at ω_eg. No bra-side interactions, so the sign is +.`),TR(`${c(2,'s1')} SE: pump가 ket과 bra를 하나씩 올려 들뜬 집단 |e⟩⟨e|를 만든다. probe가 bra를 내려 |e⟩⟨g|가 되고, 역시 ω_eg에서 신호가 나온다. bra 쪽 2번이라 부호 +.`,`${c(2,'s1')} SE: the pump raises the ket and the bra once each, creating the excited population |e⟩⟨e|. The probe lowers the bra to give |e⟩⟨g|, and the signal again appears at ω_eg. Two bra-side interactions, so the sign is +.`),TR('둘 다 probe 흡수를 줄인다(투과가 는다). 이 페이지의 ΔT/T 규약으로 + (빨강)이다. ΔA로 그리면 음수라 색이 반대다.','Both reduce probe absorption (transmission increases). In the ΔT/T convention of this page that is + (red). Plotted as ΔA it is negative, so the colors are reversed.'),TR('진동 전이에서는 두 경로가 같은 자리(ω_eg), 같은 크기로 겹친다. 2D IR 탭 2단계의 "GSB+SE" 피크가 이것이다.','For a vibrational transition, the two pathways overlap at the same position (ω_eg) with the same size. This is the "GSB+SE" peak of 2D IR step 2.')],
+ q:TR('SE 다이어그램에서 T 구간(가운데 긴 구간)의 원소는?','In the SE diagram, which element occupies the T interval (the long middle interval)?'),a:TR('|e⟩⟨e|. 들뜬 상태의 집단이다. 그래서 T 동안 들뜬 상태가 사라지면 SE도 함께 줄어든다.','|e⟩⟨e|, the excited-state population. So when the excited state decays during T, the SE decreases with it.')},
+{t:TR('ESA: bra 쪽이 홀수 번 → −, 그리고 상쇄','ESA: odd number on the bra side → −, and cancellation'),ec:TR('ESA 경로와 준위','ESA pathway and levels'),mc:TR('probe 스펙트럼: 합과 성분','probe spectrum: sum and parts'),
+ slider:{min:0,max:80,step:2,init:30,label:TR('비조화성 Δ','anharmonicity Δ'),fmt:v=>Math.round(v)+' cm⁻¹'},
+ e:v=>{const Y=[248,176,116];return fdDiag(40,{...FD_ESA,name:'ESA',sub:TR('bra 1번 → −','bra ×1 → −'),n:3,hi:2})+fdKey(40,20)
+   +['g','e','f'].map((l,i)=>L(200,280,Y[i])+T(286,Y[i]+4,l,'sub')).join('')+A(214,Y[0]-2,214,Y[1]+3,'g',0)+A(236,Y[0]-2,236,Y[1]+3,'g',0)+A(262,Y[1]-2,262,Y[2]+3,'s3',3,{dx:14})
+   +T(196,76,'ω_fe = ω_eg − Δ','sub')+T(196,94,`Δ = ${Math.round(v)} cm⁻¹`,'sub')},
+ m:v=>fdSpec(v,'all'),
+ read:[TR(`${c(3,'s2')} ESA: pump가 만든 |e⟩⟨e|에서 probe가 ket을 한 번 더 올려 |f⟩⟨e|가 된다. 신호는 ω_fe에서 나오고, bra 쪽 1번이라 부호 −(파랑)다. probe 흡수가 늘어난다.`,`${c(3,'s2')} ESA: starting from the |e⟩⟨e| made by the pump, the probe raises the ket once more to |f⟩⟨e|. The signal appears at ω_fe, and with one bra-side interaction the sign is − (blue). Probe absorption increases.`),TR('세기도 다이어그램이 정한다. GSB, SE는 각각 μ_eg⁴, ESA는 μ_eg²μ_fe²에 비례한다. 조화 진동자는 μ_fe² = 2μ_eg²라 ESA 하나가 GSB + SE 둘과 크기가 같다.','The diagram also sets the strength. GSB and SE each scale as μ_eg⁴, and ESA as μ_eg²μ_fe². For a harmonic oscillator μ_fe² = 2μ_eg², so one ESA equals GSB + SE together.'),TR('슬라이더로 Δ를 0으로 줄이면 ω_fe = ω_eg가 되어 + 와 −가 정확히 지워진다. 조화 진동자는 pump-probe 신호가 없다. 신호가 보이는 것은 비조화성 덕분이다(2D IR 탭 4단계와 같은 논리).','Reducing Δ to 0 with the slider makes ω_fe = ω_eg, and + and − cancel exactly. A harmonic oscillator gives no pump-probe signal. The signal is visible thanks to anharmonicity (same logic as 2D IR step 4).'),TR('Δ가 선 폭보다 크면 + 띠와 − 띠가 따로 보인다. Δ가 작으면 두 띠가 겹쳐 봉우리 위치가 실제 ω_eg, ω_fe에서 밀려난다. 그래서 두 봉우리 간격은 Δ와 꼭 같지 않다.','When Δ is larger than the linewidth, the + and − bands appear separately. When Δ is small, the bands overlap and the peak positions are pushed away from the true ω_eg and ω_fe. So the spacing between the two peaks is not exactly Δ.')],
+ q:TR('Δ가 선 폭보다 훨씬 작으면 스펙트럼은 어떤 모양인가?','What does the spectrum look like when Δ is much smaller than the linewidth?'),a:TR('+ 와 − 가 거의 지워지고, 미분 모양(위아래로 붙은 작은 쌍)만 남는다. 크기도 Δ에 비례해 작아진다.','+ and − nearly cancel, leaving only a derivative shape (a small up-down pair). Its size also shrinks in proportion to Δ.')},
+{t:TR('시간 변수: t₁ ≈ 0, T를 스캔, t₃는 분광기가','Time variables: t₁ ≈ 0, T is scanned, t₃ goes to the spectrometer'),ec:TR('SE 경로의 세 구간','three intervals of the SE pathway'),mc:TR('T에 따른 신호 (집단 수명 1.5 ps 예시)','signal vs T (population lifetime 1.5 ps, example)'),
+ slider:{min:0,max:5,step:.05,init:0,label:TR('지연 T','delay T'),fmt:v=>v.toFixed(2)+' ps',play:1},
+ e:v=>{const ys=[262,238,216,120,78,52],x=60,xb=x+FD_W,bx=xb+40;const pop=Math.exp(-v/1.5);
+  const brace=(a,b,lab,sub)=>`<path d="M${bx-4},${a} H${bx} V${b} H${bx-4}" fill="none" style="stroke:var(--muted)"/>`+T(bx+6,(a+b)/2+(sub?-2:4),lab,'labn')+(sub?T(bx+6,(a+b)/2+13,sub,'sub'):'');
+  return fdDiag(x,{...FD_SE,ys,hi:2})+brace(ys[1],ys[2],'t₁ ≈ 0','')+brace(ys[2],ys[3],TR('T = 지연','T = delay'),TR('스테이지로 스캔','scanned by stage'))+brace(ys[3],ys[4],'t₃',TR('분광기 → ω₃','spectrometer → ω₃'))+fdKey(40,20)
+   +`<rect x="${x+6}" y="${ys[2]-8-(ys[2]-ys[3]-16)*pop}" width="${FD_W-12}" height="${(ys[2]-ys[3]-16)*pop}" style="fill:var(--s1);fill-opacity:.15"/>`+T(bx+6,286,TR(`남은 집단 ${Math.round(pop*100)}%`,`population left ${Math.round(pop*100)}%`),'sub')},
+ m:v=>{const P=plot({x:[0,5],y:[0,1.1],xt:[0,1,2,3,4,5].map(t=>({v:t,l:String(t)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:TR('지연 T (ps)','delay T (ps)'),yl:TR('ΔT/T (상대)','ΔT/T (rel.)'),T:30});
+  return P.s+crv(P,t=>Math.exp(-t/1.5),0,5,'var(--s1)')+`<circle cx="${P.X(v)}" cy="${P.Y(Math.exp(-v/1.5))}" r="6" style="fill:var(--s1)"/>`+T(P.R,P.T-12,TR('ω_eg에서 본 GSB + SE','GSB + SE at ω_eg'),'sub','end')},
+ read:[TR('상호작용 사이 세 구간을 t₁, T(= t₂), t₃라 한다. 2D IR 탭 첫 단계 위 "공통" 상자의 시간 축과 같은 것이다.','The three intervals between interactions are t₁, T (= t₂) and t₃. They match the time axis in the shared box above the first 2D IR step.'),TR('t₁: 두 pump 상호작용이 한 펄스 안에서 일어나 거의 0이다. 그래서 pump-probe에는 ω₁ 축이 없다. 2D IR은 이 t₁을 스캔해 ω₁ 축을 얻는다.','t₁: both pump interactions happen within one pulse, so it is almost 0. That is why pump-probe has no ω₁ axis. 2D IR scans this t₁ to obtain the ω₁ axis.'),TR('T: pump와 probe 사이 지연이다. 지연 스테이지로 직접 스캔하는 유일한 구간이다. 이 동안 시료는 집단(|e⟩⟨e|)에 있다. 그래서 pump-probe는 집단이 줄어드는 속도를 잰다.','T: the delay between pump and probe. It is the only interval scanned directly, with the delay stage. During T the sample is in a population (|e⟩⟨e|), so pump-probe measures how fast the population decays.'),TR('t₃: 신호가 나오는 구간이다. 스캔하지 않는다. 투과한 probe를 분광기로 펼쳐 배열 검출기로 찍으면 t₃가 바로 ω₃ 축으로 바뀐다(검출과 분광기 노트).','t₃: the interval in which the signal is emitted. It is not scanned. Dispersing the transmitted probe in a spectrometer onto an array detector turns t₃ directly into the ω₃ axis (detection and spectrometer note).'),TR('재생을 누르면 T가 늘며 |e⟩⟨e| 집단이 줄고(왼쪽 색칠), 신호가 같이 준다(오른쪽). 1.5 ps는 예시 값이다.','With Play, T increases, the |e⟩⟨e| population shrinks (shaded, left) and the signal drops with it (right). 1.5 ps is an example value.')],
+ q:TR('pump와 probe가 겹치는 T ≈ 0 근처 데이터를 조심해야 하는 이유는?','Why must data near T ≈ 0, where pump and probe overlap, be treated with care?'),a:TR('펄스가 겹치면 상호작용 순서가 정해지지 않고, 용매·창의 비공명 신호(coherent artifact)가 더해진다. 그래서 이 구간은 피팅에서 빼거나 따로 다룬다.','When the pulses overlap, the interaction order is not defined, and nonresonant signals from solvent and windows (coherent artifact) add in. So this region is excluded from fits or treated separately.')},
+{t:TR('rephasing과 non-rephasing','Rephasing and non-rephasing'),ec:TR('같은 GSB, 순서만 다른 두 경로','same GSB, two pathways in different order'),mc:TR('신호가 나가는 방향','signal direction'),
+ e:()=>fdDiag(48,{...FD_GSBR,name:'rephasing',sub:'t₁: |g⟩⟨e|'})+fdDiag(204,{...FD_GSB,name:'non-rephasing',sub:'t₁: |e⟩⟨g|'})+fdKey(40,20),
+ m:()=>{const S=[170,160];return TM(14,26,['rephasing:  k_s = −k₁ + k₂ + k₃','non-rephasing:  k_s = +k₁ − k₂ + k₃'],'lab','start',18)
+   +LN(30,236,S[0]-6,S[1]+4,'var(--pump)',{w:2.5,mk:'g'})+T(30,256,'pump (k₁ = k₂)','sub')+LN(30,96,S[0]-6,S[1]-4,'var(--s3)',{w:2.5,mk:'s3'})+T(30,88,'probe (k₃)','sub')
+   +`<circle cx="${S[0]}" cy="${S[1]}" r="10" class="dev"/>`+T(S[0],S[1]+28,TR('시료','sample'),'sub','middle')
+   +LN(S[0]+10,S[1]+6,300,226,'var(--s1)',{w:2.5,dash:1,mk:'b'})+T(300,244,TR('신호 = probe 방향','signal = probe direction'),'sub','end')+T(300,258,TR('(두 경로가 합쳐짐)','(both pathways add)'),'sub','end')},
+ read:[TR('같은 GSB라도 pump의 두 상호작용 순서에 따라 두 경로가 있다. t₁ 동안 결맞음이 |g⟩⟨e|(rephasing)인지 |e⟩⟨g|(non-rephasing)인지가 다르다.','Even the same GSB has two pathways, depending on the order of the two pump interactions. They differ in whether the coherence during t₁ is |g⟩⟨e| (rephasing) or |e⟩⟨g| (non-rephasing).'),TR('rephasing은 t₁에서 거꾸로 돌던 위상을 t₃에서 되감는다. 그래서 주파수가 조금씩 다른 분자들의 위상이 다시 모이는 echo가 생긴다.','Rephasing unwinds during t₃ the phase that ran backwards during t₁. Molecules with slightly different frequencies therefore come back into phase: an echo.'),TR('두 경로는 나가는 방향이 다르다(위 식). 그런데 pump-probe에서는 k₁ = k₂(같은 pump 빔)라 두 식이 모두 k_s = k₃가 되어, 둘 다 probe 방향으로 나와 합쳐진다.','The two pathways leave in different directions (equations above). In pump-probe, however, k₁ = k₂ (the same pump beam), so both equations give k_s = k₃: both leave in the probe direction and add.'),TR('그래서 pump-probe로는 둘을 나눌 수 없다. 나누려면 세 빔을 따로 쓰는 BOXCARS 배치나 위상 순환(phase cycling)이 필요하다(셋업 탭).','So pump-probe cannot separate them. Separating them needs a BOXCARS geometry with three separate beams, or phase cycling (setup tab).')],
+ q:TR('GSB, SE, ESA 각각에 rephasing·non-rephasing이 있다면 pump-probe 경로는 모두 몇 개인가?','If GSB, SE and ESA each have rephasing and non-rephasing versions, how many pump-probe pathways are there?'),a:TR('6개(3 × 2). 3준위계에서 바닥 아래로 내려가거나 결맞음으로 끝나는 경로를 빼면 이만큼 남는다.','Six (3 × 2). In a three-level system, that is what remains after removing pathways that go below the ground state or end in a coherence.')},
+{t:TR('편광: magic angle 54.7°','Polarization: magic angle 54.7°'),ec:TR('pump와 probe 편광 방향 (빔 진행 방향에서 본 모습)','pump and probe polarization directions (viewed along the beams)'),mc:TR('T에 따른 신호 (예시: 집단 5 ps, 회전 3 ps)','signal vs T (example: population 5 ps, rotation 3 ps)'),
+ slider:{min:0,max:90,step:.5,init:54.7,label:TR('편광 사이 각 θ','angle between polarizations θ'),fmt:v=>v.toFixed(1)+'°'},
+ e:v=>{const th=v*Math.PI/180,cx=160,cy=170,R=90,f=3*Math.cos(th)**2-1;
+  return LN(cx,cy,cx,cy-R,'var(--pump)',{w:3,mk:'g'})+T(cx-8,cy-R-6,TR('pump 편광','pump pol.'),'sub','end')+LN(cx,cy,cx+R*Math.sin(th),cy-R*Math.cos(th),'var(--s3)',{w:3,mk:'s3'})+T(cx+R*Math.sin(th)+6,cy-R*Math.cos(th)+(v>70?16:0),TR('probe 편광','probe pol.'),'sub','start','var(--s3)')
+   +`<path d="M${cx},${cy-34} A34,34 0 0 1 ${cx+34*Math.sin(th)},${cy-34*Math.cos(th)}" fill="none" style="stroke:var(--muted)"/>`+(v<16?T(cx-8,cy-40,'θ','sub','end'):T(cx+50*Math.sin(th/2),cy-50*Math.cos(th/2)+4,'θ','sub','middle'))
+   +TM(20,212,['S(θ) = S_iso · [1 + r · (3cos²θ − 1)]',TR(`지금 3cos²θ − 1 = ${f.toFixed(2)}`,`now 3cos²θ − 1 = ${f.toFixed(2)}`),Math.abs(f)<.02?TR('→ r 항이 사라져 S = S_iso','→ the r term vanishes: S = S_iso'):TR('→ 분자 회전(r)이 신호에 섞인다','→ molecular rotation (r) mixes into the signal')],'sub','start',16)},
+ m:v=>{const th=v*Math.PI/180,f=3*Math.cos(th)**2-1,iso=t=>Math.exp(-t/5),r=t=>.4*Math.exp(-t/3),S=(t,g)=>iso(t)*(1+r(t)*g);
+  const P=plot({x:[0,10],y:[0,1.9],xt:[0,2,4,6,8,10].map(t=>({v:t,l:String(t)})),yt:[{v:0,l:'0'},{v:1,l:'1'}],xl:TR('지연 T (ps)','delay T (ps)'),yl:TR('ΔT/T (상대)','ΔT/T (rel.)'),T:30});
+  return P.s+crv(P,t=>S(t,2),0,10,'var(--s4)',{dash:1,w:1.3})+crv(P,t=>S(t,-1),0,10,'var(--s5)',{dash:1,w:1.3})+crv(P,iso,0,10,'var(--muted)',{dash:1,w:1})+crv(P,t=>S(t,f),0,10,'var(--fg)')
+   +LN(P.R-110,P.T,P.R-90,P.T,'var(--s4)',{dash:1})+T(P.R-84,P.T+4,TR('평행 (0°)','parallel (0°)'),'sub')+LN(P.R-110,P.T+16,P.R-90,P.T+16,'var(--s5)',{dash:1})+T(P.R-84,P.T+20,TR('수직 (90°)','perp. (90°)'),'sub')+LN(P.R-110,P.T+32,P.R-90,P.T+32,'var(--fg)',{w:2})+T(P.R-84,P.T+36,TR('지금 θ','current θ'),'sub')+LN(P.R-110,P.T+48,P.R-90,P.T+48,'var(--muted)',{dash:1,w:1})+T(P.R-84,P.T+52,'S_iso (54.7°)','sub')},
+ read:[TR('pump는 편광 방향과 나란한 전이 쌍극자를 가진 분자를 더 많이 들뜨게 한다(광선택). 그래서 신호는 pump와 probe 편광 사이 각 θ에 따라 달라진다.','The pump preferentially excites molecules whose transition dipole is parallel to its polarization (photoselection). So the signal depends on the angle θ between the pump and probe polarizations.'),TR('들뜬 분자가 회전하면 이 치우침이 풀리며 신호가 변한다. 이 효과가 이방성 r(T)이다. 평행(0°)은 크게, 수직(90°)은 작게 보인다.','As the excited molecules rotate, this bias relaxes and the signal changes. This effect is the anisotropy r(T). Parallel (0°) appears larger, perpendicular (90°) smaller.'),TR('3cos²θ − 1 = 0이 되는 θ ≈ 54.7°(magic angle)에서는 r 항이 사라진다. 그러면 분자 회전이 집단 감소처럼 보이는 일을 막을 수 있다.','At θ ≈ 54.7° (the magic angle), where 3cos²θ − 1 = 0, the r term vanishes. This keeps molecular rotation from looking like population decay.'),TR('슬라이더로 θ를 바꾸면 실선이 평행과 수직 사이를 오가고, 54.7°에서 점선(S_iso)과 겹친다. 수명 5 ps, 회전 3 ps, r(0) = 0.4는 예시 값이다.','Changing θ with the slider moves the solid line between parallel and perpendicular; at 54.7° it overlaps the dotted S_iso. Lifetime 5 ps, rotation 3 ps and r(0) = 0.4 are example values.'),TR('반대로 평행과 수직을 둘 다 재면 r(T)를 따로 얻어 회전 동역학을 볼 수 있다. 이때 두 채널이 정말 서로 다른 편광인지 확인해야 한다.','Conversely, measuring both parallel and perpendicular gives r(T) separately and reveals rotational dynamics. The two channels must then be checked to really carry different polarizations.')],
+ q:TR('평행과 수직 신호로 등방성 신호를 만드는 식은?','What formula builds the isotropic signal from the parallel and perpendicular signals?'),a:TR('S_iso = (S_∥ + 2S_⊥) / 3. 수직 방향이 두 개(공간의 나머지 두 축)라 2를 곱한다.','S_iso = (S_∥ + 2S_⊥) / 3. There are two perpendicular directions (the other two axes of space), hence the factor 2.')},
+{t:TR('직접 그려 보기: 상호작용 세 번을 고르면 신호가 정해진다','Building a diagram: three chosen interactions fix the signal'),ec:TR('내가 고른 다이어그램','chosen diagram'),mc:TR('판정: 이름, 부호, 자리','verdict: name, sign, position'),
+ tg:[{k:'b1',l:TR('①을 bra 쪽에','① on bra side'),on:false},{k:'b2',l:TR('②를 bra 쪽에','② on bra side'),on:false},{k:'d2',l:TR('② 내림','② down'),on:true},{k:'b3',l:TR('③(probe)을 bra 쪽에','③ (probe) on bra side'),on:false},{k:'d3',l:TR('③ 내림','③ down'),on:false}],
+ e:(v,tg)=>{const R=fdBuild(tg),x=96,xb=x+FD_W,ys=[256,228,200,138,88,56];
+  const rho=R.rho.slice();while(rho.length<4)rho.push('?');
+  const a=FD_LV.indexOf(rho[3][1]),fin=R.err?'?':`|${FD_LV[a-1]}⟩⟨${rho[3][4]}|`;rho.push(fin);
+  let s=fdDiag(x,{it:R.it.map(([sd,up],i)=>[sd,up,i<2?'g':'s3']),rho,sig:R.err?'g':(R.sign>0?'b':'r')})+fdKey(20,20);
+  R.it.forEach(([sd],i)=>{const y=ys[i+1];s+=sd==='k'?T(x-34,y+4,'①②③'[i],'sub','end'):T(xb+32,y+4,'①②③'[i],'sub')});
+  s+=TM(214,110,[TR(`bra 쪽 ${R.nb}번`,`bra side ×${R.nb}`),...R.kk.map((k,i)=>`${'①②③'[i]} ${k>0?'+k':'−k'}`)],'sub','start',16);
+  return s+T(14,290,TR('+k = ket 올림 또는 bra 내림 (오른쪽 화살표)','+k = ket up or bra down (rightward arrow)'),'sub')},
+ m:(v,tg)=>{const R=fdBuild(tg);let s='';
+  if(R.err){const words=R.err.split(' '),lines=[];let cur='';words.forEach(w=>{if((cur+' '+w).length>TR(26,46)&&cur){lines.push(cur);cur=w}else cur=cur?cur+' '+w:w});lines.push(cur);
+   s+=T(14,34,TR('✗ 이 조합은 pump-probe 신호가 아니다','✗ not a pump-probe signal'),'labn','start','var(--s6)')+TM(14,58,lines,'sub','start',15)}
+  else{const col=R.sign>0?'var(--s1)':'var(--s2)',w0=R.w==='ω_eg'?2500:2470;
+   const P=plot({x:[2420,2540],y:[-1.2,1.2],T:96,B:150,L:40,noy:1,xt:[{v:2470,l:'2470'},{v:2500,l:'2500'}],xl:'probe ω₃ (cm⁻¹)'});
+   s+=T(14,30,`${R.name} (${R.reph?'rephasing':'non-rephasing'})`,'labn','start',col)+T(14,50,TR(`bra 쪽 ${R.nb}번 → (−1)^${R.nb} = ${R.sign>0?'+ (빨강)':'− (파랑)'}`,`bra side ×${R.nb} → (−1)^${R.nb} = ${R.sign>0?'+ (red)':'− (blue)'}`),'sub','start',col)
+    +T(14,68,TR(`신호 자리: ${R.w} = ${w0} cm⁻¹ (예시, Δ = 30)`,`signal at ${R.w} = ${w0} cm⁻¹ (example, Δ = 30)`),'sub')
+    +P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/><line x1="${P.X(w0)}" x2="${P.X(w0)}" y1="${P.Y(0)}" y2="${P.Y(R.sign)}" style="stroke:${col}" stroke-width="6"/>`}
+  s+=T(14,206,TR('가능한 조합은 6개뿐이다','only 6 combinations are allowed'),'lab');
+  FD_ALL.forEach(([n,r,code],i)=>{const y=224+i*13,on=!R.err&&n===R.name&&(r==='rephasing')===R.reph,col=n==='ESA'?'var(--s2)':'var(--s1)',cls=on?'labn':'sub';
+   s+=T(14,y,(on?'▶ ':'')+n,cls,'start',on?col:undefined)+T(64,y,r,cls,'start',on?col:undefined)+T(160,y,code,cls,'start',on?col:undefined)+T(236,y,n==='ESA'?'−':'+',cls,'start',col)});
+  return s},
+ read:[TR('체크박스로 세 상호작용이 ket(왼쪽)인지 bra(오른쪽)인지, ②와 ③이 올림인지 내림인지 고르면 다이어그램과 판정이 바로 바뀐다. ①은 바닥 |g⟩⟨g|에서 시작하니 항상 올림이다.','The checkboxes choose whether each interaction acts on the ket (left) or the bra (right), and whether ② and ③ go up or down; the diagram and the verdict update at once. ① starts from the ground state |g⟩⟨g|, so it always goes up.'),TR('규칙 1: pump 두 번(①②)은 +k 하나, −k 하나여야 한다. ket 올림과 bra 내림이 +k, ket 내림과 bra 올림이 −k다. 그래야 지연 T 동안 집단(대각선)에 머물고 신호가 probe 방향으로 나온다.','Rule 1: the two pump interactions (①②) must be one +k and one −k. Ket up and bra down are +k; ket down and bra up are −k. Only then does the system stay in a population (diagonal) during T and the signal leave in the probe direction.'),TR('규칙 2: probe(③)는 +k₃(ket 올림 또는 bra 내림)이고, 그 뒤 ket이 bra보다 한 칸 위인 결맞음이어야 ket 쪽에서 신호가 나온다.','Rule 2: the probe (③) is +k₃ (ket up or bra down), and afterwards the state must be a coherence with the ket one level above the bra, so that the signal is emitted on the ket side.'),TR('규칙 3: 부호 = (−1)^(bra 쪽 수). 이 규칙을 모두 지키는 조합은 오른쪽 표의 6개뿐이다. GSB와 SE는 +(빨강), ESA는 −(파랑)이다. rephasing 단계 점검 질문의 "6개"가 이것이다.','Rule 3: sign = (−1)^(number on the bra side). Only the 6 combinations in the table on the right satisfy all the rules. GSB and SE are + (red), ESA is − (blue). These are the "six" of the check question in the rephasing step.'),TR('①을 bra 쪽에 두면 rephasing, ket 쪽에 두면 non-rephasing이다. pump-probe에서는 둘이 같은 방향으로 나와 합쳐진다.','With ① on the bra side the pathway is rephasing; on the ket side it is non-rephasing. In pump-probe both leave in the same direction and add.'),TR('✗가 나오면 오른쪽에 이유가 나온다. 대부분 "g 아래로 내려감"이거나 "pump 두 번이 같은 부호"다.','When ✗ appears, the reason is shown on the right. Usually it is "goes below g" or "both pump interactions have the same sign".')],
+ q:TR('①②를 모두 ket 올림으로 고르면 어떤 상태가 되고, 왜 pump-probe 신호가 아닌가?','If ① and ② are both chosen as ket up, which state results, and why is it not a pump-probe signal?'),a:TR('|f⟩⟨g|, 두 양자(2Q) 결맞음이다. +k가 두 번이라 신호가 2k_pump + k₃ 쪽으로 나가 probe 방향과 다르다. 이런 경로는 2Q 2D 분광에서 따로 잰다.','|f⟩⟨g|, a two-quantum (2Q) coherence. With +k twice, the signal leaves along 2k_pump + k₃, not the probe direction. Such pathways are measured separately in 2Q 2D spectroscopy.')}];
+
+/* ---------- 탭 ---------- */
+const TABS=[
+{id:'ir',name:'2D IR',sub:TR('진동, 비조화성과 coupling','vibrations, anharmonicity, coupling'),desc:TR('에너지 그림과 2D 맵을 번호로 이으며, 비조화성 Δ와 모드 사이 coupling이 피크를 만드는 과정을 한 단계씩 본다.','Energy diagrams and 2D maps are linked by numbers, one step at a time, to show how the anharmonicity Δ and the coupling between modes create the peaks.'),ec:TR('에너지 그림','energy diagram'),mc:TR('2D 맵','2D map'),tl:'T = 0',steps:IR},
+{id:'es',name:'2DES',sub:TR('전자 상태와 에너지 전달','electronic states, energy transfer'),desc:TR('밀린 포물선으로 흡수와 SE, vibronic 구조, ESA, 에너지 전달, fs 시간대의 파속 운동을 본다.','Displaced parabolas show absorption and SE, vibronic structure, ESA, energy transfer, and wavepacket motion on the fs scale.'),ec:TR('에너지 그림','energy diagram'),mc:TR('2D 맵','2D map'),tl:'T = 0',steps:ES},
+{id:'fd',name:'Feynman',title:TR('Feynman 다이어그램','Feynman diagrams'),sub:TR('신호의 부호와 자리','sign and position of signals'),desc:TR('이중 Feynman 다이어그램(DSFD)으로 GSB, SE, ESA가 어느 주파수에 어떤 부호로 나오는지 미리 읽는다. pump-probe와 2D 신호의 바탕이다.','Double-sided Feynman diagrams (DSFD) predict where GSB, SE and ESA appear and with which sign. They underlie pump-probe and 2D signals.'),ec:TR('Feynman 다이어그램','Feynman diagram'),mc:TR('신호','signal'),tl:'',ev:'0 0 320 300',mv:'0 0 320 300',steps:FD},
+{id:'su',name:TR('셋업','Setup'),title:TR('실험 셋업','Experimental setup'),sub:TR('펄스 순서와 빔 배치','pulse order and beam geometry'),desc:TR('펄스 1, 2, 3이 샘플에 닿는 순서와 pump-probe, BOXCARS 배치를 움직여 본다.','Animations show the order in which pulses 1, 2, 3 reach the sample in the pump-probe and BOXCARS geometries.'),ec:TR('빔 배치','beam layout'),mc:TR('펄스 시간 축','pulse time axis'),tl:'',mv:'-10 30 330 230',steps:SU}];
+const NOTE={key:'2dsteps',ev:'0 0 320 316',mv:'-30 0 350 312',
+ top:`<details class="axisnote" id="axisnote" open><summary>${TR('공통: 왜 축이 ω₁, ω₃이고 ω₂는 없나?','Shared: why are the axes ω₁ and ω₃, with no ω₂?')}</summary><svg id="axissvg" viewBox="-12 96 330 150" role="img" aria-label="${TR('펄스 세 개와 신호의 시간 순서','time order of the three pulses and the signal')}" style="max-width:420px;margin-top:6px"></svg><p id="axistext"></p></details>`,
+ afterCtl:`<div class="legend"><span><i style="background:var(--s1)"></i>GSB/SE (ΔT/T &gt; 0)</span><span><i style="background:var(--s2)"></i>ESA (ΔT/T &lt; 0)</span><span><i style="background:var(--pump)"></i>pump</span><span>${TR('같은 번호 = 같은 전이 (마우스를 올리면 짝이 강조됨)','same number = same transition (hover to highlight the pair)')}</span></div>`,
+ init(){document.getElementById('axistext').innerHTML=AXIS_NOTE;/* 공통 상자의 marker id를 따로 둔다: 같은 id가 숨은 상자에 먼저 있으면 본 그림의 화살촉이 안 그려진다 */
+  document.getElementById('axissvg').innerHTML=(DEFS+timeline(0,['1','2','3'],1)).replace(/id="m/g,'id="axm').replace(/url\(#m/g,'url(#axm')},
+ onRender(){document.getElementById('axisnote').hidden=idx!==0;document.querySelector('.legend').hidden=TABS[tab].id==='su'}};
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>

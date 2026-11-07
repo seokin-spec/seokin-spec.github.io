@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Research Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--accent:#24407f;--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:20px}
+.hero{border-radius:12px;padding:24px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:6px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;max-width:70ch}
+h2{font-size:13px;font:500 13px var(--f-mono);color:var(--muted);letter-spacing:.06em;margin:4px 0 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{display:flex;flex-direction:column;gap:10px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;color:inherit;background:#fff;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(13,22,48,.08)}
+.card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;margin-left:8px;letter-spacing:0;vertical-align:1px}
+.hero .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:2px 10px;text-decoration:none;white-space:nowrap}
+.hero .lang b{color:#fff;font-weight:700}
+.hero .lang:hover{border-color:#9cc2ff}
+.en{font:600 11px var(--f-sans);color:#1b2b57;background:#dbe5f7;border-radius:999px;padding:1px 8px;margin-left:6px;letter-spacing:0;vertical-align:1px}
+.card .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.card h3{margin:0;font-size:18px;font-weight:600}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0;list-style:none}
+.tabs li{font-size:12px;background:var(--soft);border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--fg)}
+.tabs li b{font-weight:500;color:var(--muted);margin-left:4px;font-family:var(--f-mono)}
+.go{margin-top:auto;font-size:14px;font-weight:500;color:var(--accent)}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+
+<div class="wrap">
+  <header class="hero">
+    <div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · Research notes</span><span class="status">Under review</span><a class="lang" href="../index.html" title="한국어">한 · <b>EN</b></a></div>
+    <h1>Step-by-step research notes</h1>
+    <p>Interactive notes on spectroscopy principles, measurement techniques, instruments and lab practice, one idea per step. The left figure shows the cause, the right figure the result, and matching numbers mark the same transition. All notes are drafts before expert review; values carry approx./example/to-be-verified marks.</p>
+  </header>
+
+  <h2>ENGLISH EDITION</h2>
+  <div class="cards">
+    <a class="card" href="../notes/en/2d-spectroscopy.html">
+      <span class="k">Spectroscopy · 4 tabs · 27 steps<span class="status">Under review</span></span>
+      <h3>2D Spectroscopy Notes</h3>
+      <p>Energy diagrams and 2D maps linked by number: how anharmonicity, coupling, energy transfer and wavepacket motion build the peaks. Feynman diagrams fix the signal signs.</p>
+      <ul class="tabs"><li>2D IR<b>9</b></li><li>2DES<b>8</b></li><li>Feynman<b>8</b></li><li>Setup<b>2</b></li></ul>
+      <span class="go">Open →</span>
+    </a>
+    <a class="card" href="../notes/en/pumpprobe.html">
+      <span class="k">Spectroscopy · 2 tabs · 11 steps<span class="status">Under review</span></span>
+      <h3>IR Pump-Probe Notes</h3>
+      <p>A chopper alternates pump-on and pump-off shots to build ΔT/T. Fluence calibration, time zero and IRF, dispersion, beam walk-off, and an HDO check of the setup.</p>
+      <ul class="tabs"><li>Principle · signal<b>5</b></li><li>Setup checks<b>6</b></li></ul>
+      <span class="go">Open →</span>
+    </a>
+  </div>
+
+  <h2>KOREAN ONLY (FOR NOW)</h2>
+  <div class="cards">
+    <a class="card" href="../notes/analysis.html">
+      <span class="k">Korean only</span>
+      <h3>Data analysis</h3>
+      <p>Kinetics, global fitting, 2D-COS</p>
+      <span class="go">Open (Korean) →</span>
+    </a>
+    <a class="card" href="../notes/lab-techniques.html">
+      <span class="k">Korean only</span>
+      <h3>Lab techniques</h3>
+      <p>FTIR, in situ FTIR, Raman, CARS, VSFG, DEMS</p>
+      <span class="go">Open (Korean) →</span>
+    </a>
+    <a class="card" href="../notes/detection.html">
+      <span class="k">Korean only</span>
+      <h3>Detection and spectrometers</h3>
+      <p>Monochromator, detectors, boxcar</p>
+      <span class="go">Open (Korean) →</span>
+    </a>
+    <a class="card" href="../notes/lasers.html">
+      <span class="k">Korean only</span>
+      <h3>Laser sources</h3>
+      <p>Ti:Sapphire, Yb</p>
+      <span class="go">Open (Korean) →</span>
+    </a>
+    <a class="card" href="../notes/lab-ops.html">
+      <span class="k">Korean only</span>
+      <h3>Lab operations</h3>
+      <p>Basic equipment, UPS</p>
+      <span class="go">Open (Korean) →</span>
+    </a>
+    <a class="card" href="../notes/simulation.html">
+      <span class="k">Korean only</span>
+      <h3>Computational methods</h3>
+      <p>DFT vs MD</p>
+      <span class="go">Open (Korean) →</span>
+    </a>
+  </div>
+
+  <footer>Each note is a single self-contained HTML file. Parts of the content still await expert review.</footer>
+</div>

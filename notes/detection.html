@@ -18,6 +18,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15
 .hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
 .hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
 .hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
 .status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
 .hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
 .hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
@@ -77,6 +80,11 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 </div>
 
 <script>
+const LANG='ko';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
 /* ---------- SVG 헬퍼 (모든 노트 공통) ----------
    색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
 const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
@@ -125,14 +133,16 @@ const NOTE={key:'detection'};
 const moCol=l=>l>700?'hsl(0,55%,36%)':`hsl(${Math.round(Math.max(0,Math.min(270,270*(1-(l-400)/300))))},72%,40%)`;
 const moGauss=(x,x0,w)=>Math.exp(-(((x-x0)/w)**2)*2.77);
 const moTri=(x,x0,w)=>Math.max(0,1-Math.abs(x-x0)/w);
-const moMir=(x,y)=>`<path d="M${x-28},${y-6} Q${x},${y+10} ${x+28},${y-6}" style="fill:none;stroke:var(--fg)" stroke-width="2.5"/>`;
+/* 오목거울: 빛이 아래에서 오므로 오목한 면(가장자리가 내려온 쪽)이 아래를 향한다 */
+const moMir=(x,y)=>`<path d="M${x-28},${y+6} Q${x},${y-10} ${x+28},${y+6}" style="fill:none;stroke:var(--fg)" stroke-width="2.5"/>`;
 /* Czerny-Turner 광로. o.cols = [[λ nm, 위치 오프셋 -1..1], ...], o.exit = 'slit' | 'array', o.rot = 격자 회전(°), o.num = 번호 배지 */
 function moCT(o={}){const cols=o.cols||[[550,0]],rot=o.rot??0;
  let s=LN(46,252,56,252,'var(--fg)',{w:3})+LN(64,252,74,252,'var(--fg)',{w:3});
- s+=LN(60,252,74,54,'var(--pump)',{w:1})+LN(60,252,106,54,'var(--pump)',{w:1});
- s+=LN(74,54,144,190,'var(--pump)',{w:1})+LN(106,54,176,190,'var(--pump)',{w:1});
- cols.forEach(([l,k])=>{const col=moCol(l),a=214+7*k,b=246+7*k,f=262+22*k;
-  s+=LN(144,190,a,54,col,{w:1.3})+LN(176,190,b,54,col,{w:1.3})+LN(a,54,f,250,col,{w:1.3})+LN(b,54,f,250,col,{w:1.3})});
+ /* 광선이 돌아간 격자 면(중심 160,190, 양쪽 16) 위에서 끝나게 한다. 들어오고 나가는 빛은 각각 평행광을 유지한다 */
+ const ur=rot*Math.PI/180,h1x=160-16*Math.cos(ur),h1y=190-16*Math.sin(ur),h2x=160+16*Math.cos(ur),h2y=190+16*Math.sin(ur),m1=h1x-(h1y-54)*70/136,m2=h2x-(h2y-54)*70/136;
+ s+=LN(60,252,m1,54,'var(--pump)',{w:1})+LN(60,252,m2,54,'var(--pump)',{w:1})+LN(m1,54,h1x,h1y,'var(--pump)',{w:1})+LN(m2,54,h2x,h2y,'var(--pump)',{w:1});
+ cols.forEach(([l,k])=>{const col=moCol(l),g=7*k+70,a=h1x+(h1y-54)*g/136,b=h2x+(h2y-54)*g/136,f=262+22*k;
+  s+=LN(h1x,h1y,a,54,col,{w:1.3})+LN(h2x,h2y,b,54,col,{w:1.3})+LN(a,54,f,250,col,{w:1.3})+LN(b,54,f,250,col,{w:1.3})});
  s+=moMir(90,52)+moMir(230,52)+`<rect x="138" y="186" width="44" height="8" class="dev" transform="rotate(${rot} 160 190)"/>`;
  if(o.exit==='array'){s+=Array.from({length:12},(_,i)=>`<rect x="${222+i*7}" y="252" width="6" height="10" style="fill:var(--s3)" fill-opacity="${.25+.06*(i%3)}" stroke="var(--s3)" stroke-width=".6"/>`).join('')}
  else s+=`<line x1="222" x2="302" y1="252" y2="252" class="lvl2"/>`+LN(242,252,256,252,'var(--fg)',{w:3})+LN(268,252,282,252,'var(--fg)',{w:3});
@@ -164,7 +174,7 @@ const MO=[
   s+=T(20,250,`1차 회절: λ = ${Math.round(v)} nm → β = ${(b*180/Math.PI).toFixed(1)}°`,'lab')+T(20,268,'얇은 선 = 400, 650, 900 nm 위치','sub')+T(282,228,'격자 홈','sub','end');
   return s},
  m:v=>{const bt=l=>moBeta(l)*180/Math.PI;
-  const P=plot({x:[400,900],y:[0,50],xt:[400,500,600,700,800,900].map(x=>({v:x,l:String(x)})),yt:[0,10,20,30,40,50].map(y=>({v:y,l:y+'°'})),xl:'wavelength λ (nm)',yl:'회절각 β',T:30});
+  const P=plot({x:[400,900],y:[0,50],xt:[400,500,600,700,800,900].map(x=>({v:x,l:String(x)})),yt:[0,10,20,30,40,50].map(y=>({v:y,l:y+'°'})),xl:'wavelength λ (nm)',yl:'회절각 β (°)',T:30});
   return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(50)}" y2="${P.Y(50)}" class="lvl2"/>`+T(P.R,P.Y(50)+14,'0차 (β = α = 50°)','sub','end')+crv(P,bt,400,900,'var(--fg)')+`<circle cx="${P.X(v)}" cy="${P.Y(bt(v))}" r="6" style="fill:${moCol(v)}"/>`+T(P.L+8,P.T-10,'m λ = d (sin α − sin β), m = 1','lab')},
  read:['격자는 아주 촘촘한 홈(여기서는 1 mm에 600개, 홈 간격 d ≈ 1667 nm)이 새겨진 거울이다.','홈마다 반사된 빛이 서로 간섭한다. 이웃 홈에서 온 빛의 길이 차이 d (sin α − sin β)가 파장의 정수배(m λ)가 되는 방향에서만 세게 더해진다. 이게 격자 방정식이다.','여기서 β는 법선의 입사 반대쪽에서 잰 각이다. 책마다 부호 약속이 달라 m λ = d (sin α + sin β)로 쓰고 β를 음수로 두기도 한다. 내용은 같다.','0차(m = 0)는 길이 차이가 0인 방향, 곧 β = α인 거울 반사다. 파장과 상관없어 색이 나뉘지 않는다.','1차에서는 파장이 길수록 β가 작아진다. 거울 반사 방향에서 더 멀리 꺾이는 셈이다. 그래서 백색광이 각도로 펼쳐진다. 슬라이더로 λ를 바꾸면 굵은 선이 움직인다.','홈이 더 촘촘하면(d가 작으면) 같은 파장 차이가 더 큰 각도 차이로 벌어진다.'],
  q:'1200 gr/mm 격자로 바꾸면 d와 각도 퍼짐은?',a:'d가 약 833 nm로 절반이 되고, 같은 파장 차이에 대한 각도 차이는 대략 2배가 된다.'},
@@ -176,15 +186,18 @@ const MO=[
   return s+T(P.X(0)+14,P.T-8,'출구 슬릿 (나머지는 막힘)','sub')},
  read:[`${c(1,'f')} 입구 슬릿이 좁은 광원 역할을 한다.`,`${c(2,'f')} 오목거울 1이 퍼지는 빛을 평행광으로 만든다.`,`${c(3,'f')} 격자가 파장마다 다른 각도로 보낸다(1단계).`,`${c(4,'f')} 오목거울 2가 평행광을 다시 모으는데, 각도가 다르니 파장마다 출구 평면의 다른 위치에 초점이 맺힌다.`,`${c(5,'f')} 출구 슬릿은 그중 한 좁은 띠만 통과시킨다. "한 색만 고른다"는 뜻의 monochromator다.`,'거울 두 개를 대칭으로 놓으면 한 거울이 만드는 수차(코마)를 다른 거울이 일부 상쇄한다(확인 필요). 실제 장치는 각도가 더 작고, 그림의 광선 간격은 보기 쉽게 과장했다.'],
  q:'출구 슬릿을 빼면 어떤 장치가 되나?',a:'출구 평면 전체에 스펙트럼이 펼쳐진다. 거기에 배열 검출기를 두면 여러 파장을 한 번에 찍는 분광기(spectrograph)가 된다(6단계).'},
-{t:'격자를 돌리면 출구 파장이 바뀐다',ec:'격자 회전',mc:'광원 스펙트럼 위의 통과 대역',
+{t:'격자를 돌리면 출구 파장이 바뀐다',ec:'격자 회전 (위에서 본 그림, 광로 각도는 보기 쉽게 과장)',mc:'광원 스펙트럼 위의 통과 대역',
  slider:{min:13,max:34,step:.5,init:20,label:'격자 각도 θ',fmt:v=>v.toFixed(1)+'°',play:1},
- e:v=>{const l=2*MO_D*Math.cos(15*Math.PI/180)*Math.sin(v*Math.PI/180);
-  return moCT({cols:[[l,0]],rot:v-20})+T(96,244,`θ = ${v.toFixed(1)}°`,'lab')+T(96,262,`출구 λ ≈ ${Math.round(l)} nm`,'lab','start',moCol(l))},
+ e:v=>{const l=2*MO_D*Math.cos(15*Math.PI/180)*Math.sin(v*Math.PI/180),r=v*Math.PI/180;
+  /* θ = 0이면 격자 법선이 세로 점선(입사·회절 방향의 가운데선)과 겹쳐 거울(0차)처럼 된다. 법선이 출구 쪽으로 θ만큼 돈다 */
+  const nrm=`<line x1="160" y1="186" x2="160" y2="132" class="lvl2"/>`+LN(160,186,160+54*Math.sin(r),186-54*Math.cos(r),'var(--fg)',{w:1.2,dash:1})
+   +`<path d="M160,${186-40} A40,40 0 0 1 ${160+40*Math.sin(r)},${186-40*Math.cos(r)}" fill="none" style="stroke:var(--muted)"/>`;
+  return moCT({cols:[[l,0]],rot:v})+nrm+T(96,244,`법선 회전 θ = ${v.toFixed(1)}°`,'lab')+T(96,262,`출구 λ ≈ ${Math.round(l)} nm`,'lab','start',moCol(l))},
  m:v=>{const l=2*MO_D*Math.cos(15*Math.PI/180)*Math.sin(v*Math.PI/180),src=x=>Math.min(1,.15+.85*Math.exp(-(((x-750)/320)**2)));
   const P=plot({x:[350,950],y:[0,1.15],xt:[400,500,600,700,800,900].map(x=>({v:x,l:String(x)})),xl:'wavelength λ (nm)',yl:'세기 (상대)',T:30});
   return P.s+crv(P,src,350,950,'var(--s6)',{dash:1})+`<rect x="${P.X(l-6)}" y="${P.Y(src(l))}" width="${Math.max(2,P.X(l+6)-P.X(l-6))}" height="${P.B-P.Y(src(l))}" style="fill:${moCol(l)}" fill-opacity=".8"/>`
    +T(P.R,P.T-12,'점선 = 할로젠 램프 (예시)','sub','end')+T(P.X(l),P.Y(1.1),Math.round(l)+' nm','sub','middle')},
- read:['Czerny-Turner에서는 입구와 출구 방향이 고정되어 있고 격자만 돈다. 격자를 돌리면 α와 β가 함께 바뀌고 출구 슬릿에 오는 파장이 바뀐다.','입사와 회절 사이 각도(편향각)가 고정이면 λ = (2d/m) cos K sin θ 꼴이 된다. K = 편향각의 절반, θ = 격자 회전각이다(여기서는 K = 15° 가정).','재생을 누르면 격자가 돌며 통과 대역이 광원 스펙트럼 위를 훑는다. 출구 뒤에 PMT 같은 단일 검출기를 두고 값을 기록하면 파장 스캔이 된다.','그래서 모노크로메이터 + 단일 검출기는 "한 번에 한 파장"이다. 넓은 범위를 찍으려면 시간이 걸린다.'],
+ read:['Czerny-Turner에서는 입구와 출구 방향이 고정되어 있고 격자만 돈다. 격자를 돌리면 α와 β가 함께 바뀌고 출구 슬릿에 오는 파장이 바뀐다.','입사와 회절 사이 각도(편향각)가 고정이면 λ = (2d/m) cos K sin θ 꼴이 된다. K = 편향각의 절반, θ = 격자 회전각이다(여기서는 K = 15° 가정). θ는 격자 법선(진한 점선)이 입사·회절 방향의 가운데선(옅은 세로 점선)에서 돌아간 각이다. θ = 0이면 격자가 거울처럼 0차만 보낸다.','재생을 누르면 격자가 돌며 통과 대역이 광원 스펙트럼 위를 훑는다. 출구 뒤에 PMT 같은 단일 검출기를 두고 값을 기록하면 파장 스캔이 된다.','그래서 모노크로메이터 + 단일 검출기는 "한 번에 한 파장"이다. 넓은 범위를 찍으려면 시간이 걸린다.'],
  q:'파장 스캔 중 광원 세기가 흔들리면 어떻게 되나?',a:'스펙트럼에 그대로 섞인다. 한 파장씩 다른 시간에 재기 때문이다. 그래서 기준 검출기로 광원을 같이 재서 나누거나 이중 빔 배치를 쓴다.'},
 {t:'슬릿 폭과 분해능은 맞바꾼다',ec:'출구 평면의 슬릿 상 (Hg 노란 두 줄)',mc:'측정 스펙트럼 (역선형 분산 2.5 nm/mm 예시)',
  slider:{min:50,max:1000,step:10,init:200,label:'슬릿 폭',fmt:v=>Math.round(v)+' µm'},
@@ -205,22 +218,23 @@ const MO=[
 {t:'홈 개수와 blaze: 효율이 높은 파장을 고른다',ec:'격자 단면 (톱니 홈)',mc:'회절 효율 (예시)',
  slider:{min:0,max:2,step:1,init:0,label:'격자',fmt:v=>['1200 gr/mm · 500 nm','600 gr/mm · 1 µm','150 gr/mm · 4 µm'][Math.round(v)]},
  e:v=>{const i=Math.round(v),p=[16,32,128][i],th=17.5*Math.PI/180,x0=30,x1=290,y=170;let d=`M${x0},${y}`;
-  for(let x=x0;x<x1;x+=p){const h=p*Math.cos(th)*Math.sin(th);d+=` L${Math.min(x1,x+p*Math.cos(th)**2)},${y-h} L${Math.min(x1,x+p)},${y}`}
+  let x=x0;for(;x+p<=x1;x+=p){const h=p*Math.cos(th)*Math.sin(th);d+=` L${x+p*Math.cos(th)**2},${y-h} L${x+p},${y}`}
+  if(x<x1)d+=` L${x1},${y}`; /* 남는 자리는 평평하게 (반쪽 톱니를 그리지 않는다) */
   const xf=x0+p*Math.cos(th)**2*.5,yf=y-p*Math.cos(th)*Math.sin(th)*.5;
   return `<path d="${d}" style="fill:var(--soft);stroke:var(--fg)" stroke-width="1.4"/>`+`<line x1="${x0}" x2="${x1}" y1="${y}" y2="${y}" class="lvl2"/>`
    +LN(x0,y+18,x0+p,y+18,'var(--muted)',{w:1})+LN(x0,y+12,x0,y+24,'var(--muted)',{w:1})+LN(x0+p,y+12,x0+p,y+24,'var(--muted)',{w:1})+T(x0+p+6,y+22,'d = '+['833 nm','1667 nm','6.7 µm'][i],'sub')
    +T(20,30,['1200 gr/mm, blaze 500 nm','600 gr/mm, blaze 1 µm','150 gr/mm, blaze 4 µm'][i],'lab')+T(20,48,'세 격자 모두 blaze 각 약 17.5° (예시)','sub')
-   +T(20,250,'홈 면의 기울기(blaze 각)가 한 파장에서 반사 방향과','sub')+T(20,266,'회절 방향을 맞춰 그 파장 효율을 높인다','sub')+(i===2?'':T(xf,yf-34,'톱니 하나','sub','middle'))},
+   +T(20,250,'홈 면의 기울기(blaze 각)가 한 파장에서 반사 방향과','sub')+T(20,266,'회절 방향을 맞춰 그 파장 효율을 높인다','sub')+(i===2?'':LN(xf,yf-30,xf,yf-4,'var(--muted)',{w:1})+T(xf,yf-34,'톱니 하나','sub','middle'))},
  m:v=>{const i=Math.round(v),lb=[.5,1,4];const P=plot({x:[.3,10],y:[0,1],logx:1,xt:[{v:.3,l:'0.3'},{v:1,l:'1'},{v:3,l:'3'},{v:10,l:'10'}],yt:[{v:0,l:'0'},{v:.5,l:'50%'},{v:1,l:'100%'}],xl:'wavelength (µm)',yl:'효율',T:30});
   const ef=b=>x=>.85*Math.exp(-((Math.log10(x/b)/(x<b?.17:.3))**2));
-  return P.s+lb.map((b,j)=>crv(P,ef(b),b/2.5,Math.min(10,b*4),j===i?'var(--s3)':'var(--s6)',{w:j===i?2.5:1,dash:j!==i,n:300})).join('')+lb.map((b,j)=>T(P.X(b),P.Y(.9),['500 nm','1 µm','4 µm'][j],'sub','middle',j===i?'var(--s3)':undefined)).join('')+T(P.R,P.T-12,'실선 = 고른 격자, 점선 = 나머지','sub','end')},
+  return P.s+lb.map((b,j)=>crv(P,ef(b),Math.max(.3,b/2.5),Math.min(10,b*4),j===i?'var(--s3)':'var(--s6)',{w:j===i?2.5:1,dash:j!==i,n:300})).join('')+lb.map((b,j)=>T(P.X(b),P.Y(.9),['500 nm','1 µm','4 µm'][j],'sub','middle',j===i?'var(--s3)':undefined)).join('')+T(P.R,P.T-12,'실선 = 고른 격자, 점선 = 나머지','sub','end')},
  read:['홈 단면을 톱니 모양으로 깎으면, 각 홈 면이 작은 거울처럼 한 방향으로 빛을 몰아 준다. 그 방향이 원하는 파장의 1차 회절 방향과 맞으면 효율이 크게 오른다. 그 파장을 blaze 파장이라 한다.','효율 곡선은 blaze 파장 근처에서 높고, 짧은 쪽으로 빨리, 긴 쪽으로 천천히 떨어진다(대략적인 모양, 예시).','파장이 길수록 홈 간격 d도 커야 한다. m λ ≤ 2d라야 1차 회절이 생기기 때문이다. 그래서 중적외선용 격자는 홈이 성기다(예: 수십–150 gr/mm, 확인 필요).','분광기 하나에 격자 두세 개를 달아 돌려 가며 쓰는 경우가 많다. 측정 파장에 맞는 격자를 골랐는지 먼저 본다.'],
  q:'5 µm(2000 cm⁻¹)를 1200 gr/mm 격자로 보면?',a:'d ≈ 0.83 µm라 m λ ≤ 2d ≈ 1.7 µm 조건을 넘는다. 1차 회절이 생기지 않는다. 중적외선용 격자(홈이 성긴 것)로 바꿔야 한다.'},
 {t:'출구 슬릿 대신 배열 검출기: 분광기(spectrograph)',ec:'출구 평면에 배열 검출기',mc:'한 번에 찍은 스펙트럼 (64화소, 예시)',
- e:()=>moCT({cols:[[450,-1],[550,0],[650,1]],exit:'array'})+T(96,244,'출구 평면 전체를','sub')+T(96,260,'화소 수십~수천 개가 받는다','sub'),
+ e:()=>moCT({cols:[[450,-1],[550,0],[650,1]],exit:'array'})+TM(100,238,['출구 평면 전체를','화소 수십~수천 개가','받는다']),
  m:()=>{const P=plot({x:[0,65],y:[0,1.15],xt:[{v:1,l:'1'},{v:16,l:'16'},{v:32,l:'32'},{v:48,l:'48'},{v:64,l:'64'}],xl:'화소 번호',yl:'신호 (상대)',T:30});
   let s=P.s;for(let i=1;i<=64;i++){const y=.08+.92*Math.exp(-(((i-30)/14)**2))-.35*Math.exp(-(((i-38)/2.5)**2));s+=`<rect x="${P.X(i-.4)}" y="${P.Y(y)}" width="${P.X(i+.4)-P.X(i-.4)}" height="${P.B-P.Y(y)}" style="fill:var(--s3)" fill-opacity=".75"/>`}
-  return s+T(P.X(38),P.Y(.38),'흡수 띠','sub','middle')+T(P.R,P.T-12,'화소 하나 = 파장 한 칸','sub','end')},
+  return s+LN(P.X(43),P.Y(.56),P.X(38.6),P.Y(.44),'var(--muted)',{w:1})+T(P.X(43),P.Y(.6),'흡수 띠','sub')+T(P.R,P.T-12,'화소 하나 = 파장 한 칸','sub','end')},
  read:['출구 슬릿을 빼고 출구 평면에 CCD나 MCT 배열을 놓으면, 여러 파장을 한 번에 찍는다. 이걸 spectrograph(분광기)라 부른다.','화소당 파장 간격 = 역선형 분산 × 화소 폭. 예: 2.5 nm/mm × 25 µm = 0.0625 nm (예시).','분해능은 출구 슬릿 대신 입구 슬릿 폭과 화소 크기가 정한다. 입구 슬릿 상이 화소 두세 개보다 좁으면 화소가 한계가 된다.','우리 IR pump-probe 셋업은 모노크로메이터(Horiba iHR 320) 뒤에 MCT 배열(한 스펙트럼 64화소)을 둔다. 격자와 화소당 간격은 확인 필요(논문 TODO).','배열이라도 화소 수가 유한해 한 번에 보는 범위가 정해진다. 범위를 넓히려면 격자를 돌려 여러 구간을 이어 붙인다.'],
  q:'64화소 배열로 200 cm⁻¹ 범위를 찍으면 화소당 간격은?',a:'약 3 cm⁻¹ (200 / 64 ≈ 3.1 cm⁻¹).'},
 {t:'고차 회절이 겹친다: order-sorting 필터',ec:'같은 방향으로 나가는 두 빛',mc:'측정 스펙트럼 (가로축 = 1차 기준 파장)',
@@ -232,12 +246,12 @@ const MO=[
   s+=T(20,24,'1 × 800 nm = 2 × 400 nm','lab')+T(20,42,'m λ가 같으면 β도 같다','sub');
   s+=`<line x1="40" x2="74" y1="244" y2="244" style="stroke:var(--s3)" stroke-width="3"/>`+T(80,248,'1차 800 nm','sub')+`<line x1="160" x2="194" y1="244" y2="244" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="4 3"/>`+T(200,248,'2차 400 nm','sub');
   const fx=cx+.6*R*Math.sin(MO_AL),fy=cy-.6*R*Math.cos(MO_AL);
-  if(tg.f)s+=`<rect x="${fx-5}" y="${fy-18}" width="10" height="36" style="fill:var(--s4)" fill-opacity=".6" transform="rotate(-40 ${fx} ${fy})"/>`+T(fx+14,fy+14,'필터','sub')+T(20,270,'필터가 400 nm를 격자 앞에서 막는다','sub');
+  if(tg.f)s+=`<rect x="${fx-5}" y="${fy-18}" width="10" height="36" style="fill:var(--s4)" fill-opacity=".6" transform="rotate(-40 ${fx} ${fy})"/>`+T(fx+14,fy+14,'필터','sub')+T(20,270,'필터가 400 nm를 미리 막는다 (실제로는 입구 슬릿 앞)','sub');
   else s+=T(20,270,'두 빛이 같은 화소(출구)에 도착한다','sub');
   return s},
  m:(v,tg)=>{const P=plot({x:[600,1000],y:[0,1.15],xt:[600,700,800,900,1000].map(x=>({v:x,l:String(x)})),xl:'표시 파장 (nm, 1차 기준)',yl:'신호 (상대)',T:30});
   let s=P.s+crv(P,x=>.6*moGauss(x,900,40),600,1000,'var(--s3)')+`<g data-n="1">${badge(P.X(900),P.Y(.6)-16,1,'var(--s3)')}</g>`+T(P.X(900),P.Y(.6)-32,'진짜 900 nm','sub','middle');
-  if(!tg.f)s+=crv(P,x=>.9*moGauss(x,800,6),760,840,'var(--s5)')+`<g data-n="2">${badge(P.X(800)-18,P.Y(.9),2,'var(--s5)')}</g>`+T(P.X(800)-30,P.Y(.75),'유령 (실제는 400 nm 2차)','sub','end');
+  if(!tg.f)s+=crv(P,x=>.9*moGauss(x,800,6),760,840,'var(--s5)')+`<g data-n="2">${badge(P.X(800)-18,P.Y(.9),2,'var(--s5)')}</g>`+TM(P.X(800)-14,P.Y(.72),['유령','(실제는 400 nm 2차)'],'sub','end');
   else s+=T(P.X(800),P.Y(.3),'유령 사라짐','sub','middle');
   return s},
  read:['격자 방정식에는 m λ가 들어간다. 1차 800 nm와 2차 400 nm는 m λ가 같아서 같은 각도로 나간다.','광원에 400 nm 빛이 있으면 800 nm 자리에 가짜 봉우리가 생긴다. 체크박스를 끄고 켜며 비교하면 유령이 필터로 사라진다.','그래서 보려는 범위의 절반보다 짧은 파장을 막는 필터(order-sorting, long-pass)를 슬릿 앞에 둔다. 넓은 범위를 스캔하는 장비는 필터 바퀴로 구간마다 바꾼다.','중적외선에서도 같다. 4 µm(2500 cm⁻¹) 자리에 2 µm(5000 cm⁻¹) 2차가 겹칠 수 있다.'],
@@ -258,7 +272,7 @@ const MO=[
 /* 0~99를 고정된 순서로 섞은 것 (QE 그림에서 어느 광자가 전자가 되는지) */
 const DT_ORD=Array.from({length:100},(_,i)=>(i*37+11)%100);
 const DT_RNG=[[.2,.9],[.2,1.1],[.9,1.7],[2,16]]; /* 실용 범위 (µm, 대략). 짧은 쪽 끝은 띠 간격이 아니라 창·기판·표면 흡수가 정한다 */
-const DT_DET=[['PMT 광음극',1.4,'s5'],['Si (CCD)',1.12,'s2'],['InGaAs',.75,'s4'],['HgCdTe (MCT)',.1,'s1']];
+const DT_DET=[['PMT 광음극',1.4,'s5'],['Si (CCD)',1.12,'s2'],['InGaAs',.75,'s4'],['HgCdTe (MCT)',.078,'s1']]; /* MCT: 오른쪽 그림의 16 µm 끝과 맞춘 값 (1.24 / 16 ≈ 0.078 eV) */
 const dtKT=t=>8.617e-5*t; /* eV */
 const DT=[
 {t:'공통 원리: 광자 하나가 전자 하나를 만든다',ec:'광자 100개 (예시)',mc:'세어 보기',
@@ -276,7 +290,7 @@ const DT=[
  e:v=>{const l=10**v,E=1.24/l,Y=e=>236-e/1.6*200;let s=`<line x1="40" x2="40" y1="36" y2="236" class="ax"/>`+[0,.4,.8,1.2,1.6].map(e=>`<line x1="35" x2="40" y1="${Y(e)}" y2="${Y(e)}" class="ax"/>`+T(32,Y(e)+4,String(e),'sub','end')).join('');
   s+=`<text x="12" y="136" class="lab" text-anchor="middle" transform="rotate(-90 12 136)">에너지 (eV)</text>`;
   DT_DET.forEach(([n,g,k],i)=>{const x=74+i*62,ok=E>=g,st=!ok?'x':(l<DT_RNG[i][0]?'s':'o');s+=`<g data-n="${i+1}"><rect x="${x-16}" y="${Y(g)}" width="32" height="${236-Y(g)}" style="fill:${COL[k]}" fill-opacity=".22" stroke="${COL[k]}"/>`+badge(x,Y(g)-14,i+1,COL[k])+T(x,252,n.split(' ')[0],'sub','middle')+(n.includes(' ')?T(x,266,n.split(' ')[1],'sub','middle'):'')+'</g>'
-   +T(x,Y(Math.min(E,1.6))-(Y(g)-Y(Math.min(E,1.6))<26?-14:-14)+0,'','sub')+`<text x="${x}" y="230" class="labn" text-anchor="middle" style="fill:${{o:'var(--s3)',s:'var(--s4)',x:'var(--s1)'}[st]}">${{o:'✓',s:'△',x:'✗'}[st]}</text>`});
+   +T(x,Y(Math.min(E,1.6))-(Y(g)-Y(Math.min(E,1.6))<26?-14:-14)+0,'','sub')+`<text x="${236-Y(g)<20?x+24:x}" y="${236-Y(g)<20?234:230}" class="labn" text-anchor="middle" style="fill:${{o:'var(--s3)',s:'var(--s4)',x:'var(--s1)'}[st]}">${{o:'✓',s:'△',x:'✗'}[st]}</text>`});
   const yE=Y(Math.min(E,1.6));s+=`<line x1="44" x2="300" y1="${yE}" y2="${yE}" class="cur" style="stroke:var(--fg)" stroke-width="1.5" stroke-dasharray="6 3"/>`;
   return s+T(44,12,'막대 = 띠 간격, 점선 = 광자 '+E.toFixed(2)+' eV'+(E>1.6?' (위로 넘침)':''),'sub')+T(44,28,'✓ 보임 · △ 짧은 쪽 한계 · ✗ 띠 간격 미달','sub')},
  m:v=>{const l=10**v;const P=plot({x:[.2,20],y:[0,5],logx:1,xt:[{v:.2,l:'0.2'},{v:1,l:'1'},{v:2,l:'2'},{v:5,l:'5'},{v:10,l:'10'},{v:20,l:'20'}],xl:'wavelength (µm)',L:20,noy:1,T:30});
@@ -290,7 +304,7 @@ const DT=[
  e:v=>{const g=.1,f=t=>Math.exp(-g/(2*dtKT(t))),r=f(v)/f(300),n=Math.round(40*r);let s=`<rect x="30" y="60" width="260" height="70" style="fill:var(--s2)" fill-opacity=".1"/>`+T(296,100,'전도띠','sub','end')
    +`<rect x="30" y="170" width="260" height="70" style="fill:var(--s6)" fill-opacity=".15"/>`+T(296,212,'가전자띠','sub','end')+LN(30,130,290,130,'var(--fg)')+LN(30,170,290,170,'var(--fg)')
    +T(160,154,'띠 간격 0.1 eV','sub','middle');
-  for(let i=0;i<n;i++){const x=40+((i*53)%24)*10,y=72+((i*29)%5)*11;s+=`<circle cx="${x}" cy="${y}" r="3.5" style="fill:var(--s2)"/>`}
+  for(let i=0;i<n;i++){const x=40+((i*53)%22)*10,y=72+((i*29)%5)*11; /* 22칸 × 5줄, 겹치지 않음. 오른쪽 '전도띠' 글자 자리는 비운다 */s+=`<circle cx="${x}" cy="${y}" r="3.5" style="fill:var(--s2)"/>`}
   return s+T(30,30,`kT = ${(dtKT(v)*1000).toFixed(1)} meV`,'lab')+T(30,48,`열 전자 (300 K 40개 기준): ${n<1&&r>0?'1개 미만':n+'개'}`,'lab')+T(30,262,'점 = 열로 띠 간격을 넘은 전자 (개수는 예시)','sub')},
  m:v=>{const f=(g,t)=>Math.exp(-g/(2*dtKT(t)))/Math.exp(-g/(2*dtKT(300)));const P=plot({x:[60,300],y:[1e-9,1],logy:1,xt:[{v:77,l:'77'},{v:150,l:'150'},{v:200,l:'200'},{v:300,l:'300'}],yt:[{v:1,l:'1'},{v:1e-3,l:'10⁻³'},{v:1e-6,l:'10⁻⁶'},{v:1e-9,l:'10⁻⁹'}],xl:'온도 (K)',yl:'상대값',L:62,T:30});
   return P.s+crv(P,t=>f(.1,t),60,300,'var(--s1)')+crv(P,t=>f(.25,t),60,300,'var(--s5)',{dash:1})+`<line x1="${P.X(77)}" x2="${P.X(77)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(77)+4,P.Y(1e-8),'LN₂ 77 K','sub')+`<line x1="${P.X(220)}" x2="${P.X(220)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(220)+4,P.Y(1e-8),'TE 약 220 K','sub')+`<line x1="${P.X(295)}" x2="${P.X(295)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(295)+4,P.T-8,'상온 약 295 K','sub','end')
@@ -299,15 +313,15 @@ const DT=[
  q:'5 µm 차단 MCT(0.25 eV)와 12 µm 차단 MCT(0.1 eV) 중 냉각이 더 절실한 쪽은?',a:'12 µm 쪽. 띠 간격이 작아 같은 온도에서 열 전자가 훨씬 많다.'},
 {t:'PMT: 광전자 하나를 수백만 개로 키운다',ec:'광음극 → 다이노드 → 양극',mc:'증폭률 vs 다이노드 단 수 (단마다 4배)',
  slider:{min:1,max:12,step:1,init:10,label:'다이노드 수',fmt:v=>Math.round(v)+'단'},
- e:v=>{const n=Math.round(v);let s=`<rect x="12" y="150" width="14" height="70" style="fill:var(--s5)" fill-opacity=".35" stroke="var(--s5)"/>`+T(19,240,'광음극','sub','middle')+LN(-4,130,14,166,'var(--s4)',{w:2,mk:'s4'})+T(4,120,'광자','sub');
+ e:v=>{const n=Math.round(v);let s=`<rect x="12" y="150" width="14" height="70" style="fill:var(--s5)" fill-opacity=".35" stroke="var(--s5)"/>`+T(19,240,'광음극','sub','middle')+LN(2,128,12,160,'var(--s4)',{w:2,mk:'s4'})+T(4,120,'광자','sub');
   let px=26,py=185;for(let i=1;i<=12;i++){const x=26+i*20,y=i%2?110:200,on=i<=n;s+=`<rect x="${x-7}" y="${y-4}" width="14" height="8" rx="2" style="fill:${on?'var(--fg)':'var(--line)'}"/>`;if(on){s+=LN(px,py,x,y+(i%2?4:-4),'var(--s2)',{w:Math.min(3.5,.6+i*.25)});px=x;py=y+(i%2?4:-4)}}
   const ax=26+(n+1)*20;s+=`<rect x="${ax-4}" y="140" width="8" height="40" style="fill:var(--s3)"/>`+LN(px,py,ax-4,160,'var(--s2)',{w:3.5})+T(ax,196,'양극','sub','middle');
-  return s+T(12,36,`전자 1개 × 4^${n} = ${Math.round(4**n).toLocaleString('en-US')}개`,'lab')+T(12,54,`= 전하 약 ${(4**n*1.602e-19*1e15).toPrecision(2)} fC`,'sub')+T(12,266,'선 굵기 = 전자 수 (보기용)','sub')},
+  return s+T(12,36,`전자 1개 × 4^${n} = ${Math.round(4**n).toLocaleString('en-US')}개`,'lab')+T(12,54,`= 전하 약 ${(q=>q>=100?Math.round(q).toLocaleString('en-US'):String(+q.toPrecision(2)))(4**n*1.602e-4)} fC`,'sub')+T(12,266,'선 굵기 = 전자 수 (보기용)','sub')},
  m:v=>{const n=Math.round(v);const P=plot({x:[0,13],y:[1,1e8],logy:1,xt:[1,4,8,12].map(x=>({v:x,l:String(x)})),yt:[{v:1,l:'1'},{v:1e2,l:'10²'},{v:1e4,l:'10⁴'},{v:1e6,l:'10⁶'},{v:1e8,l:'10⁸'}],xl:'다이노드 수',yl:'증폭률',T:30});
   let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(1e6)}" y2="${P.Y(1e6)}" class="lvl2"/>`+T(P.L+6,P.Y(1e6)-6,'10⁶ (흔한 PMT 수준, 대략)','sub');
   for(let i=1;i<=12;i++)s+=`<circle cx="${P.X(i)}" cy="${P.Y(4**i)}" r="${i===n?6:3}" style="fill:${i===n?'var(--s2)':'var(--s6)'}"/>`;
   return s},
- read:['광자가 광음극에 맞으면 광전자 하나가 튀어나온다(광음극 QE 대략 10–30%, 확인 필요).','광전자는 전압으로 가속되어 첫 다이노드에 부딪히고, 전자 몇 개를 새로 떼어 낸다. 이게 단마다 반복된다.','세어 보기: 단마다 4배면 10단에서 4¹⁰ ≈ 10⁶배다. 전자 하나가 약 0.16 pC 펄스가 되어 광자 하나도 셀 수 있다.','응답이 빠르다(대략 ns). 그래서 형광 수명 측정이나 아주 약한 빛에 쓴다.','단점: 화소가 하나라 스펙트럼을 한 번에 못 찍고(모노크로메이터로 스캔, 앞 탭 3단계), 전원이 켜진 상태에서 센 빛을 받으면 망가질 수 있다.'],
+ read:['광자가 광음극에 맞으면 광전자 하나가 튀어나온다(광음극 QE 대략 10–30%, 확인 필요).','광전자는 전압으로 가속되어 첫 다이노드에 부딪히고, 전자 몇 개를 새로 떼어 낸다. 이게 단마다 반복된다.','세어 보기: 단마다 4배면 10단에서 4¹⁰ ≈ 10⁶배다. 전자 하나가 약 0.17 pC(= 168 fC) 펄스가 되어 광자 하나도 셀 수 있다.','응답이 빠르다(대략 ns). 그래서 형광 수명 측정이나 아주 약한 빛에 쓴다.','단점: 화소가 하나라 스펙트럼을 한 번에 못 찍고(모노크로메이터로 스캔, 앞 탭 3단계), 전원이 켜진 상태에서 센 빛을 받으면 망가질 수 있다.'],
  q:'단마다 3배, 12단이면 증폭률은?',a:'3¹² ≈ 5.3 × 10⁵.'},
 {t:'CCD: 화소마다 모아서 한 칸씩 밀어 읽는다',ec:'전하 이동 (화소 8개, 예시)',mc:'읽어 낸 스펙트럼',
  slider:{min:0,max:8,step:.02,init:0,label:'읽기 진행',fmt:v=>Math.floor(v)+' / 8칸',play:1},
@@ -329,14 +343,16 @@ const DT=[
    +`<rect x="42" y="${y+18}" width="${sc(Nn)}" height="12" style="fill:${COL[k]}" fill-opacity=".35"/>`+T(48+sc(Nn),y+28,'잡음 '+Nn.toFixed(1),'sub')+T(42,y+48,'SNR = '+(S/Nn).toFixed(1),'labn','start',COL[k])};
   return row(50,'PMT (QE 25%, 읽기 잡음 무시)',pS,pN,'s5',1)+row(150,'CCD (QE 90%, 읽기 잡음 5 e⁻)',cS,cN,'s2',2)+T(20,262,'막대 길이는 log 눈금 (보기용)','sub')},
  m:v=>{const N=10**v,sp=n=>Math.sqrt(.25*n),sc=n=>.9*n/Math.sqrt(.9*n+25);const P=plot({x:[3,1e4],y:[.1,100],logx:1,logy:1,xt:[{v:10,l:'10'},{v:100,l:'100'},{v:1e3,l:'10³'},{v:1e4,l:'10⁴'}],yt:[{v:.1,l:'0.1'},{v:1,l:'1'},{v:10,l:'10'},{v:100,l:'100'}],xl:'광자 수',yl:'SNR',T:30});
-  return P.s+`<g data-n="1">${crv(P,sp,3,1e4,'var(--s5)')}<circle cx="${P.X(N)}" cy="${P.Y(sp(N))}" r="5" style="fill:var(--s5)"/></g><g data-n="2">${crv(P,sc,3,1e4,'var(--s2)')}<circle cx="${P.X(N)}" cy="${P.Y(sc(N))}" r="5" style="fill:var(--s2)"/></g>`
+  /* log 축이라 log(광자 수)를 고르게 나눠 그린다 (그냥 나누면 10 근처가 직선으로 뭉개져 교차점이 어긋난다) */
+  const PG={...P,X:u=>P.X(10**u)},lg=f=>u=>f(10**u),u0=Math.log10(3);
+  return P.s+`<g data-n="1">${crv(PG,lg(sp),u0,4,'var(--s5)')}<circle cx="${P.X(N)}" cy="${P.Y(sp(N))}" r="5" style="fill:var(--s5)"/></g><g data-n="2">${crv(PG,lg(sc),u0,4,'var(--s2)')}<circle cx="${P.X(N)}" cy="${P.Y(sc(N))}" r="5" style="fill:var(--s2)"/></g>`
    +`<line x1="${P.X(10.7)}" x2="${P.X(10.7)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(10.7)+4,P.Y(.2),'약 11개에서 역전 (가정 아래)','sub')+T(P.X(800),P.Y(4),'PMT','sub','start','var(--s5)')+T(P.X(150),P.Y(25),'CCD','sub','end','var(--s2)')},
  read:['광자는 무작위로 도착한다. 평균 N개를 받으면 흔들림이 √N이다(shot noise). 전자 100개면 잡음 10, SNR 10이다. 전자 10 000개면 잡음 100, SNR 100이다.','읽기 잡음은 읽을 때마다 더해지는 고정 잡음이다(CCD 대략 수 e⁻, 여기서는 5 e⁻ 가정, 확인 필요). 신호가 작을 때 SNR을 크게 깎는다.',`${c(1,'s5')} PMT는 증폭이 커서 읽기 잡음을 거의 무시할 수 있다. 대신 QE가 낮다(25% 가정).`,`${c(2,'s2')} CCD는 QE가 높다(90% 가정). 신호가 충분하면 읽기 잡음이 묻혀 CCD가 이긴다.`,'이 가정에서는 광자 약 11개 아래에서만 PMT가 유리하다. 실제로는 PMT의 증폭 잡음, 양쪽의 암전류가 더해져 경계가 움직인다(예시 계산).'],
  q:'광자 400개: PMT(QE 25%)와 CCD(QE 90%, 읽기 잡음 5 e⁻)의 SNR은?',a:'PMT 전자 100개 → SNR 10. CCD 전자 360개 → √(360 + 25) ≈ 19.6 → SNR 약 18.'},
 {t:'정리: 어떤 실험에 무엇을 쓰나',ec:'파장 범위와 읽는 속도 (대략)',mc:'비교 표 (대략, 예시)',
  e:()=>{const P=plot({x:[.2,20],y:[0,5],logx:1,xt:[{v:.2,l:'0.2'},{v:1,l:'1'},{v:5,l:'5'},{v:20,l:'20'}],xl:'wavelength (µm)',L:20,noy:1,T:30});
   const it=[['PMT · 화소 1 · ns 응답',.2,.9,'s5'],['CCD · 배열 · 노출 후 읽기',.2,1.1,'s2'],['InGaAs 배열 · 근적외선',.9,1.7,'s4'],['MCT 배열 · 1 kHz 샷마다',2,16,'s1']];
-  return P.s+it.map(([l,a,b,k],i)=>{const y=P.Y(4.4-i*1.05);return `<g data-n="${i+1}">`+badge(P.X(.2)+10,y+10,i+1,COL[k])+`<rect x="${P.X(a)}" y="${y+2}" width="${P.X(b)-P.X(a)}" height="14" rx="3" style="fill:${COL[k]}" fill-opacity=".45"/></g>`+T(P.X(i<2?.26:a),y-6,l,'sub')}).join('')},
+  return P.s+it.map(([l,a,b,k],i)=>{const y=P.Y(4.4-i*1.05);const lx=i<2?P.X(.2)+26:P.X(a)+14;return `<g data-n="${i+1}">`+badge(lx-14,y-10,i+1,COL[k])+`<rect x="${P.X(a)}" y="${y+2}" width="${P.X(b)-P.X(a)}" height="14" rx="3" style="fill:${COL[k]}" fill-opacity=".45"/></g>`+T(lx,y-6,l,'sub')}).join('')},
  m:()=>{const rows=[['','화소','한 번 읽기','쓰는 곳 (예시)'],['① PMT','1','ns (연속)','형광 수명'],['② CCD','수백–수천','ms–s','Raman, 형광'],['③ InGaAs','수백','약 0.1–1 ms','근적외선 분광'],['④ MCT 배열','수십–백여','1 ms (샷마다)','IR pump-probe']],xs=[8,78,140,226];
   let s='';rows.forEach((r,i)=>{const y=40+i*34;if(i)s+=`<g data-n="${i}"><line x1="8" x2="316" y1="${y-21}" y2="${y-21}" style="stroke:var(--line)"/></g>`;r.forEach((t,j)=>{s+=T(xs[j],y,t,i?'sub':'lab','start',i&&j===0?COL[['s5','s2','s4','s1'][i-1]]:undefined)})});
   return s+TM(8,206,['한 번 읽기 = 값 하나(PMT)나 스펙트럼 한 장(배열)을','얻는 데 걸리는 시간 (대략, 모델마다 다름)','우리 IR pump-probe: MCT 배열 128화소 (2줄 × 64),','LN₂ 77 K, 1 kHz 샷마다 읽기 (논문 3.3, A.4)'],'sub',undefined,15)},
@@ -456,7 +472,8 @@ const TABS=[
        title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
      NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
        key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
-   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl. */
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
 let tab=0,idx=0,V=0,TG={},raf=0;
 const $=id=>document.getElementById(id);
 if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
@@ -472,26 +489,30 @@ function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf
  const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
  $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
  $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
- const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent='재생';
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
  if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
  TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
  $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
- $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${i+1}단계" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
  [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
  if(NOTE.onRender)NOTE.onRender(s);
- draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}}
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
 function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
 $('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
 $('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
 $('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
 $('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
-$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent='재생';return}
- const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent='정지';
- const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent='재생'}};raf=requestAnimationFrame(step)};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
 const stage=$('stage'),notes=document.querySelector('.notes');
 function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
 [stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
 try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
 render();
 </script>

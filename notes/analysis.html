@@ -18,6 +18,9 @@ body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15
 .hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
 .hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
 .hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
 .status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
 .hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
 .hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
@@ -77,6 +80,11 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid
 </div>
 
 <script>
+const LANG='ko';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
 /* ---------- SVG 헬퍼 (모든 노트 공통) ----------
    색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
 const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
@@ -172,8 +180,8 @@ const KIN=[
   let pk=-1,pv=0;for(let t=-1;t<=3;t+=.005){const y=anConv(t,1,v);if(y>pv){pv=y;pk=t}}
   return P.s+crv(P,t=>t<0?0:Math.exp(-t),-1,3,'var(--muted)',{dash:1,n:400,w:1.2})+crv(P,t=>anConv(t,1,v),-1,3,'var(--fg)',{n:400})
    +`<line x1="${P.X(0)}" x2="${P.X(0)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`+T(P.X(0)+4,P.Y(1.1)+4,'t₀','sub')
-   +`<circle cx="${P.X(pk)}" cy="${P.Y(pv)}" r="4.5" style="fill:var(--fg)"/>`+T(P.X(pk)+10,P.Y(pv)-8,`측정 피크: t = ${pk.toFixed(2)} ps, 높이 ${pv.toFixed(2)}`,'sub')+T(P.R,P.T-12,'실선 = ① × ② (합성곱)','sub','end')},
- read:[`${c(1,'f')} 모델은 t₀에서 갑자기 올라가 지수로 줄어든다. 하지만 ${c(2,'s5')} 펄스에 길이가 있어서, 장비는 이 모양을 그대로 보지 못한다.`,'측정 곡선 = 모델과 IRF(장비 응답)의 합성곱이다. IRF가 가우시안이면 지수 하나는 식 하나로 쓸 수 있다(erfc가 들어간 꼴).','IRF를 넓히면 피크가 낮아지고 늦어진다. 그래서 "피크 위치 = t₀"가 아니고, "반쯤 올라간 점 = t₀"도 IRF와 τ에 따라 어긋난다.','τ가 IRF보다 아주 짧으면 측정 곡선은 거의 IRF 모양이 된다. 이때 τ는 데이터만으로 잘 정해지지 않는다.','t₀ 근처의 결맞음 잡신호(coherent artifact) 구간은 보통 맞춤에서 뺀다. 이 잘라 내는 시간을 바꿔도 빠른 τ가 버티는지 따로 확인한다(맞춤 구간 민감도).'],
+   +`<circle cx="${P.X(pk)}" cy="${P.Y(pv)}" r="4.5" style="fill:var(--fg)"/>`+T(P.X(pk)+10,P.Y(pv)-8,`측정 피크: t = ${pk.toFixed(2)} ps, 높이 ${pv.toFixed(2)}`,'sub')+T(P.R,P.T-12,'실선 = ① ⊗ ② (합성곱), 점선 = ①','sub','end')},
+ read:[`${c(1,'f')} 모델은 t₀에서 갑자기 올라가 지수로 줄어든다. 하지만 ${c(2,'s5')} 펄스에 길이가 있어서, 장비는 이 모양을 그대로 보지 못한다.`,'측정 곡선 = 모델과 IRF(장비 응답)의 합성곱(⊗)이다. 곱하기가 아니라, IRF를 시간축으로 밀면서 겹친 만큼 더한 것이다. IRF가 가우시안이면 지수 하나는 식 하나로 쓸 수 있다(erfc가 들어간 꼴).','IRF를 넓히면 피크가 낮아지고 늦어진다. 그래서 "피크 위치 = t₀"가 아니고, "반쯤 올라간 점 = t₀"도 IRF와 τ에 따라 어긋난다.','τ가 IRF보다 아주 짧으면 측정 곡선은 거의 IRF 모양이 된다. 이때 τ는 데이터만으로 잘 정해지지 않는다.','t₀ 근처의 결맞음 잡신호(coherent artifact) 구간은 보통 맞춤에서 뺀다. 이 잘라 내는 시간을 바꿔도 빠른 τ가 버티는지 따로 확인한다(맞춤 구간 민감도).'],
  q:'IRF FWHM 300 fs인 장비로 τ = 100 fs 과정을 재면?',a:'측정 곡선이 거의 IRF 모양이라 τ의 불확도가 크다. IRF를 따로 재서 고정하고 합성곱 모델로 맞춘 뒤, "IRF 수준보다 짧다" 정도로만 보고하는 편이 안전하다.'},
 {t:'A → B → C: 중간 상태는 올라갔다 내려간다',ec:'순차 모델 (τ₁ = 1 ps 고정, 예시)',mc:'인구 N(t)',
  slider:{min:.2,max:5,step:.05,init:2,label:'τ₂ (B의 수명)',fmt:v=>v.toFixed(2)+' ps'},
@@ -187,18 +195,18 @@ const KIN=[
   return P.s+crv(P,t=>anNA(t,k1),0,8,'var(--s3)')+crv(P,t=>anNB(t,k1,k2),0,8,'var(--s5)')+crv(P,t=>anNC(t,k1,k2),0,8,'var(--s6)',{dash:1})
    +`<circle cx="${P.X(tm)}" cy="${P.Y(nb)}" r="4.5" style="fill:var(--s5)"/>`
    +T(P.X(.35),P.Y(.95),'A','labn','start','var(--s3)')+T(P.X(7.6),P.Y(anNC(7.6,k1,k2))-8,'C','labn','end','var(--s6)')+T(P.R,P.T-12,'초록 A · 보라 B · 회색 점선 C','sub','end')},
- read:[`A가 ${c(1,'f')} τ₁로 B가 되고, B가 ${c(2,'f')} τ₂로 C가 된다. 단계마다 1단계와 같은 지수 감쇠다.`,'B는 A에서 들어오는 만큼 늘고, 자기 수명만큼 빠져나간다. 그래서 올라갔다 내려가는 모양이 된다.','τ₂를 줄이면(B가 빨리 빠지면) B는 별로 쌓이지 않는다. τ₂를 늘리면 B가 많이 쌓이고 오래 남는다.','모든 인구는 지수 함수 두 개(exp(−t/τ₁), exp(−t/τ₂))의 합으로 쓸 수 있다. 단계가 더 많아도 같은 방식으로 이어진다.','τ₁ = τ₂면 위 식의 분모가 0이 된다. 그때는 N_B = k t exp(−kt)라는 다른 꼴을 쓴다.'],
+ read:[`A가 ${c(1,'f')} τ₁로 B가 되고, B가 ${c(2,'f')} τ₂로 C가 된다. 단계마다 1단계와 같은 지수 감쇠다.`,'B는 A에서 들어오는 만큼 늘고, 자기 수명만큼 빠져나간다. 그래서 올라갔다 내려가는 모양이 된다.','τ₂를 줄이면(B가 빨리 빠지면) B는 별로 쌓이지 않는다. τ₂를 늘리면 B가 많이 쌓이고 오래 남는다.','모든 인구는 지수 함수 두 개(exp(−t/τ₁), exp(−t/τ₂))의 합으로 쓸 수 있다(N_C에는 상수 1이 더 붙는다). 단계가 더 많아도 같은 방식으로 이어진다.','τ₁ = τ₂면 위 식의 분모가 0이 된다. 그때는 N_B = k t exp(−kt)라는 다른 꼴을 쓴다.'],
  q:'τ₂가 τ₁보다 훨씬 짧으면 B는 어떻게 보이나?',a:'B가 거의 쌓이지 않는다. 들어오자마자 빠져나가므로, 겉보기에는 A가 바로 C로 가는 것처럼 보인다.'},
 {t:'신호 = 계수 × 인구의 합',ec:'상태별 신호 계수 (ΔT/T, 예시)',mc:'측정 신호 ΔT/T (τ₁ = 1 ps, τ₂ = 3 ps)',
  slider:{min:-1,max:1,step:.05,init:-.5,label:'B의 계수 c_B',fmt:v=>(v>0?'+':v<0?'−':'')+Math.abs(v).toFixed(2)},
  e:v=>T(20,30,'한 파수에서 상태마다 신호에 주는 몫','lab')+`<line x1="160" x2="160" y1="60" y2="170" class="lvl2"/>`+T(160,186,'0','sub','middle')
-   +`<g data-n="1">${anBar(160,90,1,90,'c_A',30)}</g><g data-n="2">${anBar(160,140,v,90,'c_B',30)}</g>`
+   +`<g data-n="1">${badge(20,90,1,COL.s3)}${anBar(160,90,1,90,'c_A',36)}</g><g data-n="2">${badge(20,140,2,COL.s5)}${anBar(160,140,v,90,'c_B',36)}</g>`
    +T(20,224,'빨강 = + (투과 증가: GSB, SE)','sub','start','var(--s1)')+T(20,242,'파랑 = − (투과 감소: ESA)','sub','start','var(--s2)')+T(20,264,'연구실 규약 ΔT/T. ΔA와는 부호가 반대다.','sub'),
  m:v=>{const k1=1,k2=1/3;const P=plot({x:[0,8],y:[-.7,1.1],xt:[0,2,4,6,8].map(x=>({v:x,l:String(x)})),yt:[{v:-.5,l:'−0.5'},{v:0,l:'0'},{v:.5,l:'0.5'},{v:1,l:'1'}],xl:'시간 t (ps)',yl:'ΔT/T (상대)',T:30});
   return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`
-   +`<g data-n="1">${crv(P,t=>anNA(t,k1),0,8,'var(--s3)',{dash:1,w:1.4})}</g><g data-n="2">${crv(P,t=>v*anNB(t,k1,k2),0,8,'var(--s5)',{dash:1,w:1.4})}</g>`
-   +crv(P,t=>anNA(t,k1)+v*anNB(t,k1,k2),0,8,'var(--fg)')+T(P.R,P.T-12,'실선 = 합, 점선 = c_A N_A, c_B N_B','sub','end')},
- read:['측정 신호는 인구에 상태별 계수를 곱해 더한 것이다: ΔT/T(t) = c_A N_A(t) + c_B N_B(t) + …',`${c(1,'s3')} c_A는 고정(+1)이고, ${c(2,'s5')} c_B를 슬라이더로 바꾼다. 계수의 부호는 그 상태가 투과를 늘리는지(+, 빨강) 줄이는지(−, 파랑)를 뜻한다.`,'c_B가 음수면 신호가 0 아래로 내려갔다가 돌아온다. 같은 인구라도 계수에 따라 곡선 모양이 크게 바뀐다.','계수는 파수마다 다르다. 그래서 같은 τ라도 파수마다 신호 모양이 다르다(6단계 전역 피팅의 출발점).','진폭(맞춤에서 나온 계수)은 "몇 %가 그 상태에 있나"와 같은 말이 아니다. 계수에는 그 상태의 흡수 세기가 곱해져 있다.'],
+   +`<g data-n="1">${crv(P,t=>anNA(t,k1),0,8,'var(--s3)',{dash:1,w:1.4})}${badge(P.X(.3),P.Y(anNA(.3,k1))+(v>=0?18:-18),1,COL.s3)}</g><g data-n="2">${crv(P,t=>v*anNB(t,k1,k2),0,8,'var(--s5)',{dash:1,w:1.4})}${badge(P.X(5),P.Y(v*anNB(5,k1,k2))+(v<0?14:-14),2,COL.s5)}</g>`
+   +crv(P,t=>anNA(t,k1)+v*anNB(t,k1,k2),0,8,'var(--fg)')+T(P.R,P.T-12,'실선 = 합, 점선 ① c_A N_A, ② c_B N_B','sub','end')},
+ read:['측정 신호는 인구에 상태별 계수를 곱해 더한 것이다: ΔT/T(t) = c_A N_A(t) + c_B N_B(t) + …',`${c(1,'s3')} c_A는 고정(+1)이고, ${c(2,'s5')} c_B를 슬라이더로 바꾼다. 계수의 부호는 그 상태가 투과를 늘리는지(+, 빨강) 줄이는지(−, 파랑)를 뜻한다. 오른쪽 점선의 초록·보라는 부호가 아니라 상태(A, B) 구분이다(3단계와 같은 색).`,'c_B가 음수면 신호가 0 아래로 내려갔다가 돌아온다. 같은 인구라도 계수에 따라 곡선 모양이 크게 바뀐다.','계수는 파수마다 다르다. 그래서 같은 τ라도 파수마다 신호 모양이 다르다(6단계 전역 피팅의 출발점).','진폭(맞춤에서 나온 계수)은 "몇 %가 그 상태에 있나"와 같은 말이 아니다. 계수에는 그 상태의 흡수 세기가 곱해져 있다.'],
  q:'c_B = 0이면 신호는 어떤 모양인가?',a:'c_A N_A만 남아 τ₁ 하나짜리 지수 감쇠다. B가 존재해도 그 파수에서 신호를 내지 않으면 보이지 않는다.'},
 {t:'교환 대칭: 맞춤이 좋아도 순서는 정해지지 않는다',ec:'두 해: τ₁과 τ₂를 바꾸고 c_B만 다시 맞춤 (예시)',mc:'두 해의 신호 (ΔT/T)',
  tg:[{k:'pop',l:'B 인구도 보기',on:false}],
@@ -213,7 +221,7 @@ const KIN=[
   return s+T(P.R,P.T-12,`두 신호의 최대 차이: ${dm<1e-9?'0':dm.toExponential(1)}`,'sub','end')+T(P.R,P.Y(.42),'굵은 선 ① = 점선 ②','sub','end')},
  read:['3단계 모델에서 τ₁과 τ₂를 서로 바꾸고, B의 계수만 다시 맞추면 신호가 정확히 같아진다. 굵은 선과 점선이 완전히 겹친다.',`${c(1,'s3')} 해 ①: 빠르게(0.5 ps) B가 되고 B가 천천히(3 ps) 사라진다. c_B = +0.6.`,`${c(2,'s5')} 해 ②: 천천히(3 ps) B가 되고 B가 빠르게(0.5 ps) 사라진다. c_B' = −1.40 (부호까지 바뀐다).`,'체크박스로 B 인구를 켜면 두 해의 속은 완전히 다르다. 그래도 데이터는 둘을 가르지 못한다. 잡음이 0이어도 마찬가지다.','성립 조건 세 가지: B가 처음에 비어 있다(N_B(0) = 0), c_B가 자유 맞춤 변수다, k₁ ≠ k₂. 하나라도 깨지면 대칭도 깨진다.','그래서 "맞춤이 잘 된다"는 τ와 과정의 짝을 정해 주지 않는다. c_B의 부호나 크기에 대한 물리적 기대, 조건을 바꾼 실험의 경향처럼 맞춤 밖의 정보가 필요하다. 그 전에는 두 해를 같이 보고한다.'],
  q:'B가 t = 0에 이미 30% 차 있으면?',a:'교환 대칭이 깨진다. 바꾼 해가 같은 신호를 내지 못하므로, 데이터가 순서를 가릴 수 있다(조건 1).'},
-{t:'전역 피팅: 모든 파수가 같은 τ를 나눠 쓴다',ec:'세 파수의 시간 곡선 (같은 τ₁, τ₂)',mc:'파수별 진폭 스펙트럼 (예시)',
+{t:'전역 피팅: 모든 파수가 같은 τ를 나눠 쓴다',ec:'세 파수의 시간 곡선 (같은 τ₁, τ₂ · 색은 파수 구분)',mc:'파수별 진폭 스펙트럼 (예시)',
  tg:[{k:'eas',l:'EAS로 보기 (DAS 대신)',on:false}],
  e:()=>{const k1=2,k2=1/3,cA=w=>anG(w,2010,14)-.8*anG(w,1975,16),cB=w=>.55*anG(w,2010,18)-.25*anG(w,1975,18);
   const P=plot({x:[0,8],y:[-.85,1.1],xt:[0,2,4,6,8].map(x=>({v:x,l:String(x)})),yt:[{v:-.5,l:'−0.5'},{v:0,l:'0'},{v:.5,l:'0.5'},{v:1,l:'1'}],xl:'시간 t (ps)',yl:'ΔT/T (상대)',T:30});
@@ -222,7 +230,7 @@ const KIN=[
    +T(P.R,P.T-12,'τ₁ = 0.5 ps, τ₂ = 3 ps (모든 곡선 공통)','sub','end')},
  m:(v,tg)=>{const k1=2,k2=1/3,cA=w=>anG(w,2010,14)-.8*anG(w,1975,16),cB=w=>.55*anG(w,2010,18)-.25*anG(w,1975,18);
   const d1=w=>cA(w)+cB(w)*k1/(k2-k1),d2=w=>-cB(w)*k1/(k2-k1);const f1=tg.eas?cA:d1,f2=tg.eas?cB:d2;
-  const P=plot({x:[1940,2060],y:[-1,1.1],xt:[1950,1975,2000,2025,2050].map(x=>({v:x,l:String(x)})),yt:[{v:-1,l:'−1'},{v:0,l:'0'},{v:1,l:'1'}],xl:'probe wavenumber ω₃ (cm⁻¹)',yl:'진폭',T:44});
+  const P=plot({x:[1940,2060],y:[-1,1.1],xt:[1950,1975,2000,2025,2050].map(x=>({v:x,l:String(x)})),yt:[{v:-1,l:'−1'},{v:0,l:'0'},{v:1,l:'1'}],xl:'probe wavenumber ω₃ (cm⁻¹)',yl:'진폭 (ΔT/T, 상대)',T:44});
   let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`+crv(P,f1,1940,2060,'var(--fg)')+crv(P,f2,1940,2060,'var(--s5)',{dash:1});
   s+=[[1975,'s4',1],[1995,'s5',2],[2010,'s3',3]].map(([w,k,n])=>`<g data-n="${n}"><line x1="${P.X(w)}" x2="${P.X(w)}" y1="${P.T-2}" y2="${P.B}" style="stroke:${COL[k]}" stroke-dasharray="2 3"/>${badge(P.X(w),P.T-13,n,COL[k])}</g>`).join('');
   return s+T(P.R,14,tg.eas?'실선 = EAS 1 (처음), 점선 = EAS 2 (다음)':'실선 = DAS τ₁ 0.5 ps, 점선 = DAS τ₂ 3 ps','sub','end')},
@@ -236,9 +244,11 @@ const KIN=[
    +`<circle cx="30" cy="258" r="6" style="fill:none;stroke:var(--s6)" stroke-width="1.2"/>`+T(40,262,'흡수 0','sub')+`<g data-n="1"><circle cx="100" cy="258" r="6" style="fill:var(--s3)"/></g>`+T(110,262,'1개','sub')+`<g data-n="2"><circle cx="152" cy="258" r="6" style="fill:var(--s5)"/></g>`+T(162,262,'2개 이상','sub')},
  m:v=>{const m=10**v,P=plot({x:[.03,4],y:[1e-4,1],logx:1,logy:1,xt:[{v:.03,l:'0.03'},{v:.1,l:'0.1'},{v:.3,l:'0.3'},{v:1,l:'1'},{v:4,l:'4'}],yt:[{v:1e-4,l:'10⁻⁴'},{v:1e-2,l:'10⁻²'},{v:1,l:'1'}],xl:'⟨N⟩ (fluence에 비례)',yl:'비율',L:62,T:30});
   const p2=x=>1-anPois(0,x)-anPois(1,x);
-  return P.s+crv(P,x=>1-anPois(0,x),.03,4,'var(--fg)',{dash:1})+`<g data-n="1">${crv(P,x=>anPois(1,x),.03,4,'var(--s3)')}</g><g data-n="2">${crv(P,p2,.03,4,'var(--s5)')}</g>`
+  return P.s+crv(P,x=>1-anPois(0,x),.03,4,'var(--fg)',{dash:1})
    +`<line x1="${P.X(m)}" x2="${P.X(m)}" y1="${P.T}" y2="${P.B}" class="lvl2"/>`
-   +T(P.R-2,P.Y(2.5e-3),'1개: 기울기 1','sub','end','var(--s3)')+T(P.R-2,P.Y(6e-4),'2개 이상: 기울기 2','sub','end','var(--s5)')+T(P.R,P.T-12,'점선 = 1개 이상 전체','sub','end')},
+   +`<g data-n="1">${crv(P,x=>anPois(1,x),.03,4,'var(--s3)')}${badge(P.X(.06),P.Y(anPois(1,.06))-14,1,COL.s3)}${T(P.R-2,P.Y(2.5e-3),'① 1개: 기울기 1','sub','end','var(--s3)')}</g>`
+   +`<g data-n="2">${crv(P,p2,.03,4,'var(--s5)')}${badge(P.X(.2)+12,P.Y(p2(.2))+10,2,COL.s5)}${T(P.R-2,P.Y(6e-4),'② 2개 이상: 기울기 2','sub','end','var(--s5)')}</g>`
+   +T(P.R,P.T-12,'점선 = 1개 이상 전체','sub','end')},
  read:['펄스 하나가 흡수체(분자, 입자) 하나에 평균 몇 개의 광자를 넣는지는 ⟨N⟩ = σJ다. J = 광자 fluence(광자 수/cm²), σ = 흡수체 하나의 흡수 단면적(cm²).','σ를 몰 흡광계수 ε에서 구할 때는 ε가 "흡수체 1몰"당 값이어야 한다. 구성 원자 1몰당 값을 쓰면 크게 틀린다.','흡수가 서로 독립이면 n개를 흡수할 확률은 Poisson 분포다. 세어 보기 (⟨N⟩ = 0.1): 100개 중 0개 흡수 90, 1개 9, 2개 이상 약 0.5.',`fluence가 작을 때 ${c(1,'s3')} 1개 흡수는 fluence에 비례하고(기울기 1), ${c(2,'s5')} 2개 이상은 제곱에 비례한다(기울기 2).`,'그래서 신호가 fluence에 선형이면 "한 번 들뜬 것만 본다"의 필요조건은 맞다. 하지만 충분조건은 아니다. 여러 번 들뜬 몫이 작아서 안 보일 뿐일 수 있다.','fluence를 바꾸면 처음 인구 비율만 바뀌고 속도 상수는 그대로여야 한다. 여러 fluence를 같은 τ로 함께 맞추는 것이 인구와 속도를 떼어 보는 방법이다. 출력계 값만으로는 ⟨N⟩이 정해지지 않는다(빔 면적과 σ가 필요하다).'],
  q:'⟨N⟩ = 0.1에서 fluence를 2배로 하면 1개 흡수와 2개 이상 흡수는 각각 몇 배가 되나?',a:'1개 흡수는 약 1.8배(9.0% → 16.4%), 2개 이상은 약 3.7배(0.47% → 1.75%). 낮은 fluence일수록 2배와 4배에 가까워진다.'},
 {t:'잔차를 본다: χ²만으로는 부족하다',ec:'데이터와 맞춘 곡선 (예시 데이터)',mc:'정규화 잔차 (데이터 − 모델) / 잡음',
@@ -249,13 +259,13 @@ const KIN=[
  m:(v,tg)=>{const F=anFit(),b=tg.two?F.b2:F.b1;const P=plot({x:[0,8],y:[-6,6],xt:[0,2,4,6,8].map(x=>({v:x,l:String(x)})),yt:[-4,-2,0,2,4].map(y=>({v:y,l:String(y)})),xl:'시간 t (ps)',yl:'잔차 / σ',T:30});
   const pts=F.ts.map((t,i)=>[P.X(t),P.Y(Math.max(-6,Math.min(6,(F.ys[i]-b.m(t))/F.sg)))]);
   return P.s+`<rect x="${P.L}" y="${P.Y(2)}" width="${P.R-P.L}" height="${P.Y(-2)-P.Y(2)}" style="fill:var(--soft)"/><line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`
-   +PL(pts,tg.two?'var(--s3)':'var(--s4)',{w:1.2})+T(P.R,P.T-12,`χ²_ν = ${b.nu.toFixed(2)}  (1 근처면 잡음 수준)`,'sub','end')+T(P.R,P.B-8,'회색 띠 = ±2σ','sub','end')},
- read:['데이터는 지수 2개(0.4 ps, 3 ps)로 만든 예시에 잡음을 얹은 것이다. 지수 1개로 맞추면 곡선은 그럴듯해 보여도, 잔차에 시간 구조(처음엔 위, 중간엔 아래)가 남는다.','χ²_ν = χ² / (점 수 − 변수 수). 1 근처면 잡음 수준으로 맞은 것이다. 훨씬 크면 모델이 모자라거나 잡음을 작게 잡은 것이다.','변수를 늘리면 χ²는 항상 줄어든다. 그래서 잔차의 구조를 같이 보고, 변수 수에 벌점을 주는 AIC·BIC나 F-검정으로 모델을 비교한다.','한 변수를 고정하며 χ²가 얼마나 오르는지 본다(profile). Δχ² = 1이 대략 68% 구간이고, χ²가 평평하면 그 변수는 데이터로 정해지지 않는다.','모델 없이 하는 확인도 같이 한다: fluence별 곡선을 정규화해 겹쳐 보기, 맞춤 시작 시간을 바꿔 보기, 같은 측정을 반복해 흩어짐 보기. τ가 여러 값으로 퍼져 있으면(시료가 균일하지 않으면) 지수 몇 개로도 흉내 낼 수 있다는 점도 기억한다.'],
+   +PL(pts,tg.two?'var(--s3)':'var(--s4)',{w:1.2})+T(P.R,P.T-12,`χ²_ν = ${b.nu.toFixed(2)}  (1 근처면 잡음 수준)`,'sub','end')+T(P.R,P.B-8,'회색 띠 = ±2σ · ±6 밖은 테두리에 붙임','sub','end')},
+ read:['데이터는 지수 2개(0.4 ps, 3 ps)로 만든 예시에 잡음을 얹은 것이다. 지수 1개로 맞추면 곡선은 그럴듯해 보여도, 잔차에 시간 구조(맨 처음엔 위, 0.5–2 ps는 아래, 그 뒤는 다시 위)가 남는다.','χ²_ν = χ² / (점 수 − 변수 수). 1 근처면 잡음 수준으로 맞은 것이다. 훨씬 크면 모델이 모자라거나 잡음을 작게 잡은 것이다.','변수를 늘리면 χ²는 항상 줄어든다. 그래서 잔차의 구조를 같이 보고, 변수 수에 벌점을 주는 AIC·BIC나 F-검정으로 모델을 비교한다.','한 변수를 고정하며 χ²가 얼마나 오르는지 본다(profile). Δχ² = 1이 대략 68% 구간이고, χ²가 평평하면 그 변수는 데이터로 정해지지 않는다.','모델 없이 하는 확인도 같이 한다: fluence별 곡선을 정규화해 겹쳐 보기, 맞춤 시작 시간을 바꿔 보기, 같은 측정을 반복해 흩어짐 보기. τ가 여러 값으로 퍼져 있으면(시료가 균일하지 않으면) 지수 몇 개로도 흉내 낼 수 있다는 점도 기억한다.'],
  q:'지수를 3개로 늘렸더니 χ²_ν가 1.02에서 0.98로 줄었다. 3개가 맞나?',a:'그것만으로는 알 수 없다. 변수를 늘리면 χ²는 원래 준다. 잔차 구조가 사라졌는지, AIC·BIC가 나아졌는지, 새 τ의 profile이 평평하지 않은지 확인한다.'},
 {t:'정리: 맞춤에서 보고까지 체크리스트',ec:'순서',mc:'보고할 것',
  e:()=>{const it=['데이터와 잡음 추정','IRF·t₀ 정하기, 앞 구간 자르기','모델 고르기 (가정 적기)','전역 피팅 (τ 공유)','잔차·χ²_ν·AIC/BIC','대안 해 확인 (교환 대칭)','맞춤 밖 정보로 배정'];
   return it.map((l,i)=>{const y=16+i*37;return `<g data-n="${i+1}">${badge(26,y+14,i+1,'var(--fg)')}</g><rect x="44" y="${y}" width="236" height="28" rx="5" class="dev"/>`+T(54,y+18,l,'sub')+(i<6?LN(162,y+28,162,y+37,'var(--muted)',{w:1}):'')}).join('')},
- m:()=>TM(14,30,['• τ와 구간 (profile 또는 반복 측정)','• IRF 폭, t₀, 잘라 낸 구간','• 모델 구조와 가정','   (예: 중간 상태가 처음엔 비어 있다)','• 계수가 자유인지, 관계로 묶었는지','• 교환한 대안 해 (있으면 둘 다)','• fluence → ⟨N⟩ 계산 경로와 빔 면적','• χ²_ν, 잔차 그림','• 어떤 배정이 맞춤 밖 정보에 기대는지'],'sub','start',24),
+ m:()=>TM(14,30,['• τ와 구간 (profile 또는 반복 측정)','• IRF 폭, t₀, 잘라 낸 구간','• 모델 구조와 가정','   (예: 중간 상태가 처음엔 비어 있다)','• 계수가 자유인지, 관계로 묶었는지','• 교환한 대안 해 (있으면 둘 다)','• fluence → ⟨N⟩ 계산 경로와 빔 면적','• χ²_ν, 잔차 그림','• 어떤 배정이 맞춤 밖 정보에 기대는지'],'sub','start',24),
  read:[`${c(1,'f')} 잡음 크기를 먼저 정한다. χ²가 이 값에 기대기 때문이다(8단계).`,`${c(2,'f')} IRF와 t₀를 정하고, 결맞음 잡신호 구간을 어디서 자를지 정한다. 자르는 위치를 바꿔도 결과가 버티는지 본다(2단계).`,`${c(3,'f')} 모델을 고르고 가정(처음 인구, 계수 관계)을 적는다(3·4·7단계).`,`${c(4,'f')} 모든 파수를 같은 τ로 함께 맞춘다(6단계).`,`${c(5,'f')} 잔차 구조와 χ²_ν, AIC/BIC를 본다(8단계).`,`${c(6,'f')} 같은 신호를 내는 다른 해가 있는지 확인한다(5단계).`,`${c(7,'f')} τ와 과정의 짝은 맞춤 밖 정보(부호에 대한 기대, 조건을 바꾼 실험)로 정한다. 정하지 못하면 그렇다고 쓴다.`],
  q:'"전역 피팅으로 τ₁ = 0.5 ps는 B 생성이다"라고 쓰려면 무엇이 더 필요한가?',a:'교환한 해(τ₁ = 3 ps가 B 생성)를 배제할 근거. 예를 들어 바꾼 해에서 c_B의 부호가 물리적으로 맞지 않는다는 독립 정보, 또는 B를 직접 보는 다른 파수·실험이 필요하다.'}];
 
@@ -306,9 +316,9 @@ const CS_K=['s4','s5','s6'];  /* ① C=O 1715, ② C=N 1650, ③ 용매 1600: �
 const csNotes='가로·세로 모두 같은 스펙트럼의 파수다. 2D 분광 노트의 pump ω₁ · probe ω₃ 축과는 뜻이 다르다.';
 
 const CS=[
-{t:'시간별 스펙트럼 묶음: 10초마다 한 장씩 쌓인다',ec:'반응 중 FTIR (예시, 10 s 간격 121장 · 회색 = 200 s마다, 검정 = 지금)',mc:'띠별 세기 vs 시간 (예시)',
+{t:'시간별 스펙트럼 묶음: 10초마다 한 장씩 쌓인다',ec:'반응 중 FTIR (예시, 10 s 간격 121장)',mc:'띠별 세기 vs 시간 (예시)',
  slider:{min:0,max:1200,step:10,init:0,label:'시간',fmt:v=>Math.round(v)+' s',play:1},
- e:v=>{const r=csMain(),P=csSpecAx([0,1.15],{yl:'흡광도 (예시)'});let s=P.s;
+ e:v=>{const r=csMain(),P=csSpecAx([0,1.35],{yl:'흡광도 (예시)'});let s=P.s+T(P.R,P.Y(1.2),'회색 = 200 s마다, 검정 = 지금','sub','end');
   for(let t=0;t<=1200;t+=200)s+=csLine(P,CS_NU.map(nu=>csSpec(r.bands,t,nu)),'var(--line)',{w:1.2});
   s+=csLine(P,CS_NU.map(nu=>csSpec(r.bands,v,nu)),'var(--fg)',{w:2});
   [[1715,1],[1650,2],[1600,3]].forEach(([nu,n],i)=>{s+=`<g data-n="${n}">${badge(P.X(nu),P.T-10,n,COL[CS_K[i]])}</g>`});
@@ -324,14 +334,14 @@ const CS=[
  e:v=>{const r=csMain(),P=csSpecAx([0,1.15],{yl:'흡광도 (예시)'});
   return P.s+csLine(P,r.mean,'var(--muted)',{w:2,dash:1})+csLine(P,CS_NU.map(nu=>csSpec(r.bands,v,nu)),'var(--fg)',{w:2})
    +`<line x1="${P.R-120}" x2="${P.R-98}" y1="${P.T-12}" y2="${P.T-12}" style="stroke:var(--muted)" stroke-width="2" stroke-dasharray="4 3"/>`+T(P.R-92,P.T-8,'평균 ȳ','sub')+`<line x1="${P.R-50}" x2="${P.R-28}" y1="${P.T-12}" y2="${P.T-12}" style="stroke:var(--fg)" stroke-width="2"/>`+T(P.R-22,P.T-8,'y(t)','sub')},
- m:v=>{const r=csMain(),j=Math.round(v/10),d=r.D[j],P=csSpecAx([-.5,.5],{yl:'ỹ (예시)',yt:[{v:-.4,l:'−0.4'},{v:0,l:'0'},{v:.4,l:'+0.4'}]});
+ m:v=>{const r=csMain(),j=Math.round(v/10),d=r.D[j],P=csSpecAx([-.5,.75],{yl:'ỹ (예시)',yt:[{v:-.4,l:'−0.4'},{v:0,l:'0'},{v:.4,l:'+0.4'}]});
   let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`;const bw=(P.R-P.L)/41;
   CS_NU.forEach((nu,i)=>{const y=d[i];if(Math.abs(y)<.004)return;s+=`<rect x="${(P.X(nu)-bw/2).toFixed(1)}" y="${P.Y(Math.max(y,0)).toFixed(1)}" width="${(bw+.3).toFixed(1)}" height="${Math.abs(P.Y(y)-P.Y(0)).toFixed(1)}" style="fill:${y>0?'var(--s1)':'var(--s2)'}" fill-opacity=".8"/>`});
-  return s+`<g data-n="1">${badge(P.X(1715),P.Y(.42),1,COL.s4)}</g><g data-n="2">${badge(P.X(1650),P.Y(.42),2,COL.s5)}</g><g data-n="3">${badge(P.X(1600),P.Y(.42),3,COL.s6)}</g>`+T(P.R,P.T-12,'빨강 = 평균보다 큼(+), 파랑 = 작음(−)','sub','end')},
+  return s+`<g data-n="1">${badge(P.X(1715),P.Y(.68),1,COL.s4)}</g><g data-n="2">${badge(P.X(1650),P.Y(.68),2,COL.s5)}</g><g data-n="3">${badge(P.X(1600),P.Y(.68),3,COL.s6)}</g>`+T(P.R,P.T-12,'빨강 = 평균보다 큼(+), 파랑 = 작음(−)','sub','end')},
  read:['파수마다 121장의 평균 ȳ를 구해 각 스펙트럼에서 뺀다. 남은 ỹ = y − ȳ가 동적 스펙트럼이다.',`${c(3,'s6')} 용매 띠는 시간에 따라 변하지 않아서 평균을 빼면 0이 된다. 2D-COS는 변하는 것만 본다. 큰 용매 띠에 가려진 작은 변화도 그래서 드러난다.`,`초반에는 ${c(1,'s4')}이 평균보다 커(+) 빨강이고 ${c(2,'s5')}는 작아(−) 파랑이다. 후반에는 반대가 된다.`,'평균 대신 첫 스펙트럼을 기준으로 빼기도 한다. 기준에 따라 지도가 조금 달라지니 무엇을 썼는지 적어 둔다.'],
  q:'모든 스펙트럼에 같은 기준선 오프셋이 더해져 있으면?',a:'평균을 빼면 같이 사라진다. 하지만 기준선이 시간에 따라 흐르면 사라지지 않고 가짜 상관을 만든다(8단계).'},
 {t:'동기 지도 Φ: 같이 변하는가',ec:'두 띠의 동적 변화 ỹ (평균 뺀 값)',mc:'동기 지도 Φ(ν₁, ν₂) (예시)',
- e:()=>{const r=csMain(),P=csTimeAx([-.5,.5],{yl:'ỹ (예시)',yt:[{v:-.4,l:'−0.4'},{v:0,l:'0'},{v:.4,l:'+0.4'}]});
+ e:()=>{const r=csMain(),P=csTimeAx([-.5,.75],{yl:'ỹ (예시)',yt:[{v:-.4,l:'−0.4'},{v:0,l:'0'},{v:.4,l:'+0.4'}]});
   return P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`+`<g data-n="1">${PL(CS_T.map((t,j)=>[P.X(t),P.Y(r.D[j][csIdx(1715)])]),COL.s4,{w:2})}${badge(P.X(60),P.Y(r.D[6][csIdx(1715)])+18,1,COL.s4)}</g>`
    +`<g data-n="2">${PL(CS_T.map((t,j)=>[P.X(t),P.Y(r.D[j][csIdx(1650)])]),COL.s5,{w:2})}${badge(P.X(60),P.Y(r.D[6][csIdx(1650)])-18,2,COL.s5)}</g>`+T(P.R,P.T-12,'① 은 + → −, ② 는 − → +','sub','end')},
  m:()=>{const r=csMain();return csMap(r.phi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']]})+T(csX(1715),csY(1650)-22,'교차 피크 ①②','sub','middle')+T(csX(1712),csY(1716)+24,'autopeak','sub')},
@@ -343,13 +353,13 @@ const CS=[
   let s=T(48,44,'시점','lab','middle')+`<g data-n="1">${T(118,44,'① ỹ','lab','middle')}</g><g data-n="2">${T(188,44,'② ỹ','lab','middle')}</g>`+T(262,44,'① × ②','lab','middle')+`<line x1="20" x2="300" y1="54" y2="54" style="stroke:var(--line)"/>`;
   a.forEach((x,i)=>{const y=80+i*30,p=x*b[i];s+=T(48,y,'t'+(i+1),'sub','middle')+T(118,y,f(x),'sub','middle')+T(188,y,f(b[i]),'sub','middle')+T(262,y,f(p),'labn','middle',p>0?'var(--s1)':p<0?'var(--s2)':undefined)});
   const sum=a.reduce((q,x,i)=>q+x*b[i],0);
-  return s+`<line x1="20" x2="300" y1="214" y2="214" style="stroke:var(--line)"/>`+T(160,238,'합 = '+f(sum),'labn','middle',sum>0?'var(--s1)':'var(--s2)')+T(160,262,'Φ = 합 / (5 − 1) = '+f(sum/4),'labn','middle',sum>0?'var(--s1)':'var(--s2)')+T(160,286,'평균을 뺐으므로 ① 열, ② 열의 합은 각각 0이다','sub','middle')},
+  return s+`<line x1="20" x2="300" y1="214" y2="214" style="stroke:var(--line)"/>`+T(160,238,'합 = '+f(sum),'labn','middle',sum>0?'var(--s1)':'var(--s2)')+T(160,262,'Φ = 합 / (5 − 1) = '+(sum>0?'+':'−')+Math.abs(sum/4).toFixed(3),'labn','middle',sum>0?'var(--s1)':'var(--s2)')+T(160,286,'평균을 뺐으므로 ① 열, ② 열의 합은 각각 0이다','sub','middle')},
  m:(v,tg)=>{const a=[.4,.2,0,-.2,-.4],b=(tg.same?[.3,.15,0,-.15,-.3]:[-.3,-.15,0,.15,.3]),p=a.map((x,i)=>x*b[i]),sum=p.reduce((q,x)=>q+x,0);
   const P=plot({x:[0,7],y:[-.35,.35],xt:[1,2,3,4,5].map(x=>({v:x,l:'t'+x})).concat([{v:6.2,l:'합'}]),yt:[{v:-.3,l:'−0.3'},{v:0,l:'0'},{v:.3,l:'+0.3'}],yl:'곱 (예시)',T:30,B:256});
   let s=P.s+`<line x1="${P.L}" x2="${P.R}" y1="${P.Y(0)}" y2="${P.Y(0)}" class="lvl2"/>`;
   p.concat([sum]).forEach((x,i)=>{const cx=i<5?i+1:6.2,w=i<5?.5:.7;if(Math.abs(x)<1e-9)return;s+=`<rect x="${P.X(cx-w/2)}" y="${P.Y(Math.max(x,0))}" width="${P.X(cx+w/2)-P.X(cx-w/2)}" height="${Math.abs(P.Y(x)-P.Y(0))}" style="fill:${x>0?'var(--s1)':'var(--s2)'}" fill-opacity="${i<5?.6:1}"/>`});
   return s+T(P.R,P.T-12,sum<0?'반대로 변함 → Φ < 0 (파랑)':'같이 변함 → Φ > 0 (빨강)','sub','end')},
- read:['3단계 식을 숫자 다섯 개로 직접 계산한다. 평균을 뺀 ỹ 값이 시점 t1–t5에 있다(예시).',`시점마다 ${c(1,'s4')}과 ${c(2,'s5')}의 ỹ를 곱한다. 둘의 부호가 같으면 곱이 +, 다르면 −다.`,'곱을 모두 더해 (스펙트럼 수 − 1)로 나누면 Φ다. 여기서는 모든 곱이 − 쪽이라 Φ < 0, 지도에서 파랑 교차 피크가 된다.','체크박스로 ②도 같이 줄게 하면 곱이 모두 +가 되어 Φ > 0, 빨강이 된다.','변화가 큰 시점(t1, t5)의 곱이 Φ를 주로 정한다.'],
+ read:['3단계 식을 숫자 다섯 개로 직접 계산한다. 평균을 뺀 ỹ 값이 시점 t1–t5에 있다(예시).',`시점마다 ${c(1,'s4')}과 ${c(2,'s5')}의 ỹ를 곱한다. 둘의 부호가 같으면 곱이 +, 다르면 −다.`,'곱을 모두 더해 (스펙트럼 수 − 1)로 나누면 Φ다. 여기서는 0이 아닌 곱이 모두 −라 Φ < 0, 지도에서 파랑 교차 피크가 된다.','체크박스로 ②도 같이 줄게 하면 0이 아닌 곱이 모두 +가 되어 Φ > 0, 빨강이 된다.','변화가 큰 시점(t1, t5)의 곱이 Φ를 주로 정한다.'],
  q:'①은 변하는데 ②가 내내 그대로면 Φ는?',a:'0이다. ②의 ỹ가 모두 0이라 곱이 모두 0이다.'},
 {t:'비동기 지도 Ψ: 변하는 시점이 다른가',ec:'두 띠의 변화 진행률 (② 시작 시점을 옮김)',mc:'비동기 지도 Ψ(ν₁, ν₂) (예시)',
  slider:{min:-300,max:300,step:25,init:200,label:'② 의 늦음',fmt:v=>(v>0?'+':'')+Math.round(v)+' s'},
@@ -357,8 +367,8 @@ const CS=[
   let s=P.s+`<g data-n="1">${PL(CS_T.map(t=>[P.X(t),P.Y(csSig(t-350))]),COL.s4,{w:2})}</g><g data-n="2">${PL(CS_T.map(t=>[P.X(t),P.Y(csSig(t-350-v))]),COL.s5,{w:2,dash:1})}</g>`;
   s+=`<line x1="${P.X(760)}" x2="${P.X(820)}" y1="${P.Y(.32)}" y2="${P.Y(.32)}" style="stroke:var(--s4)" stroke-width="2"/>`+T(P.X(830),P.Y(.32)+4,'① 1715 감소','sub')+`<line x1="${P.X(760)}" x2="${P.X(820)}" y1="${P.Y(.16)}" y2="${P.Y(.16)}" style="stroke:var(--s5)" stroke-width="2" stroke-dasharray="4 3"/>`+T(P.X(830),P.Y(.16)+4,'② 1650 증가','sub');
   return s+T(P.L,P.T-12,`Ψ 최대 / Φ 최대 = ${(r.mq/r.mx).toFixed(2)}`,'labn')},
- m:v=>{const r=csMain(v);return csMap(r.psi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']]})+(r.mq/r.mx<.03?T((CS_L+CS_R)/2,CS_B-CS_W/2+40,'Ψ ≈ 0: 같은 시점에 변한다','labn','middle'):'')},
- read:['Ψ(ν₁, ν₂) = (1/(m−1)) Σⱼ ỹ(ν₁, tⱼ) · Σₖ Nⱼₖ ỹ(ν₂, tₖ). N은 Hilbert–Noda 행렬이다(Nⱼₖ = 1/(π(k−j)), 대각선은 0). ν₂ 쪽 변화를 시간축에서 90°(위상) 밀어 놓고 ν₁과 곱하는 셈이다.','슬라이더를 0에 두면 두 띠가 같은 시점에 변해 Ψ = 0이다. 지도가 빈다.','시점이 어긋날수록 교차 피크가 생기고 커진다. 앞뒤를 바꾸면(슬라이더 부호) 교차 피크 부호가 뒤집힌다.','Ψ는 대각선을 사이에 두고 반대칭이다. Ψ(ν₁, ν₂) = −Ψ(ν₂, ν₁)이고, 대각선 위는 항상 0이다.','Ψ는 Φ보다 작다. 지도 색은 두 지도 모두 Φ 최대값으로 나눈 값이라 크기를 비교할 수 있다.'],
+ m:v=>{const r=csMain(v);return csMap(r.psi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']]})+(r.mq/r.mx<.03?T(150,CS_B-CS_W+40,'Ψ ≈ 0: 같은 시점에 변한다','labn','middle'):'')},
+ read:['Ψ(ν₁, ν₂) = (1/(m−1)) Σⱼ ỹ(ν₁, tⱼ) · Σₖ Nⱼₖ ỹ(ν₂, tₖ). N은 Hilbert–Noda 행렬이다(Nⱼₖ = 1/(π(k−j)), 대각선은 0). ν₂ 쪽 변화를 시간축에서 90°(위상) 밀어 놓고 ν₁과 곱하는 셈이다.','슬라이더를 0에 두면 두 띠가 같은 시점에 변해 Ψ = 0이다. 지도가 빈다.','시점이 어긋날수록 교차 피크가 생기고 커진다. 앞뒤를 바꾸면(슬라이더 부호) 교차 피크 부호가 뒤집힌다.','Ψ는 대각선을 사이에 두고 반대칭이다. Ψ(ν₁, ν₂) = −Ψ(ν₂, ν₁)이고, 대각선 위는 항상 0이다.','Ψ는 대개 Φ보다 작다. 지도 색은 두 지도 모두 Φ 최대값으로 나눈 값이라 크기를 비교할 수 있다.'],
  q:'두 띠가 거의 같은 시점에 변하는데 잡음이 크면 Ψ는?',a:'잡음이 만든 작은 Ψ가 순서처럼 보일 수 있다. Ψ/Φ가 잡음 수준만큼 작으면 순서를 말하지 않는다.'},
 {t:'Noda 규칙: Φ와 Ψ 부호로 순서를 읽는다',ec:'동기 Φ (② 200 s 늦음, 예시)',mc:'비동기 Ψ (같은 데이터)',
  e:()=>{const r=csMain(200),v=r.phi[csIdx(1715)][csIdx(1650)];return csMap(r.phi,r.mx,{bands:[[1715,1,'s4'],[1650,2,'s5']],mark:[1715,1650]})+T(csX(1715)+14,csY(1650)+4,'Φ '+(v<0?'< 0':'> 0'),'labn')},
@@ -391,7 +401,8 @@ const TABS=[{id:'kin',name:'속도론 · 전역 피팅',sub:'시간 신호를 �
        title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
      NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
        key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
-   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl. */
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
 let tab=0,idx=0,V=0,TG={},raf=0;
 const $=id=>document.getElementById(id);
 if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
@@ -407,26 +418,30 @@ function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf
  const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
  $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
  $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
- const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent='재생';
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
  if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
  TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
  $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
- $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${i+1}단계" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
  [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
  if(NOTE.onRender)NOTE.onRender(s);
- draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}}
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
 function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
 $('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
 $('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
 document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
 $('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
 $('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
-$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent='재생';return}
- const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent='정지';
- const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent='재생'}};raf=requestAnimationFrame(step)};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
 const stage=$('stage'),notes=document.querySelector('.notes');
 function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
 [stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
 try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
 render();
 </script>
