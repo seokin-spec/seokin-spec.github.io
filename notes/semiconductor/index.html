@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="ko">
+<meta charset="utf-8">
+<title>반도체 입문 그림 모음</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--accent:#24407f}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 40px;display:flex;flex-direction:column;gap:20px}
+.hero{border-radius:12px;padding:24px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:6px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:2px;flex-wrap:wrap}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;max-width:70ch}
+.hero .back{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:2px 10px;text-decoration:none;white-space:nowrap}
+.hero .back:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;margin-left:8px;white-space:nowrap;display:inline-block;vertical-align:1px}
+h2{font:500 13px var(--f-mono);color:var(--muted);letter-spacing:.06em;margin:4px 0 0}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{display:flex;flex-direction:column;gap:8px;border:1px solid var(--line);border-radius:12px;padding:16px 18px;text-decoration:none;color:inherit;background:#fff;transition:border-color .15s,box-shadow .15s}
+.card:hover{border-color:var(--accent);box-shadow:0 2px 10px rgba(13,22,48,.08)}
+.card .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.card h3{margin:0;font-size:18px;font-weight:600}
+.card p{margin:0;font-size:14px;color:var(--muted)}
+.go{margin-top:auto;font-size:14px;font-weight:500;color:var(--accent)}
+.poster{display:flex;gap:16px;align-items:flex-start;border:1px solid var(--line);border-radius:12px;padding:16px 18px;flex-wrap:wrap}
+.poster img{width:220px;border:1px solid var(--line);border-radius:6px}
+.poster div{flex:1;min-width:240px;display:flex;flex-direction:column;gap:8px}
+.poster a{color:var(--accent);font-weight:500;text-decoration:none}
+footer{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}
+</style>
+<div class="wrap">
+  <header class="hero">
+    <div class="hrow"><span class="eyebrow">기타 공부 · 반도체</span><span class="status">검토 중</span><a class="back" href="../../index.html">← 노트 목록</a></div>
+    <h1>반도체 입문 그림 모음</h1>
+    <p>엔비디아 뉴스에서 시작한 질문을 따라, GPU 칩과 메모리, 웨이퍼 공정, 다이싱, HBM 적층을 그림과 단계별 애니메이션으로 정리했다. 분광 전공자가 입문 수준에서 만든 공부 자료이며, ⚠️나 "약"이 붙은 값은 대략값이다.</p>
+  </header>
+
+  <h2>한 장 요약</h2>
+  <div class="poster">
+    <a href="semiconductor-a4-summary.pdf"><img src="semiconductor-a4-preview.png" alt="GPU 설계에서 HBM까지 한 장 요약 포스터"></a>
+    <div>
+      <h3 style="margin:0;font-size:18px">GPU 설계에서 HBM까지</h3>
+      <p style="margin:0;color:var(--muted);font-size:14px">역할 분담, 웨이퍼와 다이, 다이싱, 패키징의 두 갈래, HBM 적층과 DDR5 공급 부족까지 A4 한 장으로.</p>
+      <a href="semiconductor-a4-summary.pdf">PDF 열기 →</a>
+    </div>
+  </div>
+
+  <h2>그림과 애니메이션</h2>
+  <div class="cards">
+    <a class="card" href="gpu_memory_comparison.html">
+      <span class="k">1 · 패키지 단면 · 6단계</span>
+      <h3>그래픽카드 vs 데이터센터 GPU</h3>
+      <p>RTX 5090은 기판 위 GDDR7, B200은 인터포저 위 GPU 다이 2개와 HBM 스택 8개. 메모리를 칩 바로 옆으로 붙이는 이유.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="gpu-die-scale.svg">
+      <span class="k">2 · 크기 비교 · 그림</span>
+      <h3>GPU 다이 크기와 웨이퍼당 개수</h3>
+      <p>GB202부터 GB206까지 실제 축척, 노광 한계(26 × 33 mm), 300 mm 웨이퍼 한 장에서 나오는 개수.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="wafer-to-chip.html">
+      <span class="k">3 · 전체 흐름 · 7단계</span>
+      <h3>웨이퍼 한 장에서 칩까지</h3>
+      <p>반복 노광, 전공정, 웨이퍼 테스트, 백그라인딩, 다이싱, 패키징. 웨이퍼를 겹치지 않고 한 장 위에 다이 수백 개를 만든다.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="wafer-process-animation.html">
+      <span class="k">4 · 웨이퍼 단면 · 13단계</span>
+      <h3>쌓고 · 찍고 · 깎고 · 채우고 · 갈아내기</h3>
+      <p>트랜지스터층(FEOL)과 배선층(BEOL), 다마신 공정과 CMP. 전체 층 높이는 웨이퍼 두께의 1~2%.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="dram-memory-infographic.html">
+      <span class="k">5 · 메모리 · 인포그래픽</span>
+      <h3>DDR5 · GDDR7 · HBM, 그리고 한정된 웨이퍼</h3>
+      <p>같은 DRAM 셀, 다른 연결 방식. HBM이 같은 용량에 웨이퍼를 더 먹어 DDR5 공급을 밀어내는 구조를 슬라이더로.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="hbm-stack.html">
+      <span class="k">6 · HBM · 6단계</span>
+      <h3>HBM 스택은 어떻게 만들어질까</h3>
+      <p>얇게 간 DRAM 다이를 양품만 골라 12단으로 쌓기. 복합 수율 슬라이더, 웨이퍼째 쌓지 않는 이유.</p>
+      <span class="go">열기 →</span>
+    </a>
+    <a class="card" href="dicing-methods.html">
+      <span class="k">7 · 다이싱 · 4개 탭</span>
+      <h3>다이싱: 네 가지 분리 방법</h3>
+      <p>블레이드, 레이저 + 블레이드, 스텔스(실리콘을 투과하는 근적외 레이저와 다광자 흡수), 플라즈마.</p>
+      <span class="go">열기 →</span>
+    </a>
+  </div>
+  <footer>2026-11 정리. 한국어판만 있다. 각 그림은 외부 파일 없이 혼자 열리는 HTML 또는 SVG 한 장이다. 입문용 도식이라 축척과 수치에 단순화가 있다.</footer>
+</div>

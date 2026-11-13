@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>한 장의 웨이퍼에서 완성 칩까지</title>
+  <style>
+    :root{--ink:#24343b;--blue:#537f9b;--pale:#dce8ed;--red:#b94e4e;--line:#dce8ed;--white:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--white);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+    main{max-width:1200px;margin:auto;padding:28px 26px 38px}
+    h1{font-size:clamp(23px,3vw,34px);margin:0 0 7px;font-weight:700;letter-spacing:-.035em}
+    .lead{margin:0 0 21px;font-size:15px;line-height:1.6}
+    .figure{border:1px solid var(--line);background:#fff}
+    svg{display:block;width:100%;height:auto;aspect-ratio:1200/620}
+    .controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:15px 2px 11px}
+    button{font:inherit;font-size:14px;padding:8px 13px;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:4px;cursor:pointer}
+    button:hover,button:focus-visible{border-color:var(--blue);outline:2px solid transparent;background:var(--pale)}
+    button:disabled{opacity:.4;cursor:default}
+    .progress{margin-left:auto;font-size:14px;font-variant-numeric:tabular-nums}
+    .steps{display:flex;gap:5px;flex-wrap:wrap;margin:0 0 13px;padding:0;list-style:none}
+    .steps button{width:32px;height:32px;padding:0;font-size:13px;border-radius:50%}
+    .steps button[aria-current="step"]{background:var(--blue);color:#fff;border-color:var(--blue)}
+    .caption{border-top:1px solid var(--line);padding:16px 18px;min-height:102px}
+    .caption h2{font-size:20px;margin:0 0 5px}
+    .caption p{font-size:15px;line-height:1.55;margin:0}
+    .method{font-size:13px;line-height:1.55;margin:14px 0 24px}
+    footer{border-top:1px solid var(--line);padding-top:19px;display:grid;grid-template-columns:1fr 1fr;gap:25px;font-size:14px;line-height:1.6}
+    footer h2{font-size:17px;margin:0 0 5px}footer ul{margin:0;padding-left:21px}
+    @media(max-width:650px){main{padding:17px 12px}.progress{margin-left:0;width:100%}footer{grid-template-columns:1fr;gap:16px}.caption{min-height:130px}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>한 장의 웨이퍼(wafer)에서 완성 칩까지</h1>
+  <p class="lead">한 장의 실리콘 웨이퍼 위에 같은 다이(die) 수백 개가 함께 형성되고, 검사·박막화·분리·패키징으로 이어지는 과정</p>
+  <div class="figure">
+    <svg id="scene" viewBox="0 0 1200 620" role="img" aria-labelledby="svgTitle svgDesc">
+      <title id="svgTitle">웨이퍼에서 칩까지의 단계별 애니메이션</title>
+      <desc id="svgDesc">한 장의 300 mm 웨이퍼를 노광하고, 전공정을 반복하고, 검사한 뒤 백그라인딩·다이싱·패키징한다.</desc>
+      <g id="drawing"></g>
+    </svg>
+    <div class="caption" aria-live="polite"><h2 id="stageTitle"></h2><p id="stageCaption"></p></div>
+  </div>
+  <div class="controls">
+    <button id="play" type="button">재생</button>
+    <button id="prev" type="button">← 이전 단계</button>
+    <button id="next" type="button">다음 단계 →</button>
+    <span class="progress" id="progress"></span>
+  </div>
+  <ol class="steps" id="steps" aria-label="단계 선택"></ol>
+  <p class="method">축척: 노광 영역(exposure field) 약 26 × 33 mm와 웨이퍼 지름 300 mm의 평면 비율은 동일합니다. 그 밖의 두께·간격·다이 분할·장치 형상은 도식으로 표현했습니다.</p>
+  <footer>
+    <section><h2>가정한 것</h2><ul>
+      <li>하나의 노광 영역 안에 같은 크기의 다이 4개를 그려, 한 장 위에 수백 개가 형성됨을 도식화했습니다. 실제 다이 크기와 배열은 주어지지 않았습니다.</li>
+      <li>그리드 위치, 불량 위치, 집어 올리는 다이와 링 프레임·패키지의 형태는 설명을 위한 예시입니다.</li>
+    </ul></section>
+    <section><h2>확실하지 않은 것</h2><ul>
+      <li>공정 후 웨이퍼 두께, 스크라이브 라인(scribe line) 폭, 실제 다이 수와 양품 수는 제공되지 않았습니다.</li>
+      <li>노광 영역 하나와 실제 다이의 관계, 장비의 구체적인 스캔 경로·속도, 적층 구조와 패키지 규격은 제공되지 않았습니다.</li>
+    </ul></section>
+  </footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const NS='http://www.w3.org/2000/svg';
+  const ink='#24343b', blue='#537f9b', pale='#dce8ed', red='#b94e4e', line=pale, white='#fff';
+  const svg=document.getElementById('drawing');
+  const title=document.getElementById('stageTitle');
+  const caption=document.getElementById('stageCaption');
+  const progress=document.getElementById('progress');
+  const play=document.getElementById('play');
+  const prev=document.getElementById('prev');
+  const next=document.getElementById('next');
+  const nav=document.getElementById('steps');
+  const stages=[
+    ['빈 실리콘 웨이퍼(wafer)','지름 300 mm, 두께 775 μm인 실리콘 웨이퍼 한 장에서 시작합니다.'],
+    ['반복 노광(step & scan)','노광 장비가 약 26 × 33 mm 영역에 패턴을 만들고 옆으로 이동해 반복합니다. 바둑판형 배열이 한 장의 웨이퍼를 채웁니다.'],
+    ['전공정(front-end process)','전공정 = 웨이퍼 위에 트랜지스터층(FEOL)과 배선층(BEOL)을 만드는 팹 공정 전체. 증착·노광·식각을 층마다 수십 번 반복. 이온주입은 트랜지스터층(FEOL)에서 수행. 같은 다이(die) 수백 개가 한 장 위에서 함께 완성되어 갑니다.'],
+    ['웨이퍼 테스트(wafer test)','웨이퍼 위의 다이를 검사합니다. 빨간 점은 불량으로 표시한 일부 다이입니다.'],
+    ['백그라인딩(backgrinding)','웨이퍼를 옆에서 본 도식입니다. 뒷면을 갈아 웨이퍼를 얇게 만듭니다. 최종 두께는 주어지지 않았습니다.'],
+    ['테이프 부착과 다이싱(dicing)','웨이퍼 한 장을 링 프레임(ring frame)의 테이프 위에 붙입니다. 스크라이브 라인(scribe line)을 따라 다이들을 분리합니다.'],
+    ['픽업과 패키징(packaging)','검사를 통과한 다이만 집어 패키지 기판(package substrate) 위에 올립니다. 완성된 칩으로 이어집니다.']
+  ];
+  let stage=0,playing=false,timer=null,animation=null;
+  const make=(tag,attrs={},parent=svg)=>{const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));parent.appendChild(e);return e};
+  const txt=(x,y,value,size=18,weight=400,anchor='start',color=ink,parent=svg)=>{const e=make('text',{x,y,fill:color,'font-size':size,'font-weight':weight,'text-anchor':anchor,'font-family':'Malgun Gothic, Apple SD Gothic Neo, sans-serif'},parent);e.textContent=value;return e};
+  const ln=(x1,y1,x2,y2,stroke=ink,width=2,dash='')=>make('line',{x1,y1,x2,y2,stroke,'stroke-width':width,'stroke-dasharray':dash});
+  const rect=(x,y,w,h,fill,stroke='none',sw=1)=>make('rect',{x,y,width:w,height:h,fill,stroke,'stroke-width':sw});
+  const circle=(cx,cy,r,fill,stroke='none',sw=1)=>make('circle',{cx,cy,r,fill,stroke,'stroke-width':sw});
+  const CX=510,CY=310,R=250,fieldW=R*2*26/300,fieldH=R*2*33/300;
+  const fields=[];
+  for(let row=-5;row<=5;row++)for(let col=-6;col<=6;col++){
+    const x=CX+col*fieldW-fieldW/2,y=CY+row*fieldH-fieldH/2;
+    const corners=[[x,y],[x+fieldW,y],[x,y+fieldH],[x+fieldW,y+fieldH]];
+    if(corners.every(([px,py])=>Math.hypot(px-CX,py-CY)<=R-2))fields.push({x,y,row,col});
+  }
+  fields.sort((a,b)=>a.row-b.row || (a.row%2===0?a.col-b.col:b.col-a.col));
+  const note=(a,b)=>{txt(1070,537,a,16,600,'end');txt(1070,561,b,14,400,'end')};
+  function baseWafer(r=R,cx=CX,cy=CY){circle(cx,cy,r,white,ink,3);circle(cx,cy,r-5,pale,'none');}
+  function topLabels(){
+    txt(52,48,'웨이퍼 한 장 · 평면도',22,700);
+    ln(52,63,1148,63,line,1);
+    txt(1070,128,'지름 300 mm',18,600,'end');
+    ln(CX-R,CY+R+14,CX+R,CY+R+14,ink,1.5);
+    ln(CX-R,CY+R+7,CX-R,CY+R+21,ink,1.5);
+    ln(CX+R,CY+R+7,CX+R,CY+R+21,ink,1.5);
+    txt(CX,CY+R+42,'300 mm',16,600,'middle');
+  }
+  function fieldGrid(mode='field'){
+    const group=make('g',{'aria-label':'반복 노광 그리드'});
+    fields.forEach((f,i)=>{
+      const g=make('g',{},group);
+      if(mode==='field')make('rect',{x:f.x,y:f.y,width:fieldW,height:fieldH,fill:pale,stroke:blue,'stroke-width':1.2},g);
+      else{
+        for(let dy=0;dy<2;dy++)for(let dx=0;dx<2;dx++){
+          const pad=1.4;
+          make('rect',{x:f.x+dx*fieldW/2+pad,y:f.y+dy*fieldH/2+pad,width:fieldW/2-2*pad,height:fieldH/2-2*pad,fill:blue,stroke:white,'stroke-width':.7},g);
+        }
+      }
+      g.dataset.order=i;
+    });
+    return group;
+  }
+  function defectDots(){
+    const picks=[11,32,56,78,100].filter(i=>i<fields.length);
+    picks.forEach(i=>{const f=fields[i];circle(f.x+fieldW*.28,f.y+fieldH*.27,5,red,white,1.2)});
+  }
+  function showStage(){
+    if(animation)cancelAnimationFrame(animation);animation=null;
+    svg.replaceChildren();
+    title.textContent=stages[stage][0];caption.textContent=stages[stage][1];
+    progress.textContent=`${stage+1} / ${stages.length}`;
+    prev.disabled=stage===0;next.disabled=stage===stages.length-1;
+    [...nav.querySelectorAll('button')].forEach((b,i)=>{if(i===stage)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+    if(stage<=3){
+      topLabels();baseWafer();
+      if(stage===0){
+        txt(900,242,'실리콘(silicon)',21,600);
+        txt(900,277,'두께 775 μm',21,600);
+        ln(770,275,865,275,ink,1.5);
+        note('단면 두께 표기','평면 크기와 별도 도식');
+      }else if(stage===1){
+        const grid=fieldGrid();
+        const target=make('rect',{x:fields[0].x,y:fields[0].y,width:fieldW,height:fieldH,fill:'none',stroke:red,'stroke-width':3});
+        txt(800,198,'노광 영역(exposure field)',18,600);
+        txt(800,227,'약 26 × 33 mm',18,600);
+        txt(800,267,'영역 ↔ 웨이퍼 비율 유지',15);
+        note('빨간 테두리: 이동 중인 노광 영역','영역마다 반복 → 다이 배열');
+        let start=performance.now();
+        function scan(now){
+          if(stage!==1)return;
+          const i=Math.floor(Math.max(0,now-start)/270)%fields.length;
+          const f=fields[i];target.setAttribute('x',f.x);target.setAttribute('y',f.y);
+          [...grid.children].forEach((g,j)=>g.setAttribute('opacity',j<=i?'1':'.18'));
+          animation=requestAnimationFrame(scan);
+        }
+        animation=requestAnimationFrame(scan);
+      }else{
+        const grid=fieldGrid('dies');
+        if(stage===2){
+          const overlay=rect(785,163,345,174,white,line,1);
+          txt(807,195,'전공정(front-end process)',18,600);
+          ['증착(deposition) · 층마다 반복','노광(lithography) · 층마다 반복','식각(etching) · 층마다 반복','이온주입 · FEOL에서 수행'].forEach((v,i)=>txt(807,225+i*27,v,15));
+          txt(807,325,'FEOL → BEOL',16,600);
+          const all=[...grid.children];let start=performance.now();
+          function build(now){if(stage!==2)return;const n=Math.floor((now-start)/32)% (all.length+1);all.forEach((g,i)=>g.setAttribute('opacity',i<n?'1':'.18'));animation=requestAnimationFrame(build)}
+          animation=requestAnimationFrame(build);
+          note('동일한 다이 수백 개','다이 크기·간격 도식 · 축척 과장');
+        }else{
+          defectDots();
+          circle(895,219,6,red);txt(914,225,'불량 표시',17,600);
+          txt(820,272,'검사 결과의 위치는 예시',15);
+          note('한 장의 웨이퍼에서 검사','다이 크기·간격 도식 · 축척 과장');
+        }
+      }
+    }else if(stage===4){
+      txt(52,48,'한 장의 웨이퍼 · 측면도',22,700);ln(52,63,1148,63,line,1);
+      txt(175,188,'백그라인딩 전',19,600);
+      rect(170,231,380,70,pale,ink,2);
+      ln(580,266,681,266,blue,3);make('path',{d:'M 681 266 l -13 -8 v 16 z',fill:blue});
+      txt(718,188,'뒷면 연삭 후',19,600);
+      rect(714,248,380,35,pale,ink,2);
+      txt(170,345,'처음 두께 775 μm',17,600);
+      txt(714,327,'얇아짐 · 최종 두께 미제공',17,600);
+      txt(600,422,'연삭 방향: 웨이퍼 뒷면',17,400,'middle');
+      ln(600,370,600,320,red,2);make('path',{d:'M 600 320 l -7 12 h 14 z',fill:red});
+      note('두께 변화 도식 · 축척 과장','처리 전후는 같은 한 장');
+    }else if(stage===5){
+      txt(52,48,'링 프레임(ring frame) 위의 한 장',22,700);ln(52,63,1148,63,line,1);
+      circle(CX,CY,286,white,line,16);circle(CX,CY,257,white,blue,2);circle(CX,CY,242,pale,ink,2);
+      const clipId='waferClip';const defs=make('defs');const clip=make('clipPath',{id:clipId},defs);make('circle',{cx:CX,cy:CY,r:240},clip);
+      const lines=make('g',{'clip-path':`url(#${clipId})`});
+      for(let x=CX-240;x<=CX+240;x+=fieldW/2)make('line',{x1:x,y1:CY-240,x2:x,y2:CY+240,stroke:white,'stroke-width':3},lines);
+      for(let y=CY-240;y<=CY+240;y+=fieldH/2)make('line',{x1:CX-240,y1:y,x2:CX+240,y2:y,stroke:white,'stroke-width':3},lines);
+      txt(845,190,'링 프레임(ring frame)',17,600);ln(830,198,769,208,line,1.5);
+      txt(845,278,'테이프(tape)',17,600);ln(831,285,765,290,blue,1.5);
+      txt(845,385,'스크라이브 라인(scribe line)',17,600);ln(830,393,716,382,ink,1.5);
+      note('라인을 따라 다이싱(dicing)','링·간격 도식 · 축척 과장');
+    }else{
+      txt(52,48,'양품 다이 픽업 → 패키지 기판',22,700);ln(52,63,1148,63,line,1);
+      const cx=308,cy=320,r=170;circle(cx,cy,r,pale,ink,2);
+      const spacing=31;
+      for(let yy=-4;yy<=4;yy++)for(let xx=-4;xx<=4;xx++){
+        const x=cx+xx*spacing,y=cy+yy*spacing;
+        if(Math.hypot(x-cx,y-cy)<r-20)rect(x-12,y-12,24,24,blue,white,1);
+      }
+      circle(cx+2*spacing,cy-spacing,5,red,white,1);
+      rect(cx-spacing-12,cy+spacing-12,24,24,white,blue,2);
+      txt(cx,535,'검사된 웨이퍼 한 장',17,600,'middle');
+      make('path',{d:'M 496 260 C 590 180 682 180 779 256',fill:'none',stroke:blue,'stroke-width':3,'stroke-dasharray':'8 7'});
+      make('path',{d:'M 779 256 l -16 -4 l 11 -12 z',fill:blue});
+      txt(640,168,'양품만 픽업(pick-up)',17,600,'middle');
+      rect(788,323,280,78,pale,ink,2);rect(865,281,126,42,blue,ink,2);
+      txt(928,305,'다이(die)',17,600,'middle',white);
+      txt(928,437,'패키지 기판(package substrate)',17,600,'middle');
+      txt(928,480,'완성된 칩',20,700,'middle');
+      note('배치·형상 도식 · 축척 과장','불량 다이는 픽업 대상에서 제외');
+    }
+  }
+  function pause(){playing=false;play.textContent='재생';if(timer)clearInterval(timer);timer=null}
+  function goto(n){stage=Math.max(0,Math.min(stages.length-1,n));showStage();if(stage===stages.length-1)pause()}
+  play.addEventListener('click',()=>{if(playing){pause();return}if(stage===stages.length-1)goto(0);playing=true;play.textContent='일시정지';timer=setInterval(()=>goto(stage+1),4300)});
+  prev.addEventListener('click',()=>goto(stage-1));next.addEventListener('click',()=>goto(stage+1));
+  stages.forEach((s,i)=>{const li=document.createElement('li'),b=document.createElement('button');b.type='button';b.textContent=i+1;b.title=s[0];b.setAttribute('aria-label',`${i+1}단계: ${s[0]}`);b.addEventListener('click',()=>goto(i));li.appendChild(b);nav.appendChild(li)});
+  showStage();
+})();
+</script>
+</body>
+</html>

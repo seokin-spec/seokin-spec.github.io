@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>다이싱 방법 네 가지 비교</title>
+  <style>
+    :root{--ink:#24343b;--blue:#4e7990;--pale:#dce9ed;--warm:#b65b3e;--white:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--white);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+    main{max-width:1050px;margin:auto;padding:28px 24px 42px}
+    h1{font-size:clamp(24px,3.4vw,34px);line-height:1.25;margin:0 0 8px}
+    .intro{margin:0 0 21px;line-height:1.65;font-size:15px}
+    .tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}
+    button{font:inherit;cursor:pointer;color:var(--ink);background:var(--white);border:1px solid var(--pale);border-radius:4px;padding:9px 11px}
+    button:hover,button:focus-visible{border-color:var(--blue);outline:2px solid var(--blue);outline-offset:1px}
+    .tabs button[aria-selected="true"],.steps button[aria-current="step"]{background:var(--blue);border-color:var(--blue);color:var(--white)}
+    .figure{border:1px solid var(--pale)}
+    svg{display:block;width:100%;height:auto;background:var(--white)}
+    .caption{border-top:1px solid var(--pale);padding:14px 17px;min-height:88px}
+    .caption h2{font-size:20px;margin:0 0 5px}.caption p{font-size:15px;line-height:1.55;margin:0}
+    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:13px 0}
+    .controls .counter{margin-left:auto;font-variant-numeric:tabular-nums;font-size:14px}
+    .steps{display:flex;gap:6px;list-style:none;padding:0;margin:0 0 19px;flex-wrap:wrap}
+    .steps button{font-size:13px;padding:6px 10px}
+    .note{font-size:14px;line-height:1.6;margin:13px 0 0}
+    footer{display:grid;grid-template-columns:1fr 1fr;gap:28px;border-top:1px solid var(--pale);padding-top:18px;margin-top:22px;font-size:14px;line-height:1.6}
+    footer h2{font-size:17px;margin:0 0 5px}footer ul{margin:0;padding-left:21px}
+    svg text{font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;fill:var(--ink)}
+    .slabel{font-size:17px;font-weight:600}.small{font-size:14px}.tiny{font-size:12px}
+    .blue{fill:var(--blue)}.warm{fill:var(--warm)}
+    .substrate{fill:var(--pale);stroke:var(--blue);stroke-width:2}.surface{fill:var(--white);stroke:var(--blue);stroke-width:2}
+    .seal{fill:var(--blue)}.tape{fill:var(--pale);stroke:var(--blue);stroke-width:2}
+    .line{stroke:var(--ink);stroke-width:2;fill:none}.blue-line{stroke:var(--blue);stroke-width:3;fill:none}.warm-line{stroke:var(--warm);stroke-width:3;fill:none}
+    .dash{stroke-dasharray:7 6}.hidden{display:none}
+    .spin{transform-origin:380px 206px;animation:spin .65s linear infinite}
+    .groove-spin{transform-origin:380px 205px}
+    .pulse{animation:pulse 1.1s ease-in-out infinite alternate}
+    @keyframes spin{to{transform:rotate(360deg)}}@keyframes pulse{to{opacity:.35}}
+    @media(max-width:640px){main{padding:18px 11px 32px}.tabs{grid-template-columns:repeat(2,1fr)}.tabs button{font-size:13px}.controls .counter{margin-left:0;width:100%}footer{grid-template-columns:1fr;gap:16px}.caption{min-height:118px}.caption h2{font-size:18px}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>다이싱(dicing): 네 가지 분리 방법</h1>
+  <p class="intro">같은 스크라이브 라인(scribe line)을 따라 다이(die)를 분리하는 네 방법입니다. 각 다이 테두리의 실링(seal ring)은 절단 균열이 칩 안으로 번지는 것을 막고, 링 프레임(ring frame)의 점착 테이프는 분리된 다이가 흩어지지 않게 붙잡습니다.</p>
+  <div class="tabs" role="tablist" aria-label="다이싱 방법">
+    <button type="button" role="tab" id="tab-blade" aria-selected="true" aria-controls="panel">블레이드</button>
+    <button type="button" role="tab" id="tab-groove" aria-selected="false" aria-controls="panel">레이저 + 블레이드</button>
+    <button type="button" role="tab" id="tab-stealth" aria-selected="false" aria-controls="panel">스텔스</button>
+    <button type="button" role="tab" id="tab-plasma" aria-selected="false" aria-controls="panel">플라즈마</button>
+  </div>
+  <section class="figure" id="panel" role="tabpanel" aria-labelledby="tab-blade">
+    <svg id="scene" viewBox="0 0 760 465" role="img" aria-labelledby="svg-title svg-desc">
+      <title id="svg-title">다이싱 방법 단면 애니메이션</title>
+      <desc id="svg-desc">다이 사이 스크라이브 라인과 실링, 웨이퍼, 점착 테이프의 단면을 보여줍니다.</desc>
+      <g id="drawing"></g>
+    </svg>
+    <div class="caption" aria-live="polite"><h2 id="caption-title"></h2><p id="caption-text"></p></div>
+  </section>
+  <div class="controls">
+    <button type="button" id="play">재생</button>
+    <button type="button" id="prev">← 이전 단계</button>
+    <button type="button" id="next">다음 단계 →</button>
+    <span class="counter" id="counter"></span>
+  </div>
+  <ol class="steps" id="steps" aria-label="단계 선택"></ol>
+  <p class="note">그림은 공정의 위치 관계를 설명하는 단면 도식입니다. <strong>축척 과장</strong>: 스크라이브 라인 폭, 층 두께, 날·빔·홈·개질층의 크기와 간격은 실제 비율을 나타내지 않습니다.</p>
+  <footer>
+    <section><h2>가정한 것</h2><ul>
+      <li>두 다이와 하나의 스크라이브 라인만 잘라 보여주고, 각 공정을 같은 단면에서 비교했습니다.</li>
+      <li>도구의 모양, 빔의 벌어짐, 개질층 표시, 절단 후 다이 사이 간격과 물방울의 위치는 흐름 설명을 위한 도식입니다.</li>
+    </ul></section>
+    <section><h2>확실하지 않은 것</h2><ul>
+      <li>웨이퍼·배선층·테이프 두께, 실링 위치·크기, 실제 홈·개질층의 형상과 깊이는 제공되지 않았습니다.</li>
+      <li>장비별 회전수, 날 두께, 레이저 파장·출력·집속 조건, DRIE 조건과 처리 시간은 제공되지 않았습니다.</li>
+    </ul></section>
+  </footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const draw=document.getElementById('drawing');
+  const tabs=[...document.querySelectorAll('[role="tab"]')];
+  const title=document.getElementById('caption-title');
+  const caption=document.getElementById('caption-text');
+  const desc=document.getElementById('svg-desc');
+  const panel=document.getElementById('panel');
+  const counter=document.getElementById('counter');
+  const play=document.getElementById('play');
+  const stepsEl=document.getElementById('steps');
+  const labels=['공통 준비','사전 처리','절단·개질','분리'];
+  const methods={
+    blade:{name:'블레이드 다이싱(blade dicing)',captions:[
+      '다이 사이의 스크라이브 라인(scribe line)은 폭 수십~100 μm의 빈 통로이며 테스트 패턴만 있습니다.',
+      '다이아몬드 입자를 박은 얇은 원형 날을 스크라이브 라인 위에 맞춥니다.',
+      '날이 고속 회전하며 물을 뿌리고 통로를 따라 갈아냅니다. 웨이퍼를 끊고 테이프는 살짝만 파고듭니다.',
+      '다이는 분리되지만 링 프레임(ring frame)의 점착 테이프 위에 붙어 흩어지지 않습니다.'
+    ]},
+    groove:{name:'레이저 그루빙 + 블레이드(laser grooving + blade)',captions:[
+      '다이 가장자리의 실링(seal ring)이 절단 균열이 칩 안으로 번지는 것을 막습니다.',
+      '먼저 레이저로 무른 low-k 배선층을 태워 스크라이브 라인에 홈을 냅니다.',
+      '그 홈 아래의 실리콘을 블레이드로 절단합니다.',
+      '분리된 다이는 링 프레임의 점착 테이프 위에 남습니다.'
+    ]},
+    stealth:{name:'스텔스 다이싱(stealth dicing)',captions:[
+      '파장 > 약 1.1 μm: 실리콘 밴드갭보다 광자 에너지가 작아, 빔이 실리콘에 들어가 거의 흡수 없이 투과합니다.',
+      '빔은 초점 바깥에서 거의 흡수되지 않고 실리콘 내부 초점으로 모입니다. 연한 경로와 진한 초점을 비교하세요.',
+      '초점에서만 세기가 높아져 다광자(비선형) 흡수로 개질층(modified layer)이 형성됩니다.',
+      '테이프가 평면에서 사방으로 늘어나면서 개질층을 따라 쪼개집니다. 가루·물은 없고 절단 폭은 거의 0입니다.'
+    ]},
+    plasma:{name:'플라즈마 다이싱(plasma dicing)',captions:[
+      '다이와 스크라이브 라인이 링 프레임의 점착 테이프 위에 있습니다.',
+      '스크라이브 라인만 열어 두고 나머지는 마스크(mask)로 덮습니다.',
+      '열린 스크라이브 라인을 DRIE(deep reactive ion etching)로 한꺼번에 식각합니다.',
+      '웨이퍼가 분리되고 각 다이는 점착 테이프 위에 남습니다.'
+    ]}
+  };
+  let method='blade',stage=0,timer=null;
+  const T=(x,y,s,cls='small',anchor='start')=>`<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
+  const L=(x1,y1,x2,y2,cls='line')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}"/>`;
+  const R=(x,y,w,h,cls)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${cls}"/>`;
+  function common(){
+    const gap=stage===3?110:52, left=380-gap/2,right=380+gap/2;
+    const cut=stage===3;
+    const stealthSplit=method==='stealth'&&cut;
+    let s=`${T(25,35,'단면도 · 축척 과장','small')}${T(735,35,'링 프레임의 점착 테이프 위','small','end')}`;
+    if(stealthSplit){
+      s+=R(45,349,280,28,'tape')+R(435,349,280,28,'tape');
+      s+=`<path d="M46 346 V391 H325 M435 391 H714 V346" class="blue-line"/>`;
+      s+=T(380,412,'점착 테이프(adhesive tape) · 링 프레임(ring frame)','small','middle');
+      s+=`<path d="M95 142 H325 l-5 31 7 28 -7 27 6 29 -6 27 5 30 v31 H95 Z M435 142 H665 V345 H435 l5 -31 -7 -30 7 -27 -6 -29 6 -27 -5 -28 Z" class="substrate"/>`;
+    }else{
+      s+=R(67,349,626,28,'tape');
+      s+=`<path d="M68 346 V391 H692 V346" class="blue-line"/>`;
+      s+=T(380,413,'점착 테이프(adhesive tape) · 링 프레임(ring frame)','small','middle');
+      s+=cut?(R(95,142,left-95,203,'substrate')+R(right,142,665-right,203,'substrate')):R(95,142,570,203,'substrate');
+    }
+    s+=R(95,126,left-95,16,'surface')+R(right,126,665-right,16,'surface');
+    s+=R(left-18,119,9,30,'seal')+R(right+9,119,9,30,'seal');
+    s+=T(177,236,'실리콘(Si)','slabel','middle')+T(571,236,'실리콘(Si)','slabel','middle');
+    s+=T(175,111,'다이(die)','slabel','middle')+T(573,111,'다이(die)','slabel','middle');
+    s+=`<path d="M${left-13} 153 L${left-70} 181 M${right+13} 153 L${right+70} 181" class="line"/>`;
+    s+=T(182,199,'실링(seal ring)','small','middle')+T(576,199,'실링(seal ring)','small','middle');
+    if(!cut&&method!=='stealth'){s+=T(380,75,'스크라이브 라인(scribe line)','slabel','middle')+T(380,97,'폭 수십~100 μm · 테스트 패턴만 있는 빈 통로','small','middle');}
+    else if(cut&&!stealthSplit){s+=T(380,77,'분리된 다이(die)','slabel','middle')+T(380,100,'테이프가 다이를 붙잡음','small','middle');}
+    return s;
+  }
+  function blade(){
+    if(stage===0)return T(380,315,'절단 경로','small','middle')+L(380,157,380,292,'blue-line dash');
+    const cy=stage===1?137:206;
+    let s=`<g ${stage===2?'class="spin"':''}><circle cx="380" cy="${cy}" r="70" fill="white" stroke="var(--ink)" stroke-width="6"/><circle cx="380" cy="${cy}" r="14" fill="var(--pale)" stroke="var(--ink)" stroke-width="3"/><path d="M380 ${cy-61} v-23 M380 ${cy+61} v23 M319 ${cy} h-23 M441 ${cy} h23" class="line"/></g>`;
+    s+=T(555,74,'다이아몬드 입자 원형 날','small','middle')+`<path d="M540 81 L433 ${cy-37}" class="line"/>`;
+    if(stage===2){s+=`<path d="M378 142 V352" class="warm-line"/>${T(505,326,'웨이퍼 절단','small')}${T(505,344,'테이프는 살짝 파임','small')}`;
+      s+=`<path d="M274 98 q-12 17 0 25 M293 89 q-12 17 0 25 M312 98 q-12 17 0 25" class="blue-line"/>`+T(225,73,'물 분사','small');}
+    if(stage===3)s=T(380,315,'절단선','small','middle')+L(380,175,380,348,'warm-line');
+    return s;
+  }
+  function groove(){
+    if(stage===0)return T(380,315,'배선층 위 스크라이브 라인','small','middle');
+    let s='';
+    if(stage===1){s+=`<path d="M345 107 L380 128 L415 107" class="warm-line"/><circle cx="380" cy="128" r="9" fill="var(--warm)" class="pulse"/>`;
+      s+=`<path d="M349 126 L365 142 H395 L411 126" fill="white" stroke="var(--warm)" stroke-width="3"/>`;
+      s+=T(220,174,'low-k 배선층에 홈','small','middle')+`<path d="M285 169 L340 158 L355 133" class="warm-line"/>`;}
+    if(stage===2){s+=`<path d="M349 126 L365 142 H395 L411 126" fill="white" stroke="var(--warm)" stroke-width="3"/>`;
+      s+=`<circle cx="380" cy="205" r="69" fill="white" stroke="var(--ink)" stroke-width="6" class="spin groove-spin"/><path d="M380 143 V349" class="warm-line"/>`;
+      s+=T(535,306,'블레이드로 Si 절단','small','middle');}
+    if(stage===3)s=T(380,316,'low-k 홈 + Si 절단선','small','middle');
+    return s;
+  }
+  function stealth(){
+    let s='';
+    if(stage<3){
+      s+=T(380,56,'파장 > 약 1.1 μm → 실리콘 밴드갭보다 에너지가 작아','small','middle');
+      s+=T(380,78,'거의 흡수 없이 투과','slabel blue','middle');
+      s+=`<path d="M346 91 L380 265 L414 91" fill="none" stroke="var(--blue)" stroke-width="5" opacity=".27"/>`;
+      s+=`<path d="M380 91 V265 M380 265 L366 327 M380 265 L394 327" fill="none" stroke="var(--blue)" stroke-width="3" stroke-dasharray="7 7" opacity=".27"/>`;
+      s+=`<circle cx="380" cy="142" r="6" fill="var(--white)" stroke="var(--blue)" stroke-width="2"/>`;
+      s+=T(459,155,'실리콘 입사 지점','small')+`<path d="M451 151 L389 143" class="blue-line"/>`;
+      s+=T(113,311,'초점 밖: 흡수 없음','small')+`<path d="M293 305 L352 198" fill="none" stroke="var(--blue)" stroke-width="2" opacity=".5"/>`;
+      if(stage===2){
+        s+=`<circle cx="380" cy="265" r="25" fill="var(--warm)" opacity=".16" class="pulse"/>`;
+        s+=`<circle cx="380" cy="265" r="11" fill="var(--warm)"/>`;
+        s+=`<path d="M380 282 V324" class="warm-line dash"/>`;
+        s+=T(489,281,'초점: 높은 세기','slabel')+T(489,303,'다광자(비선형) 흡수','small')+T(489,324,'개질층(modified layer)','small');
+      }else{
+        s+=`<circle cx="380" cy="265" r="9" fill="var(--white)" stroke="var(--warm)" stroke-width="3"/>`;
+        s+=T(489,280,'실리콘 내부 초점','slabel');
+      }
+      s+=`<path d="M399 268 L480 275" class="warm-line"/>`;
+      s+=T(35,444,'실리콘 밴드갭: 약 1.1 eV (약 1.1 μm에 해당)','small');
+    }else{
+      s+=`<path d="M380 151 V341" class="warm-line dash"/>`;
+      s+=`<path d="M78 362 H21 m17 -14 -17 14 17 14 M682 362 h57 m-17 -14 17 14 -17 14" class="blue-line"/>`;
+      s+=T(505,282,'개질층을 따라 균열·분리','slabel');
+      s+=T(505,306,'벌어진 다이와 테이프','small');
+      s+=`<defs><marker id="stealth-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M0 0 L8 4 L0 8 Z" fill="var(--blue)"/></marker></defs>`;
+      s+=`<rect x="363" y="61" width="34" height="34" fill="var(--pale)" stroke="var(--blue)" stroke-width="2"/>`;
+      s+=`<path d="M355 78 H318 M405 78 H442 M380 53 V21 M380 103 V117" fill="none" stroke="var(--blue)" stroke-width="2" marker-end="url(#stealth-arrow)"/>`;
+      s+=T(484,84,'테이프 평면도: 사방 확장','small');
+      s+=T(380,445,'가루·물 없음 · 절단 폭 거의 0','small','middle');
+    }
+    return s;
+  }
+  function plasma(){
+    if(stage===0)return T(380,316,'식각 경로','small','middle');
+    let s=R(95,119,259,7,'seal')+R(406,119,259,7,'seal');
+    s+=T(164,83,'마스크(mask)','slabel','middle')+T(588,83,'마스크(mask)','slabel','middle');
+    if(stage===1)s+=T(380,311,'스크라이브 라인만 개방','small','middle');
+    if(stage===2){
+      s+=`<path d="M365 55 v50 M380 55 v50 M395 55 v50" class="warm-line dash"/>`;
+      s+=`<path d="M354 142 H406 V345 H354 Z" fill="white" stroke="var(--warm)" stroke-width="3"/>`;
+      s+=T(545,282,'DRIE로 동시 식각','slabel','middle')+L(489,269,410,250,'warm-line');
+    }
+    if(stage===3)s+=T(380,311,'식각된 분리 통로','small','middle');
+    return s;
+  }
+  const overlays={blade,groove,stealth,plasma};
+  function render(){
+    draw.innerHTML=common()+overlays[method]();
+    const info=methods[method];
+    title.textContent=`${labels[stage]} · ${info.name}`;
+    caption.textContent=info.captions[stage];
+    desc.textContent=`${info.name}, ${labels[stage]}. ${info.captions[stage]}`;
+    counter.textContent=`${stage+1} / 4`;
+    tabs.forEach(b=>{const on=b.id===`tab-${method}`;b.setAttribute('aria-selected',on);b.tabIndex=on?0:-1});
+    panel.setAttribute('aria-labelledby',`tab-${method}`);
+    [...stepsEl.querySelectorAll('button')].forEach((b,i)=>b.setAttribute('aria-current',i===stage?'step':'false'));
+    document.getElementById('prev').disabled=stage===0;
+    document.getElementById('next').disabled=stage===3;
+  }
+  function stop(){if(timer){clearInterval(timer);timer=null}play.textContent='재생'}
+  function setStage(n){stage=Math.max(0,Math.min(3,n));render()}
+  function setMethod(m){method=m;stop();setStage(0)}
+  tabs.forEach((b,i)=>{b.addEventListener('click',()=>setMethod(b.id.slice(4)));b.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();const j=(i+(e.key==='ArrowRight'?1:3))%4;tabs[j].focus();setMethod(tabs[j].id.slice(4))}})});
+  labels.forEach((label,i)=>{const li=document.createElement('li'),b=document.createElement('button');b.type='button';b.textContent=`${i+1}. ${label}`;b.addEventListener('click',()=>{stop();setStage(i)});li.appendChild(b);stepsEl.appendChild(li)});
+  document.getElementById('prev').addEventListener('click',()=>{stop();setStage(stage-1)});
+  document.getElementById('next').addEventListener('click',()=>{stop();setStage(stage+1)});
+  play.addEventListener('click',()=>{if(timer){stop();return}if(stage===3)setStage(0);play.textContent='일시정지';timer=setInterval(()=>{if(stage===3){stop();return}setStage(stage+1)},2400)});
+  render();
+})();
+</script>
+</body>
+</html>

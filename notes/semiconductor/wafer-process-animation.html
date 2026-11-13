@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>웨이퍼 단면: FEOL에서 BEOL까지</title>
+<style>
+  :root{--ink:#24313a;--silicon:#b9c9ce;--insulator:#dce9e5;--process:#3c7790;--copper:#b7784d;--line:#24313a}
+  *{box-sizing:border-box}body{margin:0;background:#fff;color:var(--ink);font-family:Arial,"Noto Sans KR","Malgun Gothic",sans-serif}
+  main{max-width:1100px;margin:auto;padding:24px 24px 34px}
+  h1{font-size:25px;margin:0 0 8px;font-weight:700;letter-spacing:-.02em}
+  .intro{margin:0 0 19px;font-size:14px;line-height:1.5}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:22px;align-items:start}
+  .figure{border:1px solid #cbd3d5;background:#fff}
+  .figure-head{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:14px 18px;border-bottom:1px solid #cbd3d5}
+  #phase{font-size:12px;font-weight:700;letter-spacing:.09em;color:var(--process)}
+  #stepTitle{font-size:17px;font-weight:700}
+  svg{display:block;width:100%;height:auto;aspect-ratio:800/430;background:#fff}
+  svg text{font-family:Arial,"Noto Sans KR","Malgun Gothic",sans-serif;fill:var(--ink)}
+  .major{font-size:15px;font-weight:700}.minor{font-size:12px}.tiny{font-size:10px}
+  .substrate{fill:var(--silicon);stroke:var(--line);stroke-width:1.5}
+  .dielectric{fill:var(--insulator);stroke:var(--line);stroke-width:1.3}
+  .process{fill:var(--process);stroke:var(--line);stroke-width:1.2}
+  .copper{fill:var(--copper);stroke:var(--line);stroke-width:1.3}
+  .outline{fill:none;stroke:var(--line);stroke-width:1.5}
+  .dash{fill:none;stroke:var(--process);stroke-width:2;stroke-dasharray:6 5}
+  .light{stroke:var(--process);stroke-width:2.4;fill:none;marker-end:url(#arrow)}
+  .fade{animation:appear .5s ease-out both}@keyframes appear{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+  .caption{min-height:70px;padding:11px 18px 15px;border-top:1px solid #cbd3d5;font-size:14px;line-height:1.5}
+  .caption strong{display:block;margin-bottom:2px}
+  .controls{display:flex;align-items:center;gap:8px;margin:12px 0 0;flex-wrap:wrap}
+  button{font:inherit;border:1px solid var(--line);background:#fff;color:var(--ink);padding:7px 12px;border-radius:2px;cursor:pointer}
+  button:hover,button:focus-visible{background:var(--insulator)}button:disabled{opacity:.4;cursor:default}
+  #play{background:var(--process);border-color:var(--process);color:#fff;min-width:90px}
+  #counter{font-size:13px;margin-left:auto;font-variant-numeric:tabular-nums}
+  .steps{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin-top:11px}
+  .tick{height:5px;background:#d8e0e2;border:0;padding:0;min-width:0}.tick.active{background:var(--process)}
+  aside{border-left:3px solid var(--process);padding-left:15px;font-size:13px;line-height:1.55}
+  aside h2{font-size:14px;margin:0 0 6px}aside p{margin:0 0 18px}
+  .key{display:grid;grid-template-columns:16px 1fr;gap:7px 8px;align-items:center;margin:8px 0 18px}
+  .sw{width:15px;height:12px;border:1px solid var(--line)}
+  footer{border-top:1px solid #cbd3d5;margin-top:26px;padding-top:13px;display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:12px;line-height:1.5}
+  footer h2{font-size:13px;margin:0 0 5px}footer ul{margin:0;padding-left:19px}
+  @media(max-width:800px){.layout{grid-template-columns:1fr}aside{border-left:0;border-top:3px solid var(--process);padding:12px 0 0}.figure-head{align-items:start;flex-direction:column;gap:3px}footer{grid-template-columns:1fr}main{padding:16px}}
+  @media(prefers-reduced-motion:reduce){.fade{animation:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>웨이퍼 단면: 쌓고 · 찍고 · 깎고 · 채우고 · 갈아내기</h1>
+  <p class="intro">한 장의 웨이퍼 표면에서 트랜지스터를 만들고, 그 위에 배선층을 반복해 쌓는 순서입니다. 공정 장면은 <strong>축척 과장</strong>; 마지막 장면만 두께 비율을 맞췄습니다.</p>
+  <div class="layout">
+    <section aria-label="반도체 공정 애니메이션">
+      <div class="figure">
+        <div class="figure-head"><span id="phase"></span><span id="stepTitle"></span></div>
+        <svg id="scene" viewBox="0 0 800 430" role="img" aria-labelledby="svgTitle svgDesc">
+          <title id="svgTitle">웨이퍼 단면 공정 단계</title><desc id="svgDesc">FEOL과 BEOL 과정을 단계별로 보여주는 단면 개념도</desc>
+          <defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 Z" fill="#3c7790"/></marker></defs>
+          <g id="drawing"></g>
+        </svg>
+        <div class="caption" aria-live="polite"><strong id="captionTitle"></strong><span id="captionText"></span></div>
+      </div>
+      <div class="controls"><button id="prev" aria-label="이전 단계">← 이전</button><button id="play" aria-label="재생 또는 일시정지">재생</button><button id="next" aria-label="다음 단계">다음 →</button><span id="counter"></span></div>
+      <div class="steps" id="ticks" aria-label="단계 선택"></div>
+    </section>
+    <aside>
+      <h2>단면 색상</h2>
+      <div class="key"><span class="sw" style="background:var(--silicon)"></span><span>실리콘(silicon)</span><span class="sw" style="background:var(--insulator)"></span><span>절연막(insulator)</span><span class="sw" style="background:var(--process)"></span><span>감광액·게이트·공정 표시</span><span class="sw" style="background:var(--copper)"></span><span>구리(copper)</span></div>
+      <h2>왜 매번 평탄화할까?</h2>
+      <p>노광 광학의 초점 심도가 수십~100 nm로 얕다. 표면이 울퉁불퉁하면 다음 층에 초점이 맞지 않으므로 CMP로 매번 평평하게 갈아낸다.</p>
+      <h2>노광 광원 메모</h2>
+      <p>최첨단 층: EUV 13.5 nm<br>덜 미세한 층: ArF 193 nm</p>
+    </aside>
+  </div>
+  <footer>
+    <div><h2>가정한 것</h2><ul><li>단면의 홈·게이트·배선 모양과 배치는 공정 순서를 설명하기 위한 개념도다.</li><li>줌아웃 막대는 주어진 범위의 상한인 15 μm를 대표값으로 사용한다.</li></ul></div>
+    <div><h2>확실하지 않은 것</h2><ul><li>개별 막·홈·게이트의 실제 두께, 폭, 간격은 주어지지 않았다.</li><li>배선층별 정확한 층수와 두께 분포는 주어지지 않았다.</li></ul></div>
+  </footer>
+</main>
+<script>
+(() => {
+  const stages = [
+    ['FEOL · 트랜지스터층','실리콘 표면에 홈 형성','소자 분리(STI, shallow trench isolation)용 홈을 실리콘 표면에 판다.','stiCut'],
+    ['FEOL · 트랜지스터층','홈을 절연막으로 채움','절연막을 채워 소자 분리(STI, shallow trench isolation)를 만든다.','stiFill'],
+    ['FEOL · 트랜지스터층','게이트 형성','실리콘 표면에 게이트(gate)를 먼저 형성한다.','gate'],
+    ['FEOL · 트랜지스터층','소스·드레인 이온 주입','게이트를 마스크로 삼아 양옆의 소스·드레인에 이온을 주입해 도핑(doping)한다.','doping'],
+    ['BEOL · 배선층','절연막 증착(deposition)','트랜지스터층 위에 배선용 절연막을 쌓는다.','dielectric'],
+    ['BEOL · 다마신(damascene) 1회','감광액 도포','절연막 위에 감광액(photoresist)을 올린다.','resist'],
+    ['BEOL · 다마신(damascene) 1회','노광(exposure)','빛으로 감광액에 배선 홈 패턴을 찍는다.','expose'],
+    ['BEOL · 다마신(damascene) 1회','현상(development)','패턴이 드러나도록 감광액을 현상한다.','develop'],
+    ['BEOL · 다마신(damascene) 1회','홈 식각(etching)','드러난 부분의 절연막을 깎아 홈을 낸다.','etch'],
+    ['BEOL · 다마신(damascene) 1회','구리 채움','구리(copper)를 홈에 넘치도록 채운다.','copper'],
+    ['BEOL · 다마신(damascene) 1회','CMP 평탄화','화학 기계적 평탄화(CMP)로 넘친 구리를 갈아내고 표면을 평평하게 한다.','cmp'],
+    ['BEOL · 반복','배선층 반복','다마신 사이클을 반복해 배선층을 10~15층 이상 쌓는다. 아래층은 가늘고 촘촘하며 위로 갈수록 굵어진다.','repeat'],
+    ['전체 두께 · 실제 비율','웨이퍼와 표면층 비교','웨이퍼 775 μm 위의 전체 층은 수~15 μm, 웨이퍼 두께의 약 1~2%다. 막대는 15 μm 상한 기준으로 그렸다.','scale']
+  ];
+  const $ = id => document.getElementById(id);
+  const rect = (x,y,w,h,cls,extra='') => `<rect x="${x}" y="${y}" width="${w}" height="${h}" class="${cls}" ${extra}/>`;
+  const label = (x,y,s,cls='minor',anchor='start') => `<text x="${x}" y="${y}" class="${cls}" text-anchor="${anchor}">${s}</text>`;
+  const line = (x1,y1,x2,y2,cls='outline') => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" class="${cls}"/>`;
+  function base(stage){
+    const cut = stage==='stiCut';
+    let s = cut
+      ? `<path d="M70 185 H185 V225 H215 V185 H585 V225 H615 V185 H730 V350 H70 Z" class="substrate"/>`
+      : rect(70,185,660,165,'substrate');
+    if(!cut) s += rect(185,185,30,40,'dielectric')+rect(585,185,30,40,'dielectric');
+    if(['doping','dielectric','resist','expose','develop','etch','copper','cmp'].includes(stage)){
+      s += `<g class="fade">${rect(250,188,92,23,'process')}${rect(458,188,92,23,'process')}</g>`;
+      s += label(296,243,'소스','tiny','middle')+label(504,243,'드레인','tiny','middle');
+    }
+    if(['gate','doping'].includes(stage)){
+      s += `<g class="fade">${rect(385,151,30,34,'process')}</g>`+label(400,143,'게이트(gate)','minor','middle');
+    }
+    s += label(400,382,'실리콘 웨이퍼(silicon wafer)','major','middle');
+    if(cut) s += label(400,115,'소자 분리 홈(STI)','major','middle')+line(400,121,200,179,'dash');
+    else if(['stiFill','doping','gate'].includes(stage)) s += label(200,135,'절연막으로 채운 홈(STI)','minor','middle')+line(200,142,200,179,'dash');
+    return s;
+  }
+  function process(stage){
+    let s=base(stage);
+    const beol=['dielectric','resist','expose','develop','etch','copper','cmp'];
+    if(!beol.includes(stage)){
+      if(stage==='doping') s+=`<g class="fade">${[270,292,314,480,502,524].map(x=>`<path d="M${x} 95 V172" class="light"/>`).join('')}</g>`+label(400,75,'게이트를 마스크로 소스·드레인 이온 주입','major','middle');
+      return s+label(712,32,'축척 과장','minor','end');
+    }
+    const etched=['etch','copper','cmp'].includes(stage);
+    if(etched) s += `<path d="M70 100 H265 V147 H335 V100 H465 V147 H535 V100 H730 V185 H70 Z" class="dielectric fade"/>`;
+    else s += rect(70,100,660,85,'dielectric fade');
+    s += rect(385,151,30,34,'process')+label(400,232,'게이트(gate)','minor','middle');
+    if(['resist','expose'].includes(stage)) s+=rect(70,78,660,22,'process fade');
+    if(stage==='expose'){
+      s+=rect(70,42,660,12,'outline')+rect(265,42,70,12,'process')+rect(465,42,70,12,'process');
+      s+=`<g class="fade">${[280,310,480,510].map(x=>`<path d="M${x} 55 V76" class="light"/>`).join('')}</g>`;
+      s+=label(400,27,'노광 광원: EUV 13.5 nm / ArF 193 nm','minor','middle');
+    }
+    if(stage==='develop') s+=`<path d="M70 78 H265 V100 H335 V78 H465 V100 H535 V78 H730 V100 H70 Z" class="process fade"/>`;
+    if(stage==='etch') s+=label(400,60,'절연막에 배선 홈 식각','major','middle');
+    if(stage==='copper') s+=`<g class="fade">${rect(70,67,660,33,'copper')}${rect(265,100,70,47,'copper')}${rect(465,100,70,47,'copper')}</g>`+label(400,53,'구리 넘침','major','middle');
+    if(stage==='cmp') s+=`<g class="fade">${rect(265,100,70,47,'copper')}${rect(465,100,70,47,'copper')}</g>`+line(70,100,730,100,'dash')+label(400,75,'CMP 후 평탄한 표면','major','middle');
+    s+=label(712,32,'축척 과장','minor','end');
+    return s;
+  }
+  function repeat(){
+    let s=rect(70,333,660,48,'substrate')+label(400,402,'실리콘 웨이퍼(silicon wafer)','minor','middle');
+    const widths=[20,20,22,22,26,30,34,38,42,48];
+    widths.forEach((w,i)=>{
+      const y=306-i*25;
+      s+=rect(70,y,660,23,'dielectric');
+      const count=i<4?6:i<7?4:3;
+      const gap=520/(count-1);
+      for(let j=0;j<count;j++)s+=rect(140+j*gap-w/2,y,w,23,'copper');
+    });
+    s+=label(400,40,'배선층 10~15층 이상 · 반복 구조 개념도','major','middle');
+    s+=label(712,60,'축척 과장','minor','end');
+    s+=label(155,419,'아래: 가늘고 촘촘','minor')+label(515,72,'위: 굵어짐','minor');
+    return s;
+  }
+  function scale(){
+    // 775 μm : 15 μm = 310 px : 6 px, exactly 2.5 μm per pixel.
+    let s=rect(220,83,360,6,'copper')+rect(220,89,360,310,'substrate');
+    s+=line(190,83,190,89)+line(184,83,196,83)+line(184,89,196,89);
+    s+=line(190,89,190,399)+line(184,399,196,399);
+    s+=label(602,91,'전체 층: 수~15 μm','major');
+    s+=label(602,106,'그림은 15 μm 상한 기준','minor');
+    s+=label(602,250,'웨이퍼: 775 μm','major');
+    s+=label(400,46,'표면층 / 웨이퍼 두께 ≈ 1~2%','major','middle');
+    s+=label(400,416,'세로 길이 비율: 15 : 775 (상한 기준)','minor','middle');
+    return s;
+  }
+  let index=0,timer=null;
+  function render(){
+    const [phase,title,caption,stage]=stages[index];
+    $('phase').textContent=phase;$('stepTitle').textContent=title;
+    $('captionTitle').textContent=title;$('captionText').textContent=caption;
+    $('drawing').innerHTML=stage==='repeat'?repeat():stage==='scale'?scale():process(stage);
+    $('svgDesc').textContent=`${phase}: ${title}. ${caption}`;
+    $('counter').textContent=`${index+1} / ${stages.length}`;
+    $('prev').disabled=index===0;$('next').disabled=index===stages.length-1;
+    [...$('ticks').children].forEach((b,i)=>{b.classList.toggle('active',i===index);b.setAttribute('aria-current',i===index?'step':'false')});
+  }
+  function stop(){clearInterval(timer);timer=null;$('play').textContent='재생';$('play').setAttribute('aria-label','재생')}
+  function move(n){index=Math.max(0,Math.min(stages.length-1,n));render();if(index===stages.length-1)stop()}
+  $('prev').addEventListener('click',()=>move(index-1));$('next').addEventListener('click',()=>move(index+1));
+  $('play').addEventListener('click',()=>{if(timer){stop();return}if(index===stages.length-1)index=0;render();$('play').textContent='일시정지';$('play').setAttribute('aria-label','일시정지');timer=setInterval(()=>move(index+1),2700)});
+  $('ticks').innerHTML=stages.map((s,i)=>`<button class="tick" aria-label="${i+1}단계: ${s[1]}" data-step="${i}"></button>`).join('');
+  $('ticks').addEventListener('click',e=>{const b=e.target.closest('button[data-step]');if(b){stop();move(Number(b.dataset.step))}});
+  render();
+})();
+</script>
+</body>
+</html>

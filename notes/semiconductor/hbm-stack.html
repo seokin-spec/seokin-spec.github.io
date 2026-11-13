@@ -1,0 +1,244 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HBM 스택 제작 과정</title>
+  <style>
+    :root{--ink:#263943;--blue:#397b9c;--pale:#dcecf3;--red:#bb594d;--white:#fff}
+    *{box-sizing:border-box}
+    body{margin:0;background:var(--white);color:var(--ink);font-family:"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif}
+    main{max-width:1240px;margin:auto;padding:28px 24px 36px}
+    h1{margin:0 0 7px;font-size:clamp(25px,3vw,36px);letter-spacing:-.04em}
+    .lead{margin:0 0 20px;line-height:1.55;font-size:15px}
+    .frame{border:1px solid var(--ink);background:#fff}
+    svg{display:block;width:100%;height:auto;aspect-ratio:1100/510}
+    .caption{border-top:1px solid var(--ink);padding:14px 18px;min-height:91px}
+    .caption h2{margin:0 0 5px;font-size:19px}.caption p{margin:0;font-size:15px;line-height:1.5}
+    .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:13px 0}
+    button{font:inherit;color:var(--ink);background:#fff;border:1px solid var(--ink);border-radius:4px;padding:8px 12px;cursor:pointer}
+    button:hover,button:focus-visible{background:var(--pale)}button:disabled{opacity:.45;cursor:default}
+    .progress{margin-left:auto;font-size:14px;font-variant-numeric:tabular-nums}
+    .steps{display:flex;gap:6px;flex-wrap:wrap;list-style:none;margin:0 0 22px;padding:0}
+    .steps button{width:33px;height:33px;padding:0;border-radius:50%;font-size:13px}
+    .steps button[aria-current="step"]{background:var(--blue);border-color:var(--blue);color:#fff}
+    .panels{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .panel{border:1px solid var(--ink);padding:19px 20px;min-height:205px}
+    .panel h2{font-size:19px;margin:0 0 12px}.panel p{font-size:14px;line-height:1.55;margin:0 0 8px}
+    .formula{font-size:23px;font-weight:700;font-variant-numeric:tabular-nums;margin:11px 0!important}
+    .sliderrow{display:flex;align-items:center;gap:14px;font-size:14px}
+    input[type=range]{width:min(100%,300px);accent-color:var(--blue)}
+    .yieldbar{height:15px;border:1px solid var(--ink);margin-top:15px}.yieldbar span{display:block;height:100%;background:var(--blue);transition:width .15s}
+    .comparison{display:flex;align-items:center;gap:10px;margin:20px 0 14px;font-size:13px}
+    .comparison span{flex:1;text-align:center;border:1px solid var(--ink);padding:10px 6px;min-height:56px}
+    .comparison .bad{border-color:var(--red);color:var(--red)}.comparison .good{border-color:var(--blue);color:var(--blue)}
+    .note{font-size:13px;line-height:1.55;margin:20px 0;padding:11px 14px;border-left:3px solid var(--blue);background:var(--pale)}
+    footer{border-top:1px solid var(--ink);padding-top:18px;display:grid;grid-template-columns:1fr 1fr;gap:24px;font-size:14px;line-height:1.55}
+    footer h2{font-size:17px;margin:0 0 6px}footer ul{margin:0;padding-left:20px}
+    @media(max-width:700px){main{padding:18px 12px}.panels,footer{grid-template-columns:1fr}.progress{width:100%;margin:0}.caption{min-height:120px}svg{min-height:250px}}
+    @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+  </style>
+</head>
+<body>
+<main>
+  <h1>HBM 스택(stack)은 어떻게 만들어질까?</h1>
+  <p class="lead">DRAM 웨이퍼(wafer)를 검사하고 얇게 만든 다음, 양품 다이(die)만 선택해 12단으로 쌓는 과정</p>
+  <div class="frame">
+    <svg viewBox="0 0 1100 510" role="img" aria-labelledby="svgTitle svgDesc">
+      <title id="svgTitle">HBM 스택 제작 과정 애니메이션</title>
+      <desc id="svgDesc">웨이퍼 검사, 캐리어 부착과 백그라인딩, 다이싱, 양품 다이 적층, 12단 완성, GPU 옆 인터포저 배치의 여섯 단계입니다.</desc>
+      <g id="scene"></g>
+    </svg>
+    <div class="caption" aria-live="polite"><h2 id="stageTitle"></h2><p id="stageCaption"></p></div>
+  </div>
+  <div class="controls">
+    <button type="button" id="play">재생</button>
+    <button type="button" id="prev">← 이전 단계</button>
+    <button type="button" id="next">다음 단계 →</button>
+    <span class="progress" id="progress"></span>
+  </div>
+  <ol class="steps" id="steps" aria-label="단계 선택"></ol>
+  <div class="panels">
+    <section class="panel" aria-labelledby="yieldTitle">
+      <h2 id="yieldTitle">복합 수율</h2>
+      <p>다이(die) 하나의 양품률이 99%일 때, 모두 양품인 조합의 비율</p>
+      <div class="sliderrow"><label for="dieCount">다이 수 <strong id="countLabel">12</strong>장</label><input id="dieCount" type="range" min="1" max="16" value="12" aria-label="적층 다이 수"></div>
+      <p class="formula" id="yieldFormula">0.99¹² ≈ 89%</p>
+      <div class="yieldbar" role="img" aria-label="복합 수율 막대"><span id="yieldFill"></span></div>
+      <p style="margin-top:10px">각 다이의 양품 여부가 독립이라는 계산 가정입니다.</p>
+    </section>
+    <section class="panel" aria-labelledby="whyTitle">
+      <h2 id="whyTitle">웨이퍼째 안 쌓는 이유</h2>
+      <div class="comparison"><span class="bad">웨이퍼 통째로 적층<br>불량 다이도 포함</span><b aria-hidden="true">→</b><span class="good">다이로 분리해 적층<br>양품만 선택</span></div>
+      <p>웨이퍼 상태에서 검사한 결과를 바탕으로, 다이싱(dicing) 뒤 양품 다이만 골라 쌓습니다.</p>
+    </section>
+  </div>
+  <p class="note">구분 메모: “100층, 200~300층”은 HBM이 아니라 3D NAND의 이야기입니다. 3D NAND는 웨이퍼 한 장 위에 막을 수백 층 증착합니다.</p>
+  <footer>
+    <section><h2>가정한 것</h2><ul>
+      <li>그림 속 웨이퍼 격자, 불량 위치, 다이 크기와 장비 모양은 설명용 예시입니다.</li>
+      <li>복합 수율 계산에서는 각 다이의 양품 여부가 서로 독립이라고 가정했습니다.</li>
+      <li>단계 사이의 이동과 적층 속도는 애니메이션 연출입니다.</li>
+    </ul></section>
+    <section><h2>확실하지 않은 것</h2><ul>
+      <li>실제 웨이퍼·베이스 다이·GPU·인터포저 치수, TSV 수·간격, 불량률과 불량 분포는 제공되지 않았습니다.</li>
+      <li>백그라인딩 후 두께 약 30~50 μm ⚠️와 패키지 규격 약 0.7~0.8 mm ⚠️는 제시된 범위이며, 구체적인 제품의 구조나 접합 방식은 지정되지 않았습니다.</li>
+    </ul></section>
+  </footer>
+</main>
+<script>
+(() => {
+  'use strict';
+  const S=document.getElementById('scene');
+  const title=document.getElementById('stageTitle');
+  const caption=document.getElementById('stageCaption');
+  const progress=document.getElementById('progress');
+  const play=document.getElementById('play');
+  const prev=document.getElementById('prev');
+  const next=document.getElementById('next');
+  const steps=document.getElementById('steps');
+  const C={ink:'#263943',blue:'#397b9c',pale:'#dcecf3',red:'#bb594d',white:'#fff'};
+  const stages=[
+    ['1. DRAM 웨이퍼 제작과 검사','TSV가 포함된 DRAM 웨이퍼(wafer)를 만든 뒤 웨이퍼 상태에서 검사합니다. 검사 결과로 양품과 불량 다이(die)를 표시합니다.'],
+    ['2. 캐리어 부착과 백그라인딩','아주 얇게 갈아야 해서 캐리어 웨이퍼에 임시 접합해 지지 (일반 칩은 테이프 위에서 처리). 뒷면을 약 30~50 μm ⚠️까지 얇게 만듭니다. 종이 한 장 약 100 μm와 비교해 보세요.'],
+    ['3. 다이싱','얇아진 웨이퍼를 다이(die) 단위로 분리합니다. 앞서 확인한 불량 다이는 다음 적층에서 제외합니다.'],
+    ['4. 양품 다이 선택과 적층','양품 DRAM 다이만 베이스(로직) 다이(base/logic die) 위에 한 장씩 놓습니다. TSV를 정렬해 마이크로범프(microbump) 또는 직접 접합(direct bonding)으로 연결합니다.'],
+    ['5. 12단 스택 완성','12장의 DRAM 다이가 쌓입니다. 완성된 구조는 패키지 높이 규격 약 0.7~0.8 mm ⚠️ 안에 들어가야 합니다.'],
+    ['6. 인터포저 위 배치','완성된 HBM 스택(stack)을 인터포저(interposer) 위에서 GPU 옆에 배치합니다.']
+  ];
+  let current=0, running=false, stageStart=0, elapsed=0, raf=0;
+  const duration=4200;
+  const txt=(x,y,s,size=18,anchor='start',fill=C.ink,weight=400)=>`<text x="${x}" y="${y}" text-anchor="${anchor}" fill="${fill}" font-family="Malgun Gothic,Apple SD Gothic Neo,system-ui,sans-serif" font-size="${size}" font-weight="${weight}">${s}</text>`;
+  const rect=(x,y,w,h,fill=C.pale,stroke=C.ink,sw=2,rx=0)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+  const line=(x1,y1,x2,y2,stroke=C.ink,sw=2,dash='')=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw}" ${dash?`stroke-dasharray="${dash}"`:''}/>`;
+  const circle=(x,y,r,fill=C.pale,stroke=C.ink,sw=2)=>`<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}"/>`;
+  const arrow=(x1,y1,x2,y2,color=C.ink)=>`${line(x1,y1,x2,y2,color,2.5)}<path d="M${x2-10} ${y2-7} L${x2} ${y2} L${x2-10} ${y2+7}" fill="none" stroke="${color}" stroke-width="2.5"/>`;
+  function header(k,sub){return txt(48,49,`0${k+1} / 06`,17,'start',C.blue,700)+txt(48,84,sub,27,'start',C.ink,700)+line(48,101,1052,101,C.ink,1);}
+  function wafer(cx,cy,r,gaps=false){
+    let out=circle(cx,cy,r,C.pale,C.ink,3);
+    const cell=32, bad=new Set(['-2,-1','1,-2','2,1','-1,2']);
+    for(let ix=-3;ix<=3;ix++)for(let iy=-3;iy<=3;iy++){
+      const x=cx+ix*cell,y=cy+iy*cell;
+      if(Math.hypot(ix*cell,iy*cell)>r-23)continue;
+      const defective=bad.has(`${ix},${iy}`);
+      out+=rect(x-13,y-13,26,26,defective?C.red:C.blue,C.white,gaps?3:1,gaps?2:0);
+    }
+    return out;
+  }
+  function waferTest(){
+    let o=header(0,'DRAM 웨이퍼 제작 · TSV 포함');
+    o+=wafer(390,285,157);
+    o+=line(540,159,637,159,C.ink,2)+line(637,159,637,231,C.ink,2)+circle(637,239,8,C.ink,C.ink,0);
+    o+=txt(663,163,'웨이퍼 상태 검사(test)',19);
+    o+=rect(695,252,28,28,C.blue,C.white,1)+txt(735,274,'양품 다이',18);
+    o+=rect(695,308,28,28,C.red,C.white,1)+txt(735,330,'불량 다이',18);
+    o+=txt(695,386,'다이 단면의 관통 연결(TSV)',17);
+    o+=rect(695,402,260,35,C.pale,C.ink,1);
+    for(const x of [744,813,882])o+=rect(x,404,9,31,C.blue,C.ink,1);
+    o+=txt(390,479,'웨이퍼(wafer) — 격자와 불량 위치는 도식',15,'middle');
+    return o;
+  }
+  function grinding(){
+    let o=header(1,'임시 접합 후 뒷면 연삭');
+    o+=txt(313,168,'DRAM 웨이퍼 · TSV',18,'middle');
+    o+=rect(160,193,310,38,C.blue,C.ink,2);
+    for(const x of [210,280,350,420])o+=rect(x,200,8,30,C.white,C.ink,1);
+    o+=rect(160,232,310,14,C.pale,C.ink,1)+txt(488,244,'임시 접합',15);
+    o+=rect(160,247,310,68,C.pale,C.ink,2)+txt(315,284,'캐리어 웨이퍼(carrier wafer)',17,'middle');
+    o+=`<path d="M155 177 L475 177" stroke="${C.red}" stroke-width="3" stroke-dasharray="8 6"/>`;
+    o+=txt(518,185,'백그라인딩(backgrinding)',18);
+    o+=txt(625,265,'결과 두께',17)+txt(625,295,'약 30~50 μm ⚠️',24,'start',C.blue,700);
+    o+=line(111,365,988,365,C.ink,1);
+    o+=txt(160,397,'두께 비교 · 같은 길이 축척',17);
+    o+=rect(570,384,200,20,C.pale,C.ink,1)+txt(784,401,'종이 한 장 약 100 μm',16);
+    o+=rect(570,425,100,20,C.blue,C.ink,1)+txt(784,441,'DRAM 다이 약 30~50 μm ⚠️',16);
+    o+=line(630,421,630,449,C.ink,2)+txt(630,466,'30',13,'middle');
+    o+=line(670,421,670,449,C.ink,2)+txt(670,466,'50',13,'middle');
+    o+=txt(570,465,'0',13,'middle');
+    return o;
+  }
+  function dicing(){
+    let o=header(2,'다이(die) 단위로 분리');
+    o+=wafer(365,291,155,true);
+    o+=arrow(550,290,666,290,C.blue);
+    o+=rect(728,183,65,65,C.blue,C.ink,2)+rect(818,183,65,65,C.blue,C.ink,2);
+    o+=rect(728,273,65,65,C.blue,C.ink,2)+rect(818,273,65,65,C.red,C.ink,2);
+    o+=txt(756,369,'양품',17,'middle',C.blue)+txt(850,369,'불량 제외',17,'middle',C.red);
+    o+=txt(365,479,'다이싱 선·다이 크기·불량 위치는 도식',15,'middle');
+    return o;
+  }
+  function stack(n,centerX=550,baseY=429,width=220,dieH=19,gap=5){
+    let o=rect(centerX-width/2,baseY,width,30,C.ink,C.ink,1);
+    o+=txt(centerX,baseY+21,'베이스(로직) 다이',14,'middle',C.white,700);
+    for(let i=0;i<n;i++){
+      const y=baseY-gap-dieH-i*(dieH+gap);
+      o+=rect(centerX-width/2+10,y,width-20,dieH,C.blue,C.ink,1);
+      for(const dx of [-58,0,58])o+=rect(centerX+dx-3,y+2,6,dieH-4,C.white,C.white,0);
+      for(const dx of [-58,0,58])o+=circle(centerX+dx,y+dieH+gap/2,2.5,C.ink,C.ink,0);
+    }
+    return o;
+  }
+  function stacking(n){
+    let o=header(3,'양품 다이만 골라 한 장씩 적층');
+    o+=stack(n,596);
+    o+=rect(105,192,145,24,C.blue,C.ink,1)+txt(178,178,'선택된 양품 다이',17,'middle');
+    o+=arrow(273,204,422,204,C.blue);
+    o+=txt(875,159,`${n} / 12장`,23,'middle',C.blue,700);
+    o+=txt(854,241,'TSV 정렬·연결',18);
+    o+=line(752,249,836,249,C.ink,2);
+    o+=txt(847,294,'마이크로범프(microbump)',16);
+    o+=txt(847,322,'또는 직접 접합(direct bonding)',16);
+    o+=txt(596,484,'수직 두께·다이 크기·간격: 축척 과장',15,'middle');
+    return o;
+  }
+  function finished(){
+    let o=header(4,'12단 HBM 스택 완성');
+    o+=stack(12,540);
+    o+=line(728,132,728,459,C.ink,2)+line(713,132,743,132,C.ink,2)+line(713,459,743,459,C.ink,2);
+    o+=txt(760,246,'패키지 높이 규격',18);
+    o+=txt(760,281,'약 0.7~0.8 mm ⚠️',23,'start',C.blue,700);
+    o+=txt(540,485,'두께·간격·높이: 축척 과장',15,'middle');
+    return o;
+  }
+  function placed(){
+    let o=header(5,'인터포저 위 GPU 옆에 배치');
+    o+=rect(120,393,855,43,C.pale,C.ink,2)+txt(548,422,'인터포저(interposer)',18,'middle');
+    o+=rect(205,241,265,141,C.ink,C.ink,2)+txt(338,319,'GPU',34,'middle',C.white,700);
+    o+=stack(12,757,352,164,15,3);
+    for(const x of [232,285,338,391,444,699,757,815])o+=circle(x,387.5,5.5,C.ink,C.ink,0);
+    o+=txt(941,195,'HBM 스택(stack)',20,'middle',C.blue,700);
+    o+=txt(545,478,'GPU·HBM·인터포저 크기와 배치 간격: 축척 과장',15,'middle');
+    return o;
+  }
+  const renderers=[waferTest,grinding,dicing,stacking,finished,placed];
+  function render(){
+    const n=current===3?Math.max(1,Math.min(12,Math.ceil(elapsed/duration*12))):12;
+    S.innerHTML=renderers[current](n);
+    title.textContent=stages[current][0];caption.textContent=stages[current][1];
+    progress.textContent=`${current+1} / ${stages.length}`;
+    prev.disabled=current===0;next.disabled=current===stages.length-1;
+    [...steps.querySelectorAll('button')].forEach((b,i)=>{if(i===current)b.setAttribute('aria-current','step');else b.removeAttribute('aria-current')});
+  }
+  function stop(){running=false;cancelAnimationFrame(raf);play.textContent='재생';}
+  function setStage(i){current=Math.max(0,Math.min(stages.length-1,i));elapsed=0;stageStart=performance.now();render();}
+  function tick(now){
+    if(!running)return;
+    elapsed=now-stageStart;
+    if(elapsed>=duration){if(current===stages.length-1){elapsed=duration;stop();render();return;}setStage(current+1);}
+    render();raf=requestAnimationFrame(tick);
+  }
+  play.addEventListener('click',()=>{
+    if(running){stop();return;}
+    if(current===stages.length-1&&elapsed>=duration)setStage(0);
+    running=true;play.textContent='일시정지';stageStart=performance.now()-elapsed;raf=requestAnimationFrame(tick);
+  });
+  prev.addEventListener('click',()=>setStage(current-1));
+  next.addEventListener('click',()=>setStage(current+1));
+  stages.forEach((_,i)=>{const li=document.createElement('li'),b=document.createElement('button');b.type='button';b.textContent=i+1;b.setAttribute('aria-label',`${i+1}단계: ${stages[i][0]}`);b.addEventListener('click',()=>setStage(i));li.appendChild(b);steps.appendChild(li)});
+  const slider=document.getElementById('dieCount'),countLabel=document.getElementById('countLabel'),formula=document.getElementById('yieldFormula'),fill=document.getElementById('yieldFill');
+  function updateYield(){const n=Number(slider.value),pct=Math.pow(.99,n)*100;countLabel.textContent=n;formula.textContent=`0.99^${n} ≈ ${Math.round(pct)}%`;fill.style.width=`${pct}%`;fill.parentElement.setAttribute('aria-label',`다이 ${n}장일 때 복합 수율 약 ${Math.round(pct)}%`)}
+  slider.addEventListener('input',updateYield);updateYield();render();
+})();
+</script>
+</body>
+</html>
