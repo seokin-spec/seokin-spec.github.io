@@ -1,0 +1,581 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Three Light Sensors Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · how equipment works</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../light-sensors.html" href="../light-sensors.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 빛 센서 3종 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 장비 원리
+// @status 검토 중
+// @lang ko en
+// @title.en Three Light Sensors Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · how equipment works
+// @status.en Under review
+/* 파워·에너지 미터에 쓰는 빛 센서 3종: thermopile, photodiode, pyroelectric.
+   그림은 모두 단순화한 모식도다. 곡선과 숫자는 원리를 보이는 예시이고, 범위 값은 대략이다.
+   확인이 필요한 값은 REVIEW.md에 적었다. 글은 TR('한국어','English')로 쓴다. */
+const NOTE={key:'lightsensors'};
+
+/* ---------- 그림 헬퍼 (이 노트 전용, 이름은 ls로 시작) ---------- */
+const lsBeam=(x1,y1,x2,y2,col,w=12,op=.35)=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${w}" stroke-opacity="${op}"/>`;
+const lsDot=(x,y,col,r=5)=>`<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="${r}" style="fill:${col}"/>`;
+const lsHole=(x,y,col,r=5)=>`<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="${r}" style="fill:var(--panel);stroke:${col}" stroke-width="1.6"/>`;
+const lsR=(x,y,w,h,col,op=1,st)=>`<rect x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" width="${(+w).toFixed(1)}" height="${(+h).toFixed(1)}" rx="2" style="fill:${col};stroke:${st||'none'}" fill-opacity="${op}" stroke-width="1.2"/>`;
+/* 파장(µm) → 빛 종류 색 키와 이름 */
+const lsWk=u=>u<.4?'s5':u<.75?'s3':'s1';
+const lsWname=u=>u<.4?TR('자외선','ultraviolet'):u<.75?TR('가시광','visible'):TR('적외선','infrared');
+const lsUm=v=>{const u=10**v;return (u<1?u.toFixed(2):u.toFixed(1))+' µm'};
+/* 흡수체 흡수율 (예시 곡선) */
+const lsAbs=u=>.93-.04*Math.exp(-(((Math.log10(u)-1)/.15)**2))-.03*Math.exp(-(((Math.log10(u)+.6)/.1)**2));
+/* thermopile: 빛을 1 s에 켰을 때 읽은 값 (시간 상수 1.5 s, 예시) */
+const lsRise=t=>t<1?0:1-Math.exp(-(t-1)/1.5);
+const lsDrift=(t,g)=>(g.hand?1-Math.exp(-Math.max(0,t-10)/12):0)+(g.wind?.25*Math.sin(t*.9)+.15*Math.sin(t*2.3+1):0);
+/* photodiode: Si 감도 예시 곡선 (A/W), 포화 예시 */
+const lsEta=l=>l>=1100?0:.88*(1-Math.exp(-(1100-l)/70))*(1-Math.exp(-(l-250)/110));
+const lsResp=l=>lsEta(l)*l/1240;
+const lsSat=pd=>{const i=.5*pd;return i/(1+(i/5e-3)**3)**(1/3)};
+const lsPw=p=>p>=1?p.toFixed(1)+' W':p>=1e-3?(p*1e3).toFixed(p>=.1?0:1)+' mW':(p*1e6).toFixed(p>=1e-4?0:1)+' µW';
+const lsAmp=i=>i>=1e-3?(i*1e3).toFixed(2)+' mA':(i*1e6).toFixed(i>=1e-4?0:1)+' µA';
+/* pyroelectric: 분극 예시 곡선, CW를 2~7 s 동안 켰을 때 온도와 전류, 펄스 하나의 전압 모양 */
+const lsPs=t=>Math.sqrt(Math.max(0,1-t/120));
+const lsTemp=t=>t<2?0:t<7?1-Math.exp(-(t-2)):(1-Math.exp(-5))*Math.exp(-(t-7));
+const lsCur=t=>t<2?0:t<7?Math.exp(-(t-2)):-(1-Math.exp(-5))*Math.exp(-(t-7));
+const lsTwo=(t,tr,td)=>t<0?0:Math.exp(-t/td)-Math.exp(-t/tr);
+const lsP1=t=>lsTwo(t,.05,.3)/.5826; /* 봉우리 1로 맞춘 펄스 응답, 길이 약 1 ms (예시) */
+const lsTrain=(t,tp)=>{let s=0;for(let k=Math.floor(t/tp);k>=0&&t-k*tp<3;k--)s+=lsP1(t-k*tp);return s};
+/* 세 센서의 색 */
+const lsC={th:'s4',pd:'s3',py:'s5'};
+const lsBig=(x,y,s,col)=>`<text x="${x}" y="${y}" class="lab" text-anchor="middle" style="fill:${col};font-size:18px;font-weight:600">${s}</text>`;
+const lsMeter=(x,y,s)=>`<circle cx="${x}" cy="${y}" r="14" style="fill:var(--panel);stroke:var(--fg)" stroke-width="1.2"/>`+T(x,y+4,s,'lab','middle');
+
+/* ================= 탭 1: Thermopile ================= */
+const THERMO=[
+{t:TR('빛을 흡수해 열로 바꾼다: 파장을 거의 가리지 않는다','Light is absorbed and turned into heat, almost regardless of wavelength'),ec:TR('흡수체에 빛이 닿으면','Light reaching the absorber'),mc:TR('파장에 따른 흡수율 (예시)','Absorptance versus wavelength (example)'),
+ slider:{min:-.7,max:1.3,step:.02,init:-.28,label:TR('파장','Wavelength'),fmt:lsUm},
+ e:v=>{const u=10**v,k=lsWk(u),col=COL[k];return T(14,20,TR('단순화한 단면 (실제 모양과 다름)','Simplified cross-section (not the real shape)'),'sub')
+  +`<g data-n="1">${lsBeam(20,140,168,140,col,16)}${LN(50,140,120,140,col,{w:2,mk:k})}${badge(34,112,1,col)}</g>`
+  +`<rect x="178" y="80" width="80" height="120" class="dev"/>`
+  +`<g data-n="2"><rect x="168" y="80" width="10" height="120" style="fill:#2b2f36"/>${badge(173,216,2,COL.f)}</g>`+T(173,70,TR('흡수체 (검은 코팅)','Absorber (black coating)'),'sub','middle')
+  +`<g data-n="3">${[120,140,160].map(y=>LN(184,y,244,y,COL.s4,{w:1.6,mk:'s4'})).join('')}${T(214,104,TR('열','heat'),'sub','middle',COL.s4)}${badge(274,140,3,COL.s4)}</g>`
+  +T(160,250,TR('빛의 종류: ','Kind of light: ')+lsWname(u),'lab','middle')+T(160,268,TR('조금 반사되는 빛은 그리지 않았다','The small reflected part is not drawn'),'sub','middle')},
+ m:v=>{const u=10**v,P=plot({x:[.2,20],y:[0,1.1],logx:1,xt:[.2,.5,1,2,5,10,20].map(a=>({v:a,l:String(a)})),yt:[0,.5,1].map(a=>({v:a,l:String(a)})),xl:TR('파장 (µm, log 눈금)','wavelength (µm, log scale)'),yl:TR('흡수율 (예시)','absorptance (example)')});
+  let d='';for(let i=0;i<=200;i++){const a=.2*100**(i/200);d+=(d?' L':'M')+P.X(a).toFixed(1)+','+P.Y(lsAbs(a)).toFixed(1)}
+  return P.s+`<g data-n="2"><path d="${d}" fill="none" style="stroke:var(--fg)" stroke-width="2"/></g>`+LN(P.X(u),P.T,P.X(u),P.B,'var(--muted)',{w:1,dash:1})+`<g data-n="1">${lsDot(P.X(u),P.Y(lsAbs(u)),COL[lsWk(u)])}</g>`
+   +T(P.X(2),P.Y(.6),TR('자외선부터 적외선까지 거의 평평','Nearly flat from ultraviolet to infrared'),'sub','middle')},
+ read:[TR('Thermopile 센서는 빛을 직접 전기로 바꾸지 않는다. 먼저 빛을 열로 바꾸고, 그 열을 잰다.','A thermopile sensor does not turn light directly into electricity. It first turns light into heat and then measures the heat.'),
+  TR(`${c(1,'f')} 빛이 ${c(2,'f')} 검은 흡수체에 닿으면 대부분 흡수된다. 흡수된 빛 에너지는 ${c(3,'s4')} 열이 된다.`,`${c(1,'f')} Light striking the ${c(2,'f')} black absorber is mostly absorbed. The absorbed light energy becomes ${c(3,'s4')} heat.`),
+  TR('검은 코팅은 자외선부터 적외선까지 비슷하게 흡수한다. 그래서 파장이 달라도 같은 파워면 거의 같은 열이 난다.','The black coating absorbs about equally from the ultraviolet to the infrared. The same power therefore gives nearly the same heat at any wavelength.'),
+  TR('세어 보기: 흡수율이 0.93이면 100 mW 중 93 mW가 열이 된다. 이 비율은 교정 값에 이미 들어 있다.','Counting it out: with an absorptance of 0.93, 93 mW out of 100 mW becomes heat. This ratio is already included in the calibration.'),
+  TR('오른쪽 곡선은 예시다. 실제 흡수율과 쓸 수 있는 파장 범위는 코팅 종류마다 다르다.','The curve on the right is an example. The real absorptance and usable wavelength range depend on the coating type.')],
+ q:TR('532 nm 10 mW와 10 µm 10 mW를 같은 thermopile로 재면 읽은 값은?','The same thermopile measures 10 mW at 532 nm and 10 mW at 10 µm. How do the readings compare?'),a:TR('거의 같다. 흡수율이 두 파장에서 비슷하면 같은 파워가 같은 열이 된다. 작은 차이는 미터의 파장 보정이 맞춘다.','Nearly the same. With similar absorptance at both wavelengths, equal power gives equal heat. The small difference is handled by the wavelength correction of the meter.')},
+
+{t:TR('온도 차가 전압이 된다 (Seebeck 효과, 열전대 하나)','A temperature difference becomes a voltage (Seebeck effect, one thermocouple)'),ec:TR('열전대 하나 (모식도)','One thermocouple (sketch)'),mc:TR('온도 차와 전압 (예시)','Temperature difference and voltage (example)'),
+ slider:{min:0,max:10,step:.1,init:4,label:TR('온도 차 ΔT','Temperature difference ΔT'),fmt:v=>v.toFixed(1)+' K'},
+ e:v=>T(14,20,TR('서로 다른 금속 두 가닥을 한쪽 끝에서 잇는다','Two different metals joined at one end'),'sub')
+  +`<g data-n="1">${PL([[70,140],[150,96],[250,96]],COL.s4,{w:3})}${T(190,86,TR('금속 A','metal A'),'sub','middle',COL.s4)}</g>`
+  +`<g data-n="2">${PL([[70,140],[150,184],[250,184]],COL.s2,{w:3})}${T(190,204,TR('금속 B','metal B'),'sub','middle',COL.s2)}</g>`
+  +`<circle cx="70" cy="140" r="10" style="fill:var(--s1)" fill-opacity="${(.15+.08*v).toFixed(2)}"/>${lsDot(70,140,'var(--s1)',4)}`
+  +T(62,112,TR('뜨거운 접점','hot junction'),'sub','middle')+T(62,172,`T + ${v.toFixed(1)} K`,'sub','middle')
+  +T(244,70,TR('차가운 쪽 (T)','cold side (T)'),'sub','middle')
+  +PL([[250,96],[290,96],[290,126]],'var(--fg)',{w:1.2})+PL([[250,184],[290,184],[290,154]],'var(--fg)',{w:1.2})+`<g data-n="3">${lsMeter(290,140,'V')}</g>`
+  +T(160,246,`V = ${(60*v).toFixed(0)} µV`,'lab','middle')+T(160,266,TR('한 쌍에 60 µV/K로 가정 (예시)','60 µV/K per pair assumed (example)'),'sub','middle'),
+ m:v=>{const P=plot({x:[0,10],y:[0,700],xt:[0,2,4,6,8,10].map(a=>({v:a,l:String(a)})),yt:[0,200,400,600].map(a=>({v:a,l:String(a)})),xl:TR('온도 차 ΔT (K)','temperature difference ΔT (K)'),yl:TR('전압 (µV, 예시)','voltage (µV, example)')});
+  return P.s+crv(P,a=>60*a,0,10,COL.s3)+`<g data-n="3">${lsDot(P.X(v),P.Y(60*v),'var(--s3)')}</g>`+T(P.X(.6),P.Y(630),'V = S · ΔT','lab')},
+ read:[TR('금속 막대의 한쪽을 데우면 뜨거운 쪽 전자가 차가운 쪽으로 퍼진다. 그래서 양 끝에 작은 전압이 생긴다. 이것이 Seebeck 효과다.','When one end of a metal bar is heated, electrons from the hot end spread toward the cold end. A small voltage appears between the ends. This is the Seebeck effect.'),
+  TR(`전압의 크기는 금속마다 다르다. ${c(1,'s4')} 금속 A와 ${c(2,'s2')} 금속 B를 한 끝에서 이으면 두 전압의 차이가 ${c(3,'s3')} 전압계에 나온다. 이 한 쌍이 열전대다.`,`The size of the voltage differs from metal to metal. Joining ${c(1,'s4')} metal A and ${c(2,'s2')} metal B at one end sends the difference of the two voltages to the ${c(3,'s3')} voltmeter. This pair is a thermocouple.`),
+  TR('전압은 온도 차에 비례한다: V = S · ΔT. S는 금속 조합이 정하는 값이다.','The voltage is proportional to the temperature difference: V = S · ΔT. S is set by the pair of metals.'),
+  TR('양쪽 온도가 같으면 뜨겁든 차갑든 전압은 0이다. 재는 것은 온도가 아니라 온도 "차"다.','With both sides at the same temperature, hot or cold, the voltage is zero. What is measured is the temperature difference, not the temperature.'),
+  TR('이 노트의 ΔT는 온도 차다. 다른 노트의 ΔT/T(투과 변화)와 글자만 같고 뜻이 다르다.','ΔT in this note is a temperature difference. It only shares its letters with ΔT/T (transmission change) in the other notes.')],
+ q:TR('센서 전체가 방 온도보다 5 K 따뜻해졌다. 뜨거운 접점과 차가운 쪽이 같이 올랐다면 전압은?','The whole sensor has become 5 K warmer than the room. If the hot junction and the cold side rose together, what is the voltage?'),a:TR('0이다. 열전대는 두 곳의 온도 차만 전압으로 바꾼다.','Zero. A thermocouple converts only the temperature difference between the two places into voltage.')},
+
+{t:TR('열전대를 직렬로 쌓아 전압을 키운다','Thermocouples stacked in series raise the voltage'),ec:TR('열전대 여러 쌍을 잇는 방법','How many pairs are connected'),mc:TR('쌍의 수와 전압 (예시)','Number of pairs and voltage (example)'),
+ slider:{min:1,max:20,step:1,init:4,label:TR('열전대 쌍의 수','Number of pairs'),fmt:v=>Math.round(v)+TR(' 쌍',' pairs')},
+ e:v=>{const n=Math.round(v),w=240/n;let z='';for(let i=0;i<n;i++){const x=40+i*w;z+=LN(x.toFixed(1),200,(x+w/2).toFixed(1),90,COL.s4,{w:2})+LN((x+w/2).toFixed(1),90,(x+w).toFixed(1),200,COL.s2,{w:2})}
+  return T(160,70,TR('뜨거운 쪽 (흡수체 바로 아래)','hot side (just under the absorber)'),'sub','middle')+`<g data-n="1">${lsR(30,78,260,12,'var(--s1)',.3)}</g>`
+   +`<g data-n="2">${lsR(30,200,260,12,'var(--s2)',.2)}</g>`+T(160,230,TR('차가운 쪽 (방열판)','cold side (heat sink)'),'sub','middle')+z+lsDot(40,200,'var(--fg)',3)+lsDot(280,200,'var(--fg)',3)
+   +T(14,20,TR('접점이 뜨거운 쪽과 차가운 쪽을 오간다','Junctions alternate between the hot and cold sides'),'sub')
+   +T(160,254,`V = ${n} × 60 µV = ${n*60} µV`,'lab','middle')+T(160,272,TR('ΔT = 1 K, 한 쌍 60 µV/K 가정 (예시)','ΔT = 1 K, 60 µV/K per pair assumed (example)'),'sub','middle')},
+ m:v=>{const n=Math.round(v),P=plot({x:[0,20],y:[0,1.3],xt:[0,5,10,15,20].map(a=>({v:a,l:String(a)})),yt:[0,.5,1].map(a=>({v:a,l:String(a)})),xl:TR('열전대 쌍의 수 N','number of pairs N'),yl:TR('전압 (mV, ΔT = 1 K)','voltage (mV, ΔT = 1 K)')});
+  let s='';for(let i=1;i<=20;i++)s+=lsDot(P.X(i),P.Y(.06*i),'var(--s6)',2.5);
+  return P.s+crv(P,a=>.06*a,0,20,'var(--line)')+s+`<g data-n="3">${lsDot(P.X(n),P.Y(.06*n),'var(--s3)')}</g>`+T(P.X(1),P.Y(1.18),'V = N · S · ΔT','lab')},
+ read:[TR('열전대 하나의 전압은 1 K에 수십 µV뿐이다(대략). 이대로는 약한 빛을 재기 어렵다.','A single thermocouple gives only tens of µV per kelvin (approx.). That is too little for weak light.'),
+  TR(`그래서 여러 쌍을 직렬로 잇는다. 접점 하나는 ${c(1,'s1')} 뜨거운 쪽에, 다음 접점은 ${c(2,'s2')} 차가운 쪽에 번갈아 놓는다.`,`So many pairs are connected in series. One junction sits on the ${c(1,'s1')} hot side and the next on the ${c(2,'s2')} cold side, alternating.`),
+  TR(`건전지를 직렬로 잇는 것과 같은 논리다. 쌍마다 생긴 전압이 더해져 ${c(3,'s3')} 전체 전압은 N배가 된다.`,`The logic is the same as batteries in series. The voltages of the pairs add up, and the ${c(3,'s3')} total is N times larger.`),
+  TR('이렇게 쌓은 것이 thermopile(열전대 더미)이다. 빛의 파워가 클수록 온도 차가 크고, 전압도 그만큼 크다.','This stack is the thermopile. More optical power gives a larger temperature difference and a proportionally larger voltage.'),
+  TR('미터는 이 전압에 교정 값(V/W)을 곱해 파워로 바꿔 보여 준다.','The meter converts this voltage to power with the calibration factor (V/W).')],
+ q:TR('쌍의 수를 4에서 20으로 늘리면 같은 온도 차에서 전압은 몇 배인가?','Going from 4 to 20 pairs, by what factor does the voltage grow at the same temperature difference?'),a:TR('5배다. 직렬로 이은 전압은 쌍의 수에 비례한다.','Five times. The series voltage is proportional to the number of pairs.')},
+
+{t:TR('느리다: 열이 퍼져 평형이 될 때까지 기다린다','It is slow: heat must spread until equilibrium'),ec:TR('센서 판을 위에서 본 모습 (모식도)','Sensor plate seen from above (sketch)'),mc:TR('빛을 켠 뒤 읽은 값 (예시)','Reading after the light is switched on (example)'),
+ slider:{min:0,max:10,step:.05,init:0,label:TR('시간','Time'),fmt:v=>v.toFixed(1)+' s',play:1},
+ e:v=>{const r=lsRise(v);return `<circle cx="160" cy="145" r="92" class="dev"/><circle cx="160" cy="145" r="76" style="fill:var(--panel);stroke:var(--muted)" stroke-width="1"/>`
+  +`<g data-n="2"><circle cx="160" cy="145" r="${(14+62*r).toFixed(1)}" style="fill:var(--s4)" fill-opacity=".3"/></g>`
+  +(v>=1?`<g data-n="1"><circle cx="160" cy="145" r="14" style="fill:var(--s1)" fill-opacity=".6"/></g>`:`<circle cx="160" cy="145" r="14" fill="none" class="lvl2"/>`)
+  +T(160,65,TR('방열판 (차가운 쪽)','heat sink (cold side)'),'sub','middle')+T(160,120,TR('빔','beam'),'sub','middle')
+  +T(14,20,v<1?TR('빛 꺼짐','Light off'):TR('빛 켜짐: 열이 가장자리로 퍼진다','Light on: heat spreads to the rim'),'lab')
+  +T(160,262,TR('읽은 값 = 실제 파워의 ','Reading = ')+(100*r).toFixed(0)+TR(' %',' % of the real power'),'lab','middle')},
+ m:v=>{const P=plot({x:[0,10],y:[0,1.2],xt:[0,2,4,6,8,10].map(a=>({v:a,l:String(a)})),yt:[0,.5,1].map(a=>({v:a,l:String(a)})),xl:TR('시간 (s)','time (s)'),yl:TR('파워 (상대)','power (relative)')});
+  return P.s+`<g data-n="1">${PL([[P.X(0),P.Y(0)],[P.X(1),P.Y(0)],[P.X(1),P.Y(1)],[P.X(10),P.Y(1)]].map(p=>p.map(a=>+a.toFixed(1))),COL.s1,{w:1.4,dash:1})}${LN(170,186,190,186,COL.s1,{w:1.4,dash:1})}${T(196,190,TR('실제 파워','real power'),'sub')}</g>`
+   +`<g data-n="2">${crv(P,lsRise,0,10,COL.s4,{n:300})}${LN(170,206,190,206,COL.s4,{w:2})}${T(196,210,TR('읽은 값','reading'),'sub')}${lsDot(P.X(v),P.Y(lsRise(v)),'var(--s4)')}</g>`},
+ read:[TR(`${c(1,'s1')} 빛을 켜면 흡수체 가운데가 바로 데워지기 시작한다. 하지만 온도 차가 다 자라려면 ${c(2,'s4')} 열이 판을 따라 방열판까지 퍼져야 한다.`,`When the ${c(1,'s1')} light comes on, the center of the absorber starts warming at once. For the temperature difference to grow fully, ${c(2,'s4')} heat has to spread across the plate to the heat sink.`),
+  TR('들어오는 열과 빠져나가는 열이 같아지면 온도 차가 멈춘다. 이때의 전압이 파워에 비례한다.','When heat coming in equals heat leaving, the temperature difference stops changing. The voltage at that point is proportional to the power.'),
+  TR('그래서 읽은 값은 천천히 올라간다. 그림은 시간 상수 1.5 s인 예시다. 실제 센서는 대략 1초에서 수십 초까지 종류마다 다르다.','The reading therefore rises slowly. The figure is an example with a 1.5 s time constant. Real sensors range from about one second to tens of seconds, depending on the type.'),
+  TR('세어 보기: 시간 상수의 3배(4.5 s)가 지나야 95 %, 5배(7.5 s)가 지나야 99 %에 닿는다.','Counting it out: 95 % is reached after three time constants (4.5 s) and 99 % after five (7.5 s).'),
+  TR('빠른 변화는 뭉개진다. 1 kHz 펄스열을 비추면 펄스 하나하나는 보이지 않고 평균 파워만 나온다.','Fast changes are smeared out. A 1 kHz pulse train shows no individual pulses, only the average power.')],
+ q:TR('빛을 켜고 1초 뒤에 값을 적었다. 무엇이 문제인가?','The value was written down one second after switching the light on. What is wrong?'),a:TR('값이 아직 오르는 중이라 실제보다 낮게 적힌다. 숫자가 멈출 때까지 기다린 뒤 읽는다.','The reading is still rising, so the recorded value is too low. The value is read after the number has settled.')},
+
+{t:TR('영점이 흐른다: 손의 열과 바람도 신호가 된다','The zero drifts: hand warmth and air currents also give a signal'),ec:TR('레이저가 꺼져 있을 때','With the laser off'),mc:TR('빛이 없을 때 읽은 값 (예시)','Reading with no light (example)'),
+ tg:[{k:'hand',l:TR('손을 센서 가까이','Hand near the sensor'),on:false},{k:'wind',l:TR('바람이 분다','Air current'),on:false}],
+ e:(v,g)=>T(14,20,TR('레이저 꺼짐: 들어오는 빛 없음','Laser off: no light coming in'),'lab')
+  +`<rect x="198" y="80" width="80" height="120" class="dev"/><rect x="188" y="80" width="10" height="120" style="fill:#2b2f36"/>`+T(238,216,TR('흡수체 (왼쪽 검은 면)','Absorber (black face on the left)'),'sub','middle')
+  +(g.hand?`<g data-n="1"><rect x="40" y="112" width="70" height="56" rx="14" style="fill:#f0c9a8;stroke:var(--muted)" stroke-width="1"/>${T(75,144,TR('손','hand'),'sub','middle')}${[126,140,154].map(y=>LN(116,y,180,y,COL.s4,{w:1.6,mk:'s4'})).join('')}${T(148,116,TR('열복사','thermal radiation'),'sub','middle',COL.s4)}</g>`:'')
+  +(g.wind?`<g data-n="2">${[0,1,2].map(i=>LN(110+i*18,36,150+i*18,72,COL.s2,{w:1.6,mk:'s2'})).join('')}${T(102,46,TR('바람','air'),'sub','end',COL.s2)}</g>`:'')
+  +T(160,250,g.hand||g.wind?TR('빛이 없는데도 값이 나온다','A value appears although there is no light'):TR('열의 출입이 없으면 0에 머문다','With no heat exchange it stays at zero'),'lab','middle',g.hand||g.wind?COL.s1:undefined),
+ m:(v,g)=>{const P=plot({x:[0,60],y:[-.6,1.6],xt:[0,20,40,60].map(a=>({v:a,l:String(a)})),yt:[-.5,0,.5,1,1.5].map(a=>({v:a,l:String(a)})),xl:TR('시간 (s)','time (s)'),yl:TR('읽은 값 (mW, 예시)','reading (mW, example)')});
+  return P.s+LN(P.L,P.Y(0),P.R,P.Y(0),'var(--line)',{w:1})+crv(P,t=>lsDrift(t,g),0,60,COL.s1,{n:400})+T(P.L+8,P.Y(1.42),TR('레이저는 계속 꺼져 있다','The laser stays off throughout'),'sub')},
+ read:[TR('Thermopile은 열이면 무엇이든 잰다. 레이저의 열과 다른 열을 구별하지 못한다.','A thermopile measures any heat. It cannot tell laser heat from other heat.'),
+  TR(`${c(1,'s4')} 손이 가까이 있으면 손의 열복사가 흡수체를 데운다. 센서를 손으로 잡았다 놓은 직후에도 값이 천천히 흐른다.`,`${c(1,'s4')} A nearby hand warms the absorber by thermal radiation. The reading also drifts slowly just after the sensor has been held in the hand.`),
+  TR(`${c(2,'s2')} 바람은 흡수체를 식혔다 말았다 해서 값이 흔들린다.`,`${c(2,'s2')} An air current cools the absorber unevenly, and the reading fluctuates.`),
+  TR('그래서 빛을 막은 상태에서 영점(zero)을 먼저 맞춘다. 센서를 옮긴 뒤에는 온도가 자리 잡을 때까지 기다린다.','The zero is therefore set first with the light blocked. After the sensor is moved, some time is given for its temperature to settle.'),
+  TR('세어 보기: 영점이 0.5 mW 흐를 때 1 W를 재면 오차는 0.05 %다. 2 mW를 재면 25 %다. 약한 빛일수록 영점이 중요하다.','Counting it out: with 0.5 mW of zero drift, the error is 0.05 % when measuring 1 W and 25 % when measuring 2 mW. The weaker the light, the more the zero matters.')],
+ q:TR('수 mW의 약한 빛을 thermopile로 잴 때 가장 먼저 의심할 오차는?','When a thermopile measures a weak beam of a few mW, which error is suspected first?'),a:TR('영점 흐름이다. 손, 바람, 센서 자체의 온도 변화가 만드는 값이 신호와 비슷한 크기가 된다.','Zero drift. The values produced by hands, air currents, and temperature changes of the sensor itself become comparable to the signal.')}
+];
+
+/* ================= 탭 2: Photodiode ================= */
+const PDIODE=[
+{t:TR('광자 하나가 전자-정공 쌍 하나를 만든다 (밴드갭)','One photon makes one electron–hole pair (band gap)'),ec:TR('반도체의 에너지띠 (Si)','Energy bands of a semiconductor (Si)'),mc:TR('광자 에너지와 만들어지는 전자 수','Photon energy and electrons produced'),
+ slider:{min:.5,max:3,step:.02,init:1.96,label:TR('광자 에너지','Photon energy'),fmt:v=>v.toFixed(2)+' eV'},
+ e:v=>{const ok=v>=1.12,yt=210-v*53.6;
+  return lsR(110,40,190,110,'var(--s4)',.12,'var(--s4)')+lsR(110,210,190,40,'var(--s2)',.15,'var(--s2)')
+   +T(205,56,TR('전도띠 (비어 있음)','conduction band (empty)'),'sub','middle')+T(205,236,TR('가전자띠 (전자로 가득)','valence band (full)'),'sub','middle')+T(205,202,TR('밴드갭 1.12 eV','band gap 1.12 eV'),'sub','middle')
+   +T(14,168,TR('광자 ','photon ')+v.toFixed(2)+' eV','sub','start',COL.s5)
+   +(ok?`<g data-n="1">${LN(14,180,134,180,COL.s5,{w:2,mk:'s5'})}</g><g data-n="2">${LN(140,210,140,(yt+4).toFixed(1),COL.s1,{w:2,mk:'s1'})}${lsHole(140,218,'var(--s6)')}${lsDot(160,146,'var(--s4)')}</g>`
+     +(yt<132?LN(160,yt.toFixed(1),160,136,'var(--muted)',{w:1.2,dash:1,mk:'g'})+T(168,((yt+150)/2+4).toFixed(1),TR('남는 에너지 → 열','excess → heat'),'sub'):'')
+    :`<g data-n="1">${LN(14,180,300,180,COL.s5,{w:2,dash:1,mk:'s5'})}</g>`+T(205,168,TR('흡수되지 않고 지나간다','passes through unabsorbed'),'sub','middle'))
+   +lsDot(40,264,'var(--s4)',4)+T(50,268,TR('전자','electron'),'sub')+lsHole(120,264,'var(--s6)',4)+T(130,268,TR('정공 (전자가 빠진 자리)','hole (missing electron)'),'sub')
+   +T(14,20,TR('세로: 전자의 에너지','Vertical: electron energy'),'sub')},
+ m:v=>{const P=plot({x:[.5,3],y:[0,1.3],xt:[.5,1,1.5,2,2.5,3].map(a=>({v:a,l:String(a)})),yt:[0,1].map(a=>({v:a,l:String(a)})),xl:TR('광자 에너지 (eV)','photon energy (eV)'),yl:TR('광자 하나당 전자 수 (이상적)','electrons per photon (ideal)'),T:40});
+  return P.s+LN(P.X(1.12),P.T,P.X(1.12),P.B,'var(--muted)',{w:1,dash:1})+T(P.X(1.12)+6,P.T+12,TR('밴드갭','band gap'),'sub')
+   +`<g data-n="2">${PL([[P.X(.5),P.Y(0)],[P.X(1.12),P.Y(0)],[P.X(1.12),P.Y(1)],[P.X(3),P.Y(1)]].map(p=>p.map(a=>+a.toFixed(1))),COL.s4,{w:2})}${lsDot(P.X(v),P.Y(v>=1.12?1:0),'var(--s4)')}</g>`
+   +T(P.R,24,TR('파장 λ = 1240 / E = ','wavelength λ = 1240 / E = ')+(1240/v).toFixed(0)+' nm','lab','end')},
+ read:[TR('포토다이오드는 열을 거치지 않는다. 광자가 반도체 안의 전자를 직접 떼어 낸다.','A photodiode does not go through heat. A photon frees an electron inside the semiconductor directly.'),
+  TR(`반도체의 전자는 가전자띠에 묶여 있다. ${c(1,'s5')} 광자 하나가 흡수되면 ${c(2,'s1')} 전자 하나가 밴드갭을 건너 전도띠로 올라가 움직일 수 있게 된다. 빠진 자리(정공)도 움직인다.`,`Electrons in a semiconductor are bound in the valence band. When ${c(1,'s5')} one photon is absorbed, ${c(2,'s1')} one electron crosses the band gap into the conduction band and becomes mobile. The vacancy it leaves (a hole) is mobile too.`),
+  TR('광자 에너지가 밴드갭보다 작으면 전자를 올릴 수 없다. 빛은 흡수되지 않고 지나간다. Si는 약 1100 nm보다 긴 파장을 보지 못한다.','A photon with less energy than the band gap cannot lift an electron. The light passes through unabsorbed. Si does not see wavelengths longer than about 1100 nm.'),
+  TR('광자 에너지가 밴드갭보다 훨씬 커도 전자는 하나만 나온다. 남는 에너지는 열이 된다.','Even when the photon energy is far above the band gap, only one electron results. The excess energy becomes heat.'),
+  TR('즉 포토다이오드는 에너지가 아니라 광자의 "개수"를 센다. 3단계의 파장 의존성이 여기서 나온다.','So a photodiode counts the number of photons, not their energy. The wavelength dependence of step 3 comes from this.')],
+ q:TR('3 eV 광자와 1.5 eV 광자가 Si에서 만드는 전자 수는?','How many electrons do a 3 eV photon and a 1.5 eV photon each produce in Si?'),a:TR('둘 다 하나씩이다(이상적인 경우). 에너지가 두 배여도 전자는 두 배가 되지 않는다.','One each (ideally). Twice the energy does not give twice the electrons.')},
+
+{t:TR('pn 접합의 전기장이 전하를 갈라 전류가 된다','The field of the pn junction separates the charges into a current'),ec:TR('pn 접합에 빛이 닿으면','Light reaching the pn junction'),mc:TR('빛의 세기와 광전류','Light power and photocurrent'),
+ slider:{min:0,max:1,step:.01,init:.5,label:TR('빛의 세기','Light power'),fmt:v=>Math.round(v*100)+' %'},
+ e:v=>{const n=Math.round(v*6);let s='';for(let k=0;k<n;k++){const y=106+k*9;s+=lsHole(138,y,'var(--s6)',3)+lsDot(182,y,'var(--s4)',3)}
+  return T(14,20,TR('단순화한 단면','Simplified cross-section'),'sub')+lsBeam(160,30,160,70,'var(--s5)',40,(.08+.4*v).toFixed(2))+T(196,50,TR('빛','light'),'sub',undefined,COL.s5)
+   +lsR(30,70,90,110,'var(--s1)',.12,'var(--muted)')+lsR(120,70,80,110,'var(--soft)',1,'var(--muted)')+lsR(200,70,90,110,'var(--s2)',.12,'var(--muted)')
+   +T(75,88,TR('p 영역','p region'),'sub','middle')+T(160,88,TR('공핍층','depletion'),'sub','middle')+T(245,88,TR('n 영역','n region'),'sub','middle')
+   +`<g data-n="1">${LN(194,170,128,170,'var(--muted)',{w:1.4,mk:'g'})}${T(160,164,TR('전기장','field'),'sub','middle')}</g><g data-n="2">${s}</g>`
+   +T(75,140,TR('← 정공','← holes'),'sub','middle')+T(245,140,TR('전자 →','electrons →'),'sub','middle')
+   +PL([[30,125],[14,125],[14,230],[146,230]],'var(--fg)',{w:1.2})+PL([[174,230],[306,230],[306,125],[290,125]],'var(--fg)',{w:1.2})+`<g data-n="3">${lsMeter(160,230,'A')}</g>`
+   +T(160,266,TR('광전류 (상대): ','Photocurrent (relative): ')+v.toFixed(2),'lab','middle')},
+ m:v=>{const P=plot({x:[0,1],y:[0,1.1],xt:[0,.5,1].map(a=>({v:a,l:String(a)})),yt:[0,.5,1].map(a=>({v:a,l:String(a)})),xl:TR('빛의 세기 (상대)','light power (relative)'),yl:TR('광전류 (상대)','photocurrent (relative)')});
+  return P.s+crv(P,a=>a,0,1,COL.s4)+`<g data-n="3">${lsDot(P.X(v),P.Y(v),'var(--s4)')}</g>`+T(P.X(.06),P.Y(1),TR('전류 = 감도 × 파워','current = responsivity × power'),'sub')},
+ read:[TR('전자와 정공이 생기기만 해서는 전류가 되지 않는다. 그대로 두면 다시 만나 사라진다.','Creating electrons and holes is not yet a current. Left alone, they meet again and vanish.'),
+  TR(`p형과 n형 반도체를 붙이면 경계(공핍층)에 ${c(1,'f')} 전기장이 저절로 생긴다.`,`Joining p-type and n-type semiconductor creates a built-in ${c(1,'f')} electric field at the boundary (the depletion layer).`),
+  TR(`${c(2,'s4')} 이 전기장이 전자는 n 쪽으로, 정공은 p 쪽으로 민다. 갈라진 전하가 바깥 회로로 돌아 ${c(3,'s4')} 광전류가 된다.`,`${c(2,'s4')} This field pushes electrons to the n side and holes to the p side. The separated charges flow round the external circuit as the ${c(3,'s4')} photocurrent.`),
+  TR('빛이 두 배면 광자가 두 배, 전자도 두 배다. 광전류는 빛의 파워에 비례한다.','Twice the light means twice the photons and twice the electrons. The photocurrent is proportional to the optical power.'),
+  TR('세어 보기: 633 nm 1 mW는 1초에 광자 약 3 × 10¹⁵개다. 그중 85 %가 전자가 되면 전류는 약 0.43 mA다(가정).','Counting it out: 1 mW at 633 nm is about 3 × 10¹⁵ photons per second. If 85 % of them become electrons, the current is about 0.43 mA (assumed).'),
+  TR('전하가 움직이는 거리가 짧아 응답이 빠르다. 열이 퍼지기를 기다리는 thermopile과 다르다.','The charges travel only a short distance, so the response is fast. This differs from a thermopile, which waits for heat to spread.')],
+ q:TR('pn 접합이 없는 반도체 조각에 빛을 비추면 전류계에 전류가 흐르는가?','Does an ammeter show a current when light falls on a piece of semiconductor with no pn junction?'),a:TR('흐르지 않는다(바깥 전압이 없을 때). 전자와 정공을 한쪽씩으로 가르는 전기장이 없어서 다시 만나 사라진다.','No (with no external voltage). Without a field to send electrons and holes to opposite sides, they meet again and vanish.')},
+
+{t:TR('감도가 파장마다 다르다: 미터에 파장을 입력해야 한다','Responsivity depends on wavelength: the meter needs the wavelength'),ec:TR('같은 1 mW, 파장만 바꾼다','The same 1 mW, only the wavelength changes'),mc:TR('Si 포토다이오드의 감도 (예시)','Responsivity of a Si photodiode (example)'),
+ slider:{min:400,max:1090,step:5,init:800,label:TR('실제 파장','Real wavelength'),fmt:v=>Math.round(v)+' nm'},
+ tg:[{k:'set',l:TR('미터의 파장 설정을 실제 파장에 맞춘다','Meter wavelength setting matched to the real wavelength'),on:false}],
+ e:(v,g)=>{const r=lsResp(v),rd=g.set?1:r/lsResp(633),er=(rd-1)*100;
+  return T(14,20,TR('막대 길이로 비교','Compared by bar length'),'sub')
+   +`<g data-n="1">${T(20,58,TR('실제 파워: 1.00 mW','Real power: 1.00 mW'),'sub')}${lsR(20,64,160,14,'var(--s6)',.6)}</g>`
+   +`<g data-n="2">${T(20,112,TR('광전류: ','Photocurrent: ')+r.toFixed(2)+' mA','sub')}${lsR(20,118,r*300,14,'var(--s4)',.7)}</g>`
+   +`<g data-n="3">${T(20,166,TR('미터가 표시한 값: ','Value shown by the meter: ')+rd.toFixed(2)+' mW','sub')}${lsR(20,172,rd*160,14,'var(--s1)',.7)}</g>`+LN(180,56,180,196,'var(--muted)',{w:1,dash:1})
+   +T(160,232,g.set?TR('설정 = 실제 파장: 값이 맞는다','Setting = real wavelength: the value is right'):TR('미터 설정: 633 nm, 실제: ','Meter setting: 633 nm, real: ')+Math.round(v)+' nm','lab','middle')
+   +(g.set?'':T(160,254,TR('오차 ','Error ')+(er>=0?'+':'−')+Math.abs(er).toFixed(0)+' %','lab','middle',Math.abs(er)>2?COL.s1:undefined))},
+ m:v=>{const P=plot({x:[400,1150],y:[0,1],xt:[400,600,800,1000].map(a=>({v:a,l:String(a)})),yt:[0,.5,1].map(a=>({v:a,l:String(a)})),xl:TR('파장 (nm)','wavelength (nm)'),yl:TR('감도 (A/W, 예시)','responsivity (A/W, example)'),T:46});
+  return P.s+crv(P,l=>l/1240,400,1150,'var(--muted)',{dash:1,w:1.4})+LN(64,14,84,14,'var(--muted)',{w:1.4,dash:1})+T(90,18,TR('이상적: 광자 하나 = 전자 하나','ideal: one photon = one electron'),'sub')
+   +`<g data-n="2">${crv(P,lsResp,400,1150,COL.s4,{n:300})}${LN(64,30,84,30,COL.s4,{w:2})}${T(90,34,TR('Si 예시 곡선','Si example curve'),'sub')}${lsDot(P.X(v),P.Y(lsResp(v)),'var(--s4)')}</g>`
+   +LN(P.X(v),P.T,P.X(v),P.B,'var(--muted)',{w:1,dash:1})},
+ read:[TR('감도는 빛 1 W가 만드는 전류(A/W)다. 포토다이오드는 광자 개수를 세므로(1단계) 감도가 파장에 따라 달라진다.','Responsivity is the current produced per watt of light (A/W). Because a photodiode counts photons (step 1), its responsivity depends on wavelength.'),
+  TR('세어 보기: 같은 1 mW라도 800 nm 광자는 400 nm 광자보다 에너지가 절반이라 개수가 두 배다. 전류도 약 두 배다.','Counting it out: at the same 1 mW, 800 nm photons carry half the energy of 400 nm photons, so there are twice as many. The current is about twice as large.'),
+  TR('그래서 이상적인 감도는 파장에 비례해 올라간다(점선). 밴드갭 한계(Si는 약 1100 nm)에 가까워지면 흡수가 약해져 급히 떨어진다.','The ideal responsivity therefore rises in proportion to wavelength (dashed line). Near the band-gap limit (about 1100 nm for Si) absorption weakens and it falls steeply.'),
+  TR(`미터는 ${c(2,'s4')} 전류만 잰다. 입력된 파장의 감도로 나눠 ${c(3,'s1')} 파워로 바꾼다. 파장 설정이 틀리면 ${c(1,'s6')} 실제 파워와 다른 값이 나온다.`,`The meter measures only the ${c(2,'s4')} current. It divides by the responsivity at the entered wavelength to obtain the ${c(3,'s1')} power. With a wrong wavelength setting the value differs from the ${c(1,'s6')} real power.`),
+  TR('Thermopile은 이 문제가 거의 없다(탭 1의 1단계). 곡선은 예시이고, 실제 값은 센서마다 교정 데이터로 들어 있다.','A thermopile hardly has this problem (tab 1, step 1). The curve is an example; real values are stored as calibration data for each sensor.')],
+ q:TR('미터 설정을 633 nm로 둔 채 800 nm 빛을 쟀다. 값은 실제보다 큰가 작은가?','An 800 nm beam is measured with the meter left at 633 nm. Is the value above or below the real power?'),a:TR('크게 나온다. Si는 800 nm에서 감도가 더 높아 전류가 더 많이 흐르는데, 미터는 그 전류를 633 nm의 낮은 감도로 나누기 때문이다.','Above. Si is more responsive at 800 nm and gives more current, but the meter divides that current by the lower responsivity at 633 nm.')},
+
+{t:TR('민감하고 빠르지만 포화한다 (선형 범위, ND 필터)','Sensitive and fast, but it saturates (linear range, ND filter)'),ec:TR('빛이 다이오드에 닿기까지','From the beam to the diode'),mc:TR('입력 파워와 광전류 (예시)','Input power and photocurrent (example)'),
+ slider:{min:-6,max:0,step:.05,init:-3,label:TR('입력 파워','Input power'),fmt:v=>lsPw(10**v)},
+ tg:[{k:'nd',l:TR('ND 필터 (1/100)를 앞에 둔다','ND filter (1/100) in front'),on:false}],
+ e:(v,g)=>{const p=10**v,att=g.nd?.01:1,pd=p*att,i=lsSat(pd),dev=(i/(.5*pd)-1)*100;
+  return T(14,20,TR('포화 전류 5 mA로 가정 (예시)','Saturation current of 5 mA assumed (example)'),'sub')
+   +lsBeam(20,140,g.nd?124:228,140,'var(--s5)',14,.45)+(g.nd?lsBeam(136,140,228,140,'var(--s5)',14,.15)+`<g data-n="1"><rect x="124" y="96" width="12" height="88" style="fill:var(--fg)" fill-opacity=".55"/>${T(130,88,'ND','sub','middle')}</g>`:'')
+   +box(228,110,80,60,TR('포토다이오드','Photodiode'))
+   +T(66,116,TR('입력 ','input ')+lsPw(p),'sub','middle')+(g.nd?T(182,116,lsPw(pd),'sub','middle'):'')
+   +T(160,220,TR('광전류: ','Photocurrent: ')+lsAmp(i),'lab','middle')
+   +T(160,244,TR('직선에서 벗어남: ','Departure from linear: ')+(dev<-.5?'−'+Math.abs(dev).toFixed(0):'0')+' %','lab','middle',dev<-1?COL.s1:undefined)
+   +T(160,266,dev<-1?TR('미터가 실제보다 작게 읽는다','The meter reads lower than the real power'):TR('선형 범위 안: 값을 믿을 수 있다','Within the linear range: the value can be trusted'),'sub','middle')},
+ m:(v,g)=>{const p=10**v,att=g.nd?.01:1,P=plot({x:[1e-6,1],y:[1e-9,1e-1],logx:1,logy:1,L:70,ylx:12,xt:[{v:1e-6,l:'1 µW'},{v:1e-3,l:'1 mW'},{v:1,l:'1 W'}],yt:[{v:1e-9,l:'1 nA'},{v:1e-7,l:'0.1 µA'},{v:1e-5,l:'10 µA'},{v:1e-3,l:'1 mA'},{v:1e-1,l:'0.1 A'}],xl:TR('입력 파워 (log 눈금)','input power (log scale)'),yl:TR('광전류 (log 눈금)','photocurrent (log scale)')});
+  const ln=f=>{let d='';for(let k=0;k<=120;k++){const a=10**(-6+6*k/120),y=Math.max(1e-9,f(a));if(y>1e-1)break;d+=(d?' L':'M')+P.X(a).toFixed(1)+','+P.Y(y).toFixed(1)}return d};
+  return P.s+LN(P.L,P.Y(5e-3).toFixed(1),P.R,P.Y(5e-3).toFixed(1),'var(--line)',{w:1})+T(P.L+6,P.Y(5e-3)-6,TR('포화 (예시: 5 mA)','saturation (example: 5 mA)'),'sub')
+   +`<path d="${ln(a=>.5*a*att)}" fill="none" style="stroke:var(--muted)" stroke-width="1.4" stroke-dasharray="5 4"/><path d="${ln(a=>lsSat(a*att))}" fill="none" style="stroke:var(--s4)" stroke-width="2"/>`
+   +lsDot(P.X(p),P.Y(Math.max(1e-9,lsSat(p*att))),'var(--s4)')+LN(170,206,190,206,'var(--muted)',{w:1.4,dash:1})+T(196,210,TR('직선 (이상적)','linear (ideal)'),'sub')},
+ read:[TR('포토다이오드는 nW 수준의 약한 빛도 잰다(대략). Thermopile의 영점 흐름(탭 1의 5단계)보다 훨씬 작은 빛이다.','A photodiode measures light as weak as the nW level (approx.). That is far below the zero drift of a thermopile (tab 1, step 5).'),
+  TR('하지만 빛이 세지면 전류가 더는 비례해서 늘지 않는다. 이것이 포화다. 미터는 실제보다 작은 값을 보여 준다.','When the light becomes strong, however, the current no longer grows in proportion. This is saturation. The meter then shows less than the real power.'),
+  TR('포화는 경고 없이 온다. 숫자는 그럴듯하게 계속 나온다.','Saturation arrives without warning. The numbers keep looking plausible.'),
+  TR(`${c(1,'f')} ND 필터를 앞에 두면 다이오드에 닿는 빛이 줄어 더 센 빛까지 직선 범위에 든다. 파워 센서 가운데는 필터가 붙어 있는 것이 많다.`,`${c(1,'f')} An ND filter in front reduces the light on the diode, so stronger beams stay within the linear range. Many power sensors have a filter built in.`),
+  TR('짧은 펄스는 평균 파워가 작아도 순간 세기가 커서 더 일찍 포화할 수 있다.','Short pulses can saturate earlier, because the instantaneous intensity is high even when the average power is low.'),
+  TR('포화 전류 5 mA와 감도 0.5 A/W는 예시다. 실제 한계는 센서 사양표에 있다.','The 5 mA saturation current and the 0.5 A/W responsivity are examples. Real limits are in the sensor specification.')],
+ q:TR('빛을 ND 필터로 절반으로 줄였는데 읽은 값이 절반보다 덜 줄었다. 무엇을 뜻하나?','An ND filter halves the light, but the reading falls by less than half. What does this indicate?'),a:TR('필터를 넣기 전에 다이오드가 포화해 있었다. 줄이기 전의 값이 실제보다 작게 읽힌 것이다.','The diode was saturated before the filter went in. The earlier value was reading lower than the real power.')},
+
+{t:TR('재료가 파장 범위를 정한다 (Si, InGaAs, Ge)','The material sets the wavelength range (Si, InGaAs, Ge)'),ec:TR('재료별 밴드갭','Band gap by material'),mc:TR('쓸 수 있는 파장 범위 (대략)','Usable wavelength range (approx.)'),
+ e:()=>{const it=[[1,'Si',1.12,'1100','s3'],[2,'InGaAs',.75,'1650','s4'],[3,'Ge',.67,'1850','s5']];
+  return T(14,20,TR('밴드갭이 작을수록 긴 파장까지 본다','A smaller band gap reaches longer wavelengths'),'sub')
+   +it.map(([n,nm,eg,lc,k],i)=>{const x=25+i*100,h=eg*90;return `<g data-n="${n}">${lsR(x,206,70,26,COL[k],.25,COL[k])}${lsR(x,206-h-26,70,26,COL[k],.12,COL[k])}${LN(x+35,204,x+35,206-h+4,COL[k],{w:1.6,mk:k})}${T(x+41,206-h/2+4,eg.toFixed(2)+' eV','sub')}${T(x+35,250,nm,'lab','middle')}${T(x+35,268,TR('약 ','about ')+lc+TR(' nm까지',' nm max.'),'sub','middle')}</g>`}).join('')},
+ m:()=>{const P=plot({x:[200,2000],noy:1,xt:[400,800,1200,1600,2000].map(a=>({v:a,l:String(a)})),xl:TR('파장 (nm)','wavelength (nm)'),L:20,R:300,T:30,B:236});
+  const it=[[1,'Si',400,1100,'s3'],[2,'InGaAs',800,1700,'s4'],[3,'Ge',700,1800,'s5']];
+  return P.s+[800,1030,1550].map(l=>LN(P.X(l).toFixed(1),40,P.X(l).toFixed(1),P.B,'var(--line)',{w:1.2})+T(P.X(l),34,String(l),'sub','middle')).join('')+T(P.L,16,TR('세로 선: 레이저 파장 예시 (nm)','Vertical lines: example laser wavelengths (nm)'),'sub')
+   +it.map(([n,nm,a,b,k],i)=>{const y=74+i*50;return `<g data-n="${n}">${lsR(P.X(a),y,P.X(b)-P.X(a),14,COL[k],.6)}${T(P.X(a),y-6,`${nm}: ${a}–${b} nm`,'sub')}</g>`}).join('')
+   +T(P.R,222,TR('2000 nm보다 긴 파장 → thermopile','longer than 2000 nm → thermopile'),'sub','end')},
+ read:[TR('1단계에서 본 대로 광자 에너지가 밴드갭보다 커야 흡수된다. 그래서 밴드갭이 긴 파장 쪽 한계를 정한다.','As seen in step 1, a photon is absorbed only if its energy exceeds the band gap. The band gap therefore sets the long-wavelength limit.'),
+  TR(`${c(1,'s3')} Si: 밴드갭 1.12 eV, 약 1100 nm까지. 가시광과 800 nm 근처에 쓴다.`,`${c(1,'s3')} Si: band gap 1.12 eV, up to about 1100 nm. Used for the visible and around 800 nm.`),
+  TR(`${c(2,'s4')} InGaAs: 약 0.75 eV, 약 1700 nm까지. 1030 nm, 1550 nm 같은 근적외선에 쓴다.`,`${c(2,'s4')} InGaAs: about 0.75 eV, up to about 1700 nm. Used for the near infrared such as 1030 nm and 1550 nm.`),
+  TR(`${c(3,'s5')} Ge: 약 0.67 eV, 약 1800 nm까지. InGaAs와 비슷한 범위다.`,`${c(3,'s5')} Ge: about 0.67 eV, up to about 1800 nm. Its range is similar to that of InGaAs.`),
+  TR('1030 nm는 Si 범위의 끝자락이다. 감도가 낮고 온도에 따라 잘 변해서 InGaAs나 Ge가 더 맞다.','1030 nm lies at the edge of the Si range. The responsivity there is low and varies with temperature, so InGaAs or Ge fits better.'),
+  TR('중적외선(예: 3–10 µm)은 세 재료 모두 범위 밖이다. 파워는 thermopile로 잰다. 오른쪽 범위는 일반적인 파워 센서 기준의 대략 값이다.','The mid-infrared (for example 3–10 µm) is outside the range of all three. Power there is measured with a thermopile. The ranges on the right are approximate values for typical power sensors.')],
+ q:TR('1550 nm 빛을 Si 포토다이오드 센서로 재면?','What happens when 1550 nm light is measured with a Si photodiode sensor?'),a:TR('거의 0이 나온다. 1550 nm 광자(0.80 eV)는 Si 밴드갭(1.12 eV)보다 에너지가 작아 흡수되지 않는다. InGaAs나 Ge 센서를 쓴다.','Almost zero. A 1550 nm photon (0.80 eV) has less energy than the Si band gap (1.12 eV) and is not absorbed. An InGaAs or Ge sensor is used.')}
+];
+
+/* ================= 탭 3: Pyroelectric ================= */
+const PYRO=[
+{t:TR('초전 결정: 온도가 바뀌면 표면 전하가 바뀐다','A pyroelectric crystal: a temperature change alters the surface charge'),ec:TR('초전 결정의 단면 (모식도)','Cross-section of a pyroelectric crystal (sketch)'),mc:TR('온도와 분극 (예시)','Temperature and polarization (example)'),
+ slider:{min:20,max:60,step:.5,init:25,label:TR('결정 온도','Crystal temperature'),fmt:v=>v.toFixed(1)+' °C'},
+ e:v=>{const ps=lsPs(v),n=Math.round(13*ps),len=72*ps;let s='';
+  for(let i=0;i<n;i++){const x=98+i*124/(n-1);s+=T(x.toFixed(1),83,'+','lab','middle',COL.s1)+T(x.toFixed(1),208,'−','lab','middle',COL.s2)}
+  return T(14,20,TR('변화는 보기 쉽게 과장','Change exaggerated for clarity'),'sub')+T(160,60,TR('표면 전하','surface charge'),'sub','middle')
+   +lsR(90,90,140,100,'var(--s5)',.1,'var(--s5)')+LN(90,90,230,90,'var(--fg)',{w:3})+LN(90,190,230,190,'var(--fg)',{w:3})+T(240,94,TR('전극','electrode'),'sub')
+   +`<g data-n="1">${[110,135,160,185,210].map(x=>LN(x,(140+len/2).toFixed(1),x,(140-len/2).toFixed(1),COL.s5,{w:2,mk:'s5'})).join('')}</g><g data-n="2">${s}</g>`
+   +T(160,236,TR('안쪽 화살표: 결정이 스스로 가진 분극','Arrows inside: built-in polarization of the crystal'),'sub','middle')+T(160,260,`T = ${v.toFixed(1)} °C`,'lab','middle')},
+ m:v=>{const P=plot({x:[20,120],y:[0,1.1],xt:[20,40,60,80,100,120].map(a=>({v:a,l:String(a)})),yt:[0,.5,1].map(a=>({v:a,l:String(a)})),xl:TR('온도 (°C, 예시 값)','temperature (°C, example values)'),yl:TR('분극 (상대, 예시)','polarization (relative, example)')});
+  const sl=-1/(240*lsPs(v)),f=a=>lsPs(v)+sl*(a-v);
+  return P.s+`<g data-n="1">${crv(P,lsPs,20,120,COL.s5,{n:300})}</g>`+crv(P,f,Math.max(20,v-18),v+18,COL.s1,{w:1.6})+lsDot(P.X(v),P.Y(lsPs(v)),'var(--s5)')
+   +T(P.X(72),P.Y(1.02),TR('빨간 선의 기울기 = 초전 계수','slope of the red line = pyroelectric coefficient'),'sub','middle')},
+ read:[TR('초전 결정(예: LiTaO₃)은 전압을 걸지 않아도 안쪽 전하가 한쪽으로 쏠려 있다. 이것이 자발 분극이다.','In a pyroelectric crystal (for example LiTaO₃) the internal charge is displaced to one side even with no applied voltage. This is spontaneous polarization.'),
+  TR(`${c(1,'s5')} 분극 때문에 결정의 두 면에는 ${c(2,'s1')} 반대 부호의 표면 전하가 붙어 있다. 그림에서 빨강은 +, 파랑은 − 전하다.`,`Because of the ${c(1,'s5')} polarization, the two faces of the crystal carry ${c(2,'s1')} surface charges of opposite sign. In the figure red is + and blue is − charge.`),
+  TR('온도가 오르면 원자들이 더 흔들려 분극이 줄어든다. 그러면 표면에 붙어 있을 전하의 양도 줄어든다.','When the temperature rises, the atoms move more and the polarization decreases. The amount of charge held at the surfaces decreases with it.'),
+  TR('온도 1 K에 분극이 얼마나 변하는지가 초전 계수다. 오른쪽 곡선의 기울기다.','The pyroelectric coefficient is the change of polarization per kelvin. It is the slope of the curve on the right.'),
+  TR('그림의 온도 값과 곡선은 원리를 보이는 예시다. 실제 결정에서 분극이 사라지는 온도는 훨씬 높고, 센서의 온도 변화는 훨씬 작다.','The temperatures and the curve in the figure are examples that show the principle. In real crystals the polarization vanishes at a much higher temperature, and the temperature changes in a sensor are much smaller.')],
+ q:TR('Thermopile도 초전 센서도 빛을 열로 바꿔서 잰다. 초전 결정에서 열이 바꾸는 것은 무엇인가?','Both a thermopile and a pyroelectric sensor measure light through heat. What does the heat change in a pyroelectric crystal?'),a:TR('결정의 분극, 곧 표면에 붙어 있는 전하의 양이다. Thermopile에서는 두 금속 접점 사이의 온도 차였다.','The polarization of the crystal, that is, the amount of charge held at its surfaces. In a thermopile it was the temperature difference between two metal junctions.')},
+
+{t:TR('온도가 변할 때만 전류가 흐른다: CW는 못 잰다','Current flows only while the temperature changes: CW cannot be measured'),ec:TR('결정과 전류계','Crystal and ammeter'),mc:TR('CW 빛을 켰다 끌 때 (예시)','CW light switched on and off (example)'),
+ slider:{min:0,max:10,step:.02,init:0,label:TR('시간','Time'),fmt:v=>v.toFixed(1)+' s',play:1},
+ e:v=>{const on=v>=2&&v<7,tt=lsTemp(v),i=lsCur(v);
+  return T(14,20,on?TR('빛 켜짐 (CW)','Light on (CW)'):TR('빛 꺼짐','Light off'),'lab')+(on?lsBeam(160,30,160,100,'var(--s1)',44,.3):'')
+   +`<g data-n="1">${lsR(110,100,100,70,'var(--s4)',(.08+.5*tt).toFixed(2),'var(--fg)')}</g>`+T(160,132,TR('결정','crystal'),'sub','middle')+T(160,150,TR('온도 변화 ','temp. change ')+tt.toFixed(2),'sub','middle')
+   +PL([[110,112],[60,112],[60,225],[146,225]],'var(--fg)',{w:1.2})+PL([[174,225],[260,225],[260,158],[210,158]],'var(--fg)',{w:1.2})+`<g data-n="2">${lsMeter(160,225,'A')}`
+   +(i>.03?LN(272,214,272,174,COL.s5,{w:2.5,mk:'s5'}):i<-.03?LN(272,174,272,214,COL.s5,{w:2.5,mk:'s5'}):'')+`</g>`
+   +T(160,264,i>.03?TR('데워지는 중 → 전류가 흐른다','Warming → current flows'):i<-.03?TR('식는 중 → 전류가 반대로 흐른다','Cooling → current flows the other way'):TR('온도 일정 → 전류 0','Constant temperature → zero current'),'lab','middle',Math.abs(i)>.03?COL.s5:undefined)},
+ m:v=>{const A1=plot({x:[0,10],y:[0,1.25],T:30,B:112}),A2=plot({x:[0,10],y:[-1.2,1.2],T:150,B:236,xt:[0,2,4,6,8,10].map(a=>({v:a,l:String(a)})),xl:TR('시간 (s, 예시)','time (s, example)')});
+  const sh=A=>lsR(A.X(2),A.T,A.X(7)-A.X(2),A.B-A.T,'var(--s1)',.07);
+  return sh(A1)+sh(A2)+A1.s+A2.s+T(60,22,TR('결정의 온도 변화','Temperature change of the crystal'),'sub')+T(60,142,TR('전류 ∝ 온도가 변하는 빠르기','Current ∝ rate of temperature change'),'sub')
+   +T(A1.X(4.5),106,TR('빛 켜짐','light on'),'sub','middle')+LN(A2.L,A2.Y(0),A2.R,A2.Y(0),'var(--line)',{w:1})
+   +`<g data-n="1">${crv(A1,lsTemp,0,10,COL.s4,{n:400})}${lsDot(A1.X(v),A1.Y(lsTemp(v)),'var(--s4)',4)}</g><g data-n="2">${crv(A2,lsCur,0,10,COL.s5,{n:400})}${lsDot(A2.X(v),A2.Y(lsCur(v)),'var(--s5)',4)}</g>`
+   +LN(A1.X(v),A1.T,A1.X(v),A2.B,'var(--muted)',{w:1,dash:1})},
+ read:[TR('온도가 일정하면 표면 전하는 전극에 모인 반대 전하와 짝이 맞아 있다. 아무것도 흐르지 않는다.','At constant temperature the surface charge is balanced by opposite charge collected on the electrodes. Nothing flows.'),
+  TR(`${c(1,'s4')} 온도가 변하면 표면 전하가 변한다(1단계). 그 차이만큼 전극의 전하가 회로를 돌아 ${c(2,'s5')} 전류가 된다.`,`When the ${c(1,'s4')} temperature changes, the surface charge changes (step 1). The electrode charge moves round the circuit by that difference as a ${c(2,'s5')} current.`),
+  TR('전류는 온도 자체가 아니라 온도가 변하는 빠르기에 비례한다.','The current is proportional to the rate of change of temperature, not to the temperature itself.'),
+  TR('CW 빛을 켜면 처음에만 전류가 흐른다. 온도가 자리 잡으면 빛이 계속 들어와도 전류는 0이다.','When CW light is switched on, current flows only at first. Once the temperature has settled, the current is zero although light keeps arriving.'),
+  TR('빛을 끄면 결정이 식으면서 전류가 반대 방향으로 흐른다.','When the light is switched off, the crystal cools and the current flows in the opposite direction.'),
+  TR('그래서 초전 센서는 일정한 빛을 그대로는 재지 못한다. 펄스나, 초퍼로 끊어 준 빛을 잰다.','A pyroelectric sensor therefore cannot measure steady light as it is. It measures pulses, or light interrupted by a chopper.')],
+ q:TR('초전 센서에 CW 레이저를 계속 비추고 있다. 미터 값은?','A CW laser shines steadily on a pyroelectric sensor. What does the meter show?'),a:TR('0에 가깝다. 결정의 온도가 더는 변하지 않아 전류가 흐르지 않는다.','Close to zero. The crystal temperature no longer changes, so no current flows.')},
+
+{t:TR('펄스 하나의 에너지를 잰다 (전압 봉우리 ∝ 에너지)','It measures the energy of one pulse (voltage peak ∝ energy)'),ec:TR('펄스 하나가 전압이 되기까지','From one pulse to a voltage'),mc:TR('펄스 하나에 대한 센서 전압 (예시)','Sensor voltage for one pulse (example)'),
+ slider:{min:.5,max:10,step:.1,init:4,label:TR('펄스 에너지','Pulse energy'),fmt:v=>v.toFixed(1)+' mJ'},
+ e:v=>T(14,20,TR('단순화한 순서','Simplified sequence'),'sub')
+  +`<g data-n="1"><path d="M32,150 L40,${(150-9.5*v).toFixed(1)} L48,150 Z" style="fill:var(--s1)"/>${T(40,168,TR('펄스','pulse'),'sub','middle')}${T(40,184,v.toFixed(1)+' mJ','sub','middle')}</g>`
+  +LN(60,130,102,130,'var(--muted)',{w:1.2,mk:'g'})+`<g data-n="2">${box(108,100,82,60,TR('흡수체','absorber'),TR('+ 결정','+ crystal'))}</g>`+LN(190,130,216,130,'var(--muted)',{w:1.2,mk:'g'})+`<g data-n="3">${box(222,100,84,60,TR('전하','charge'),TR('→ 전압','→ voltage'))}</g>`
+  +T(160,212,TR('온도 상승 ∝ 에너지 → 전하 ∝ 온도 상승','temperature rise ∝ energy → charge ∝ rise'),'sub','middle')
+  +T(160,244,TR('봉우리 전압 = ','Peak voltage = ')+(.5*v).toFixed(2)+' V','lab','middle')+T(160,264,TR('0.5 V/mJ로 가정 (예시)','0.5 V/mJ assumed (example)'),'sub','middle'),
+ m:v=>{const P=plot({x:[0,2],y:[0,5.6],xt:[0,.5,1,1.5,2].map(a=>({v:a,l:String(a)})),yt:[0,1,2,3,4,5].map(a=>({v:a,l:String(a)})),xl:TR('시간 (ms, 예시)','time (ms, example)'),yl:TR('센서 전압 (V, 예시)','sensor voltage (V, example)')});
+  const pk=.5*v,tp=.2+.1075;
+  return P.s+LN(P.L,P.Y(pk).toFixed(1),P.X(tp).toFixed(1),P.Y(pk).toFixed(1),'var(--muted)',{w:1,dash:1})+`<g data-n="1">${LN(P.X(.2).toFixed(1),P.B,P.X(.2).toFixed(1),P.B-16,COL.s1,{w:3})}</g>`
+   +`<g data-n="3">${crv(P,t=>pk*lsP1(t-.2),0,2,COL.s5,{n:400})}${lsDot(P.X(tp),P.Y(pk),'var(--s5)')}</g>`+T(P.X(1.15),P.Y(5.1),TR('봉우리 높이 ∝ 펄스 에너지','peak height ∝ pulse energy'),'sub','middle')},
+ read:[TR(`${c(1,'s1')} 펄스 하나가 ${c(2,'f')} 흡수체에 흡수되면 결정의 온도가 순간적으로 조금 오른다. 오르는 양은 펄스 에너지에 비례한다.`,`When ${c(1,'s1')} one pulse is absorbed in the ${c(2,'f')} absorber, the crystal temperature rises slightly and suddenly. The rise is proportional to the pulse energy.`),
+  TR(`온도가 오른 만큼 전하가 흘러나온다(2단계). 이 전하가 ${c(3,'s5')} 전압 봉우리를 만든다.`,`Charge flows out in proportion to the temperature rise (step 2). This charge produces the ${c(3,'s5')} voltage peak.`),
+  TR('그래서 봉우리 높이가 펄스 에너지에 비례한다. 미터는 봉우리 높이를 읽어 에너지(J)로 보여 준다.','The peak height is therefore proportional to the pulse energy. The meter reads the peak height and shows it as energy (J).'),
+  TR('펄스 길이는 상관이 적다. 펨토초 펄스든 나노초 펄스든 센서 응답보다 짧으면 에너지가 같을 때 봉우리가 같다.','The pulse duration matters little. Femtosecond or nanosecond, any pulse shorter than the sensor response gives the same peak for the same energy.'),
+  TR('세어 보기: 평균 파워 = 펄스 에너지 × 반복률이다. 1 mJ 펄스가 1초에 1000번이면 평균 1 W다.','Counting it out: average power = pulse energy × repetition rate. Pulses of 1 mJ at 1000 per second give 1 W on average.'),
+  TR('흡수체는 thermopile처럼 넓은 파장을 흡수한다. 파장을 거의 가리지 않는다.','The absorber takes in a wide range of wavelengths, as in a thermopile. It is almost wavelength independent.')],
+ q:TR('에너지가 같은 100 fs 펄스와 10 ns 펄스를 초전 센서로 재면 봉우리 높이는?','A 100 fs pulse and a 10 ns pulse of equal energy are measured with a pyroelectric sensor. How do the peak heights compare?'),a:TR('거의 같다. 둘 다 센서 응답보다 훨씬 짧아서, 결정이 받은 열(에너지)만 봉우리를 정한다.','Nearly equal. Both are much shorter than the sensor response, so only the heat (energy) received by the crystal sets the peak.')},
+
+{t:TR('반복률 한계: 다음 펄스 전에 신호가 끝나야 한다','Repetition-rate limit: the signal must end before the next pulse'),ec:TR('레이저 펄스열 (10 ms 구간)','Laser pulse train (10 ms window)'),mc:TR('센서 전압 (예시)','Sensor voltage (example)'),
+ slider:{min:.2,max:5,step:.1,init:.5,label:TR('반복률','Repetition rate'),fmt:v=>v.toFixed(1)+' kHz'},
+ e:v=>{const tp=1/v,ok=tp>=1.2;let s='';for(let k=0;k*tp<=10.001;k++){const x=(20+k*tp*28).toFixed(1);s+=LN(x,150,x,90,COL.s1,{w:2})}
+  return T(14,20,TR('세로 선 하나가 펄스 하나','One vertical line is one pulse'),'sub')+`<g data-n="1">${s}</g>`+LN(20,150,300,150,'var(--muted)',{w:1})
+   +`<g data-n="2">${lsR(20,158,28,7,'var(--s5)',.8)}</g>`+T(54,166,TR('신호 하나의 길이 ≈ 1 ms (예시)','one signal lasts ≈ 1 ms (example)'),'sub')
+   +T(160,206,TR('펄스 간격 = ','Pulse spacing = ')+tp.toFixed(2)+' ms','lab','middle')
+   +T(160,240,ok?TR('간격 > 신호 길이: 펄스마다 따로 잰다','Spacing > signal length: each pulse measured separately'):TR('간격 < 신호 길이: 신호가 겹친다','Spacing < signal length: the signals overlap'),'lab','middle',ok?COL.s3:COL.s1)},
+ m:v=>{const tp=1/v,P=plot({x:[0,10],y:[0,2.4],xt:[0,2,4,6,8,10].map(a=>({v:a,l:String(a)})),yt:[0,1,2].map(a=>({v:a,l:String(a)})),xl:TR('시간 (ms)','time (ms)'),yl:TR('센서 전압 (상대)','sensor voltage (relative)')});
+  return P.s+LN(P.L,P.Y(1).toFixed(1),P.R,P.Y(1).toFixed(1),'var(--muted)',{w:1,dash:1})+`<g data-n="2">${crv(P,t=>lsTrain(t,tp),0,10,COL.s5,{n:700,w:1.6})}</g>`
+   +T(P.R-2,P.Y(2.2),TR('점선: 펄스 하나만 있을 때의 봉우리','dashed: peak of a single pulse alone'),'sub','end')},
+ read:[TR(`3단계의 전압 봉우리는 바로 끝나지 않는다. 결정이 식고 전하가 빠지는 데 ${c(2,'s5')} 시간이 걸린다(예시: 약 1 ms).`,`The voltage peak of step 3 does not end at once. Cooling of the crystal and draining of the charge take ${c(2,'s5')} time (example: about 1 ms).`),
+  TR(`${c(1,'s1')} 펄스 간격이 이 길이보다 길면 봉우리가 하나씩 따로 선다. 높이가 펄스 에너지를 그대로 알려 준다.`,`When the ${c(1,'s1')} pulse spacing is longer than this, the peaks stand apart. Each height gives the pulse energy directly.`),
+  TR('간격이 더 짧아지면 앞 신호가 끝나기 전에 다음 신호가 올라탄다. 봉우리 높이가 더는 펄스 하나의 에너지가 아니다.','When the spacing becomes shorter, the next signal rides on the tail of the previous one. The peak height is then no longer the energy of one pulse.'),
+  TR('그래서 초전 센서마다 최대 반복률이 정해져 있다. 종류에 따라 수십 Hz에서 수십 kHz까지 다르다(대략).','Each pyroelectric sensor therefore has a maximum repetition rate. It ranges from tens of Hz to tens of kHz, depending on the type (approx.).'),
+  TR('한계를 넘는 레이저(예: 80 MHz 오실레이터)는 펄스마다 재지 못한다. 평균 파워를 thermopile이나 포토다이오드로 잰다.','A laser above the limit (for example an 80 MHz oscillator) cannot be measured pulse by pulse. Its average power is measured with a thermopile or a photodiode.')],
+ q:TR('최대 반복률이 1 kHz인 초전 센서로 5 kHz 레이저의 펄스 에너지를 재도 되는가?','May a pyroelectric sensor with a 1 kHz maximum repetition rate measure the pulse energy of a 5 kHz laser?'),a:TR('안 된다. 신호가 겹쳐 값이 틀린다. 더 빠른 센서를 쓰거나, 평균 파워를 재서 반복률로 나눈다.','No. The signals overlap and the value is wrong. A faster sensor is used, or the average power is measured and divided by the repetition rate.')},
+
+{t:TR('Thermopile과 다른 점: 같은 "열" 센서, 다른 물리량','How it differs from a thermopile: both sense heat, but different quantities'),ec:TR('두 열 센서가 보는 것','What the two thermal sensors look at'),mc:TR('같은 입력에 대한 두 센서의 출력 (모식)','Outputs of the two sensors for the same input (schematic)'),
+ tg:[{k:'pulse',l:TR('입력을 펄스 하나로 바꾼다','Change the input to a single pulse'),on:false}],
+ e:(v,g)=>{let z=[[74,96]];for(let i=0;i<8;i++)z.push([82+i*16,i%2?96:76]);z.push([206,86]);
+  return `<g data-n="1">${T(14,52,'Thermopile','lab','start',COL.s4)}${lsR(30,64,44,44,'var(--s1)',.3,'var(--muted)')}${T(52,90,TR('뜨거움','hot'),'sub','middle')}${PL(z,COL.s4,{w:1.6})}${lsR(206,64,44,44,'var(--s2)',.2,'var(--muted)')}${T(228,90,TR('차가움','cold'),'sub','middle')}${T(140,126,TR('열이 흘러 지나가며 온도 차를 만든다','Heat flowing through keeps a difference'),'sub','middle')}${T(284,90,'V ∝ ΔT','lab','middle')}</g>`
+   +`<g data-n="2">${T(14,166,'Pyroelectric','lab','start',COL.s5)}${lsR(30,178,60,44,'var(--s5)',.2,'var(--s5)')}${T(60,204,TR('결정','crystal'),'sub','middle')}${T(102,196,TR('결정 온도가 변하는 동안만','Only while the crystal temperature changes'),'sub')}${T(102,216,'I ∝ dT/dt','lab')}</g>`
+   +T(14,20,TR('ΔT: 두 곳의 온도 차 / dT/dt: 온도가 변하는 빠르기','ΔT: difference between two places / dT/dt: rate of change'),'sub')
+   +T(160,262,g.pulse?TR('입력: 펄스 하나','Input: a single pulse'):TR('입력: CW 빛을 켠다','Input: CW light switched on'),'lab','middle')},
+ m:(v,g)=>{const A1=plot({x:[0,10],y:[0,1.25],T:30,B:112}),A2=plot({x:[0,10],y:[0,1.25],T:150,B:236,xl:TR('시간 (모식, 두 센서의 눈금은 다름)','time (schematic; the two scales differ)')});
+  const th=g.pulse?t=>.9*lsTwo(t-1,.4,1.5)/.445:lsRise,py=t=>lsTwo(t-1,.05,.3)/.5826;
+  const inp=A=>g.pulse?LN(A.X(1).toFixed(1),A.B,A.X(1).toFixed(1),A.T,COL.s1,{w:2}):lsR(A.X(1),A.T,A.R-A.X(1),A.B-A.T,'var(--s1)',.07);
+  return inp(A1)+inp(A2)+A1.s+A2.s+T(60,22,TR('Thermopile 출력','Thermopile output'),'sub','start',COL.s4)+T(60,142,TR('Pyroelectric 출력','Pyroelectric output'),'sub','start',COL.s5)
+   +`<g data-n="1">${crv(A1,th,0,10,COL.s4,{n:400})}</g><g data-n="2">${crv(A2,py,0,10,COL.s5,{n:600})}</g>`
+   +(g.pulse?T(A1.R-4,46,TR('느린 혹: 넓이 ∝ 에너지','slow bump: area ∝ energy'),'sub','end')+T(A2.R-4,190,TR('봉우리 높이 ∝ 에너지','peak height ∝ energy'),'sub','end')
+     :T(A1.R-4,102,TR('멈춘 높이 ∝ 파워','settled level ∝ power'),'sub','end')+T(A2.R-4,190,TR('켤 때 한 번뿐, 그 뒤로 0','one blip at switch-on, then zero'),'sub','end'))},
+ read:[TR('두 센서 모두 빛을 흡수체에서 열로 바꾼다. 그래서 둘 다 파장을 거의 가리지 않는다.','Both sensors turn light into heat in an absorber. Both are therefore almost wavelength independent.'),
+  TR(`${c(1,'s4')} Thermopile은 열이 방열판으로 흘러 나가며 생기는 온도 "차"를 잰다. 빛이 계속 들어오면 온도 차가 유지되고 전압도 유지된다. 그래서 CW와 평균 파워를 잰다.`,`${c(1,'s4')} A thermopile measures the temperature difference kept up by heat flowing out to the heat sink. While light keeps arriving, the difference and the voltage persist. It therefore measures CW and average power.`),
+  TR(`${c(2,'s5')} 초전 센서는 결정 온도가 "변하는 빠르기"에 반응한다. 변화가 멈추면 신호도 사라진다. 그래서 펄스 하나의 에너지를 잰다.`,`${c(2,'s5')} A pyroelectric sensor responds to the rate of change of the crystal temperature. When the change stops, the signal disappears. It therefore measures the energy of a single pulse.`),
+  TR('속도도 다르다. Thermopile은 열이 퍼지기를 기다려 초 단위이고, 초전 센서는 얇은 결정이 데워지는 순간을 보므로 ms 이하다(대략).','The speeds also differ. A thermopile waits for heat to spread and works on the scale of seconds; a pyroelectric sensor watches the moment a thin crystal warms, on the scale of ms or less (approx.).'),
+  TR('Thermopile 가운데는 펄스 하나의 느린 혹을 적분해 에너지를 구하는 기능이 있는 것도 있다. 반복률이 아주 낮을 때만 쓸 수 있다.','Some thermopiles can obtain energy by integrating the slow bump of a single pulse. This works only at very low repetition rates.')],
+ q:TR('1 kHz 레이저의 "평균 파워"와 "펄스마다의 에너지 흔들림"을 각각 어느 센서로 보는가?','For a 1 kHz laser, which sensor shows the average power and which shows the pulse-to-pulse energy fluctuation?'),a:TR('평균 파워는 thermopile, 펄스마다의 흔들림은 초전 센서다. Thermopile은 느려서 펄스를 평균하고, 초전 센서는 펄스마다 봉우리를 준다.','The thermopile shows the average power and the pyroelectric sensor the fluctuation. The thermopile is slow and averages the pulses; the pyroelectric sensor gives a peak for every pulse.')}
+];
+
+/* ================= 탭 4: 비교와 고르기 ================= */
+const lsPick=g=>g.pulse?'py':g.weak&&g.inband?'pd':'th';
+const CHOOSE=[
+{t:TR('한눈에 비교: 재는 양, 속도, 파장, 범위','At a glance: quantity, speed, wavelength, range'),ec:TR('빛이 전기 신호가 되는 길','How light becomes an electrical signal'),mc:TR('세 센서 비교 (대략)','The three sensors compared (approx.)'),
+ e:()=>{const rows=[[1,'Thermopile','th',[TR('빛','light'),TR('열','heat'),TR('온도 차','ΔT'),TR('전압','voltage')]],[2,'Photodiode','pd',[TR('광자','photon'),TR('전자·정공','e–h pair'),TR('전류','current')]],[3,'Pyroelectric','py',[TR('빛','light'),TR('열','heat'),TR('온도 변화','dT/dt'),TR('전류','current')]]];
+  return T(14,20,TR('상자 수가 적을수록 직접 바꾸는 것이다','Fewer boxes means a more direct conversion'),'sub')
+   +rows.map(([n,nm,k,bx],i)=>{const y=58+i*80,col=COL[lsC[k]];return `<g data-n="${n}">${T(14,y-10,nm,'lab','start',col)}${bx.map((s,j)=>`<rect x="${14+j*78}" y="${y}" width="62" height="30" rx="4" style="fill:var(--soft);stroke:${col}" stroke-width="1.2"/>`+T(45+j*78,y+19,s,'sub','middle')+(j<bx.length-1?LN(77+j*78,y+15,90+j*78,y+15,'var(--muted)',{w:1.2,mk:'g'}):'')).join('')}</g>`}).join('')},
+ m:()=>{const rows=[[TR('재는 양','Measures'),TR('평균 파워','avg. power'),TR('평균 파워','avg. power'),TR('펄스 에너지','pulse energy')],[TR('응답','Response'),TR('약 1 s 이상','about 1 s up'),TR('ns–µs','ns–µs'),TR('µs–ms','µs–ms')],[TR('파장','Wavelength'),TR('넓다','broad'),TR('재료별','by material'),TR('넓다','broad')],[TR('범위','Range'),'µW–kW','nW–mW','µJ–J'],[TR('파장 설정','λ setting'),TR('영향 작음','minor'),TR('필수','required'),TR('영향 작음','minor')]];
+  return [['Thermopile','th',122],['Photodiode','pd',198],['Pyroelectric','py',272]].map(([s,k,x],i)=>`<g data-n="${i+1}">${T(x,26,s,'sub','middle',COL[lsC[k]])}</g>`).join('')+L(6,314,38,'ax')
+   +rows.map(([a,b,d,e2],i)=>{const y=66+i*42;return T(8,y,a,'sub')+`<g data-n="1">${T(122,y,b,'sub','middle',COL.f)}</g><g data-n="2">${T(198,y,d,'sub','middle',COL.f)}</g><g data-n="3">${T(272,y,e2,'sub','middle',COL.f)}</g>`+L(6,314,y+16,'lvl2')}).join('')},
+ read:[TR(`${c(1,'s4')} Thermopile: 빛 → 열 → 온도 차 → 전압. 평균 파워를 잰다. 느리지만 파장을 거의 가리지 않고 센 빛까지 잰다.`,`${c(1,'s4')} Thermopile: light → heat → temperature difference → voltage. It measures average power. It is slow, but almost wavelength independent and usable up to high power.`),
+  TR(`${c(2,'s3')} Photodiode: 광자 → 전자·정공 → 전류. 평균 파워를 잰다. 가장 민감하고 빠르지만, 재료가 파장 범위를 정하고 파장 설정이 필요하며 센 빛에서 포화한다.`,`${c(2,'s3')} Photodiode: photon → electron–hole pair → current. It measures average power. It is the most sensitive and the fastest, but the material sets the wavelength range, the wavelength setting is needed, and it saturates in strong light.`),
+  TR(`${c(3,'s5')} Pyroelectric: 빛 → 열 → 온도 변화 → 전류. 펄스 하나의 에너지를 잰다. 파장을 거의 가리지 않지만 CW는 재지 못하고 반복률 한계가 있다.`,`${c(3,'s5')} Pyroelectric: light → heat → temperature change → current. It measures the energy of one pulse. It is almost wavelength independent, but cannot measure CW and has a repetition-rate limit.`),
+  TR('표의 값은 일반적인 파워·에너지 센서 기준의 대략 값이다. 실제 한계는 센서마다 사양표에 있다.','The table values are approximate figures for typical power and energy sensors. Real limits are in the specification of each sensor.'),
+  TR('포토다이오드 범위는 ND 필터를 붙이면 W 수준까지 넓어진다.','With an ND filter attached, the photodiode range extends to the watt level.')],
+ q:TR('세 센서 가운데 열을 거치지 않는 것은?','Which of the three sensors does not go through heat?'),a:TR('포토다이오드다. 광자가 전자를 직접 만든다. 그래서 빠르고 민감하지만 파장에 따라 감도가 달라진다.','The photodiode. Photons produce electrons directly. This makes it fast and sensitive, but its responsivity depends on wavelength.')},
+
+{t:TR('파워와 속도 지도에서 세 센서의 자리','Where the three sensors sit on a map of power and speed'),ec:TR('레이저 예시 세 가지','Three example lasers'),mc:TR('센서가 맡는 영역 (대략)','Regions covered by each sensor (approx.)'),
+ e:()=>{const it=[[1,TR('정렬용 빔: CW, 633 nm, 1 mW','Alignment beam: CW, 633 nm, 1 mW'),[TR('→ Photodiode (Si)','→ Photodiode (Si)')],'pd'],[2,TR('증폭기: 1 kHz, 평균 1 W','Amplifier: 1 kHz, 1 W average'),[TR('→ 평균 파워: Thermopile','→ average power: Thermopile'),TR('→ 펄스마다 1 mJ: Pyroelectric','→ 1 mJ per pulse: Pyroelectric')],'th'],[3,TR('중적외선: 10 µm, 평균 5 mW','Mid-infrared: 10 µm, 5 mW average'),[TR('→ Thermopile (다이오드 범위 밖)','→ Thermopile (outside diode range)')],'th']];
+  return T(14,20,TR('같은 번호가 오른쪽 지도에 있다','The same numbers appear on the map'),'sub')
+   +it.map(([n,a,b,k],i)=>{const y=56+i*76;return `<g data-n="${n}">${badge(22,y,n,COL.f)}${T(38,y+4,a,'lab')}${b.map((s,j)=>T(38,y+22+j*16,s,'sub','start',COL[lsC[j?'py':k]])).join('')}</g>`}).join('')},
+ m:()=>{const P=plot({x:[1e-9,1e3],y:[1e-9,100],logx:1,logy:1,L:60,ylx:12,xt:[{v:1e-9,l:'1 nW'},{v:1e-6,l:'1 µW'},{v:1e-3,l:'1 mW'},{v:1,l:'1 W'},{v:1e3,l:'1 kW'}],yt:[{v:1e-9,l:'1 ns'},{v:1e-6,l:'1 µs'},{v:1e-3,l:'1 ms'},{v:1,l:'1 s'}],xl:TR('평균 파워 (log 눈금)','average power (log scale)'),yl:TR('응답 시간 (log 눈금)','response time (log scale)')});
+  const rg=(a,b,t1,t2,k,s)=>lsR(P.X(a),P.Y(t2),P.X(b)-P.X(a),P.Y(t1)-P.Y(t2),COL[lsC[k]],.16,COL[lsC[k]])+T(P.X(a)+5,P.Y(t2)+14,s,'sub','start',COL[lsC[k]]);
+  return P.s+rg(1e-5,1e3,.3,30,'th','Thermopile')+rg(1e-5,10,1e-5,1e-2,'py','Pyroelectric')+rg(1e-9,1e-1,1e-9,1e-6,'pd','Photodiode')
+   +`<g data-n="1">${badge(P.X(1e-3).toFixed(1),P.Y(4e-9).toFixed(1),1,COL.f)}</g><g data-n="2">${badge(P.X(1).toFixed(1),P.Y(1).toFixed(1),2,COL.f)}${badge(P.X(1).toFixed(1),P.Y(1.5e-4).toFixed(1),2,COL.f)}</g><g data-n="3">${badge(P.X(5e-3).toFixed(1),P.Y(1).toFixed(1),3,COL.f)}</g>`},
+ read:[TR('가로는 빛의 평균 파워, 세로는 센서가 따라갈 수 있는 빠르기다. 아래로 갈수록 빠르다.','The horizontal axis is the average optical power and the vertical axis is how fast the sensor responds. Lower means faster.'),
+  TR(`${c(1,'f')} 약하고 파장이 Si 범위 안인 CW 빔은 포토다이오드 자리다. Thermopile로는 영점 흐름에 묻힌다.`,`${c(1,'f')} A weak CW beam within the Si range belongs to the photodiode. On a thermopile it would be buried in zero drift.`),
+  TR(`${c(2,'f')} 1 kHz 증폭기는 두 자리에 놓인다. 평균 1 W는 thermopile이 재고, 펄스 하나하나(1 mJ)는 초전 센서가 잰다. 같은 논리로 1 W ÷ 1000 Hz = 1 mJ다.`,`${c(2,'f')} A 1 kHz amplifier sits in two places. The thermopile measures the 1 W average, and the pyroelectric sensor measures each pulse (1 mJ). By the same logic, 1 W ÷ 1000 Hz = 1 mJ.`),
+  TR(`${c(3,'f')} 10 µm 빛은 Si, InGaAs, Ge 모두 보지 못한다. 약해도 thermopile을 쓰고, 영점을 꼼꼼히 맞춘다.`,`${c(3,'f')} Light at 10 µm is invisible to Si, InGaAs, and Ge alike. A thermopile is used even though the beam is weak, with careful zeroing.`),
+  TR('영역의 경계는 대략이다. 초전 센서의 가로 위치는 펄스 에너지 × 반복률로 환산한 평균 파워다.','The region boundaries are approximate. The horizontal position of the pyroelectric sensor is the average power converted from pulse energy × repetition rate.')],
+ q:TR('80 MHz 오실레이터(평균 500 mW, 800 nm)의 파워는 어느 센서로 재는가?','Which sensor measures the power of an 80 MHz oscillator (500 mW average, 800 nm)?'),a:TR('Thermopile이 무난하다. 초전 센서는 80 MHz를 따라가지 못한다. 포토다이오드는 ND 필터가 있고 포화하지 않는 범위일 때만 쓴다.','A thermopile is the safe choice. A pyroelectric sensor cannot follow 80 MHz. A photodiode is used only with an ND filter and within its unsaturated range.')},
+
+{t:TR('고르는 순서: 펄스마다인가 → 약한가 → 파장이 맞는가','Order of choosing: per pulse → weak → wavelength in range'),ec:TR('질문 세 개','Three questions'),mc:TR('고른 센서와 주의할 점','Chosen sensor and points of care'),
+ tg:[{k:'pulse',l:TR('펄스마다 에너지를 잰다','Energy of each pulse'),on:false},{k:'weak',l:TR('약한 빛 (mW 이하)','Weak light (mW or below)'),on:true},{k:'inband',l:TR('파장이 다이오드 범위 안','Wavelength within diode range'),on:true}],
+ e:(v,g)=>{const r=lsPick(g),o=a=>` opacity="${a?1:.3}"`,Y=TR('예','yes'),N=TR('아니오','no');
+  const q=(y,s,a)=>`<g${o(a)}><rect x="14" y="${y}" width="176" height="38" rx="6" class="dev"/>${T(102,y+23,s,'sub','middle')}</g>`;
+  const res=(y,s,k,a)=>`<g${o(a)}><rect x="232" y="${y}" width="80" height="38" rx="6" style="fill:var(--panel);stroke:${COL[lsC[k]]}" stroke-width="${a?2.4:1.2}"/>${T(272,y+23,s,'sub','middle',COL[lsC[k]])}</g>`;
+  const a1=!g.pulse,a2=a1&&g.weak;
+  return q(30,TR('펄스마다 에너지를 재야 하나?','Energy of each pulse needed?'),1)+`<g${o(g.pulse)}>${LN(190,49,228,49,'var(--muted)',{w:1.2,mk:'g'})}${T(209,42,Y,'sub','middle')}</g>`+res(30,'Pyroelectric','py',g.pulse)
+   +`<g${o(a1)}>${LN(102,68,102,104,'var(--muted)',{w:1.2,mk:'g'})}${T(110,90,N,'sub')}</g>`
+   +q(108,TR('빛이 약한가? (mW 이하)','Weak light? (mW or below)'),a1)+`<g${o(a1&&!g.weak)}>${LN(190,127,228,127,'var(--muted)',{w:1.2,mk:'g'})}${T(209,120,N,'sub','middle')}</g>`+res(108,'Thermopile','th',r==='th')
+   +`<g${o(a2)}>${LN(102,146,102,182,'var(--muted)',{w:1.2,mk:'g'})}${T(110,168,Y,'sub')}</g>`
+   +q(186,TR('파장이 다이오드 범위 안인가?','Wavelength within diode range?'),a2)+`<g${o(a2&&g.inband)}>${LN(190,205,228,205,'var(--muted)',{w:1.2,mk:'g'})}${T(209,198,Y,'sub','middle')}</g>`+res(186,'Photodiode','pd',r==='pd')
+   +`<g${o(a2&&!g.inband)}>${T(102,252,N+' → Thermopile','sub','middle',COL[lsC.th])}</g>`},
+ m:(v,g)=>{const r=lsPick(g),col=COL[lsC[r]];
+  const tx={py:['Pyroelectric',[TR('펄스 하나의 에너지를 전압 봉우리로 잰다','Reads one pulse energy as a voltage peak'),TR('최대 반복률 안에서만 쓴다','Used only below its maximum rep. rate'),TR('CW는 재지 못한다','Cannot measure CW'),TR('최대 에너지 밀도를 넘기지 않는다','Maximum energy density not exceeded')]],
+   pd:['Photodiode',[TR('약한 빛에 가장 민감하고 빠르다','Most sensitive and fastest for weak light'),TR('미터에 실제 파장을 입력한다','Real wavelength entered in the meter'),TR('세면 ND 필터, 포화를 의심한다','ND filter if strong; saturation suspected'),TR('빔이 센서 면보다 작아야 한다','Beam smaller than the sensor area')]],
+   th:['Thermopile',[TR('파장을 거의 가리지 않고 센 빛도 잰다','Broadband; handles high power'),TR('값이 멈출 때까지 기다려 읽는다','Read after the value has settled'),TR('영점을 맞추고 손과 바람을 피한다','Zero set; hands and air kept away'),g.weak&&!g.pulse?TR('약한 빛: 영점 흐름이 큰 오차가 된다','Weak light: zero drift is a large error'):TR('최대 파워 밀도를 넘기지 않는다','Maximum power density not exceeded')]]}[r];
+  return `<rect x="14" y="30" width="292" height="216" rx="10" style="fill:var(--panel);stroke:${col}" stroke-width="1.6"/>`+lsBig(160,72,tx[0],col)+L(34,286,90,'lvl2')
+   +tx[1].map((s,i)=>lsDot(34,122+i*32,col,3)+T(44,126+i*32,s,'sub')).join('')},
+ read:[TR('첫 질문은 "무엇을 재는가"다. 펄스 하나하나의 에너지가 필요하면 초전 센서다. 나머지 둘은 평균 파워를 잰다.','The first question is what is being measured. If the energy of each pulse is needed, the pyroelectric sensor is the one. The other two measure average power.'),
+  TR('둘째는 세기다. 빛이 세면 thermopile이 맞다. 포토다이오드는 포화한다(탭 2의 4단계).','The second is strength. Strong light suits the thermopile. A photodiode saturates (tab 2, step 4).'),
+  TR('셋째는 파장이다. 약한 빛이고 파장이 Si, InGaAs, Ge 범위 안이면 포토다이오드가 가장 정확하다. 범위 밖이면 약해도 thermopile이다.','The third is wavelength. For weak light within the range of Si, InGaAs, or Ge, the photodiode is the most accurate. Outside the range, the thermopile is used even for weak light.'),
+  TR('어느 센서든 손상 한계가 따로 있다. 펨토초 펄스는 평균 파워가 작아도 순간 세기가 커서, 빔을 넓혀서 비춘다.','Every sensor also has a damage limit. Femtosecond pulses have a high instantaneous intensity even at low average power, so the beam is spread over a larger area.'),
+  TR('"mW 이하"라는 경계는 대략이다. 실제 선택은 센서 사양표의 파워 범위, 파장 범위, 최대 반복률로 확인한다.','The "mW or below" boundary is approximate. The actual choice is checked against the power range, wavelength range, and maximum repetition rate in the sensor specification.')],
+ q:TR('5 µm, 평균 2 mW의 CW 중적외선 빔을 잰다. 어느 센서이고 무엇을 조심하는가?','A CW mid-infrared beam at 5 µm with 2 mW average power is measured. Which sensor, and what needs care?'),a:TR('Thermopile이다. 포토다이오드 세 재료 모두 5 µm를 보지 못한다. 빛이 약하므로 영점을 맞추고 손의 열과 바람을 막는다.','The thermopile. None of the three photodiode materials sees 5 µm. Because the light is weak, the zero is set and hand warmth and air currents are kept away.')}
+];
+
+const TABS=[
+{id:'thermopile',name:'Thermopile',sub:TR('열 → 온도 차 → 전압','heat → temperature difference → voltage'),title:TR('Thermopile (열전대 더미)','Thermopile'),desc:TR('빛을 열로 바꾸고, 그 열이 만드는 온도 차를 전압으로 읽는 센서. 그림은 단순화한 모식도이고 숫자는 예시다.','A sensor that turns light into heat and reads the resulting temperature difference as a voltage. The figures are simplified sketches and the numbers are examples.'),steps:THERMO},
+{id:'photodiode',name:'Photodiode',sub:TR('광자 → 전자 → 전류','photon → electron → current'),title:TR('Photodiode (포토다이오드)','Photodiode'),desc:TR('광자가 반도체 안의 전자를 직접 떼어 내 전류가 되는 센서. 감도 곡선과 포화 값은 예시다.','A sensor in which photons free electrons in a semiconductor directly and produce a current. The responsivity curve and saturation values are examples.'),steps:PDIODE},
+{id:'pyro',name:'Pyroelectric',sub:TR('온도 변화 → 전류','temperature change → current'),title:TR('Pyroelectric (초전 센서)','Pyroelectric sensor'),desc:TR('결정의 온도가 변하는 순간에만 전류가 나오는 센서. 펄스 하나의 에너지를 잰다. 시간과 전압 값은 예시다.','A sensor that gives a current only while the crystal temperature is changing. It measures the energy of one pulse. Time and voltage values are examples.'),steps:PYRO},
+{id:'choose',name:TR('비교와 고르기','Compare and choose'),sub:TR('어느 센서를 언제 쓰나','Which sensor for which case'),title:TR('세 센서 비교와 고르기','Comparing and choosing the three sensors'),desc:TR('세 센서가 재는 양, 속도, 파장, 범위를 나란히 놓고 고르는 순서를 본다. 범위 값은 대략이다.','The quantity, speed, wavelength, and range of the three sensors side by side, and the order of choosing. Range values are approximate.'),steps:CHOOSE}
+];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>
