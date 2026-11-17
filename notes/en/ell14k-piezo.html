@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>ELL14K Piezo Rotation Mount Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · how equipment works</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../ell14k-piezo.html" href="../ell14k-piezo.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title ELL14K 피에조 회전 마운트 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 장비 원리
+// @status 검토 중
+// @lang ko en
+// @title.en ELL14K Piezo Rotation Mount Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · how equipment works
+// @status.en Under review
+/* ELL14K(Thorlabs Elliptec 회전 마운트)의 공진 피에조 모터가 링을 돌리는 원리.
+   그림은 모두 단순화한 모식도다. 주파수 값(92, 108 kHz)은 예시이고 실제 값은 개체마다 다르다(둘 다 약 100 kHz 근처).
+   확인이 필요한 값은 REVIEW.md에 적었다. 글은 TR('한국어','English')로 쓴다. */
+const NOTE={key:'ell14k'};
+
+/* ---------- 그림 헬퍼 (이 노트 전용, 이름은 el로 시작) ---------- */
+/* 모터 본체: 알루미늄 공진기 + 그 안에 끼운 피에조. 팁 꼭짓점은 (238+dx, 106+dy) */
+const elBody=(dx=0,dy=0,op=1)=>`<g transform="translate(${dx.toFixed(2)},${dy.toFixed(2)})" opacity="${op}"><path d="M70,135 H212 L238,106 L250,114 L236,140 V175 H70 Z" style="fill:#e4e7ee;stroke:var(--fg)" stroke-width="1.2"/><rect x="110" y="143" width="80" height="24" style="fill:var(--s4);stroke:var(--s4)" fill-opacity=".3"/>${[0,1,2,3,4,5,6].map(i=>`<line x1="${120+i*10}" y1="143" x2="${120+i*10}" y2="167" style="stroke:var(--s4)" stroke-width=".8"/>`).join('')}</g>`;
+/* 세로 스프링 (지그재그) */
+const elSpring=(x,y1,y2,n=6,w=7)=>{const p=[[x,y1]];for(let i=0;i<n;i++)p.push([x+(i%2?-w:w),y1+(y2-y1)*(i+.5)/n]);p.push([x,y2]);return PL(p,'var(--s3)',{w:1.6})};
+/* 링 테두리(피구동체)를 편 막대 */
+const elBar=(x,y,w,h=20)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" style="fill:var(--soft);stroke:var(--s2)" stroke-width="1.4"/>`;
+/* 공진 곡선 (예시): 공진 A 92 kHz, 공진 B 108 kHz, 폭 2.5 kHz */
+const elLor=(f,f0)=>1/(1+((f-f0)/2.5)**2);
+const elAmp=f=>elLor(f,92)+.9*elLor(f,108);
+/* 한 주기의 걸음: 위상 ph=0이 타원 꼭대기(링에 가장 깊이 닿는 점). |ph| < 60° 동안만 접촉한다고 가정 */
+const elPc=Math.PI/3;
+function elCyc(t){const k=Math.min(3,Math.floor(t)),u=t-k,ph=2*Math.PI*(u-.5),sc=Math.sin(elPc);
+ const p=ph<-elPc?0:ph>elPc?1:(Math.sin(ph)+sc)/(2*sc);return{ph,d:k+p,on:Math.abs(ph)<elPc}}
+/* 위에서 본 작은 모터: 팁이 (x,y), 본체는 a도 돌린 방향으로 뻗는다 */
+const elMini=(x,y,a)=>`<g transform="translate(${x},${y}) rotate(${a})"><path d="M0,0 L7,12 V58 H-7 V12 Z" style="fill:#e4e7ee;stroke:var(--fg)" stroke-width="1.2"/><rect x="-4" y="22" width="8" height="26" style="fill:var(--s4)" fill-opacity=".5"/></g>`;
+/* 고정폭 글자 */
+const elMono=(x,y,s,col='var(--fg)')=>`<text x="${x}" y="${y}" class="num" style="fill:${col}">${s}</text>`;
+const elHex=n=>n.toString(16).toUpperCase().padStart(8,'0');
+const elDot=(x,y,col,r=5)=>`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r}" style="fill:${col}"/>`;
+/* 공진 곡선 그래프 틀 */
+const elResPlot=()=>plot({x:[70,130],y:[0,1.25],xt:[70,80,90,100,110,120,130].map(u=>({v:u,l:String(u)})),xl:TR('구동 주파수 (kHz, 예시 값)','drive frequency (kHz, example values)'),yl:TR('팁 진폭 (상대)','tip amplitude (relative)')});
+
+/* ================= 탭 1: 공진 피에조 모터 ================= */
+const MOTOR=[
+{t:TR('부품은 넷: 피에조, 공진기, 스프링, 팁','Four parts: piezo, resonator, spring, tip'),ec:TR('모터 하나의 구조','Structure of one motor'),mc:TR('전기가 회전이 되는 순서','From electricity to rotation'),
+ e:()=>{const lg=[[1,TR('피에조 소자','Piezo element'),'s4'],[2,TR('알루미늄 공진기','Aluminum resonator'),'s6'],[3,TR('스프링','Spring'),'s3'],[4,TR('팁','Tip'),'s1'],[5,TR('링 테두리 (밀리는 쪽)','Ring rim (driven part)'),'s2']];
+  return T(14,20,TR('단순화한 그림 (실제 모양과 다름)','Simplified sketch (not the real shape)'),'sub')
+   +elBar(150,86,160)+LN(180,72,236,72,COL.s2,{mk:'s2'})+T(242,76,TR('이동','motion'),'sub')
+   +elBody()+elSpring(215,175,240)+L(192,238,240)
+   +`<g data-n="1">${badge(150,155,1,COL.s4)}</g><g data-n="2">${badge(88,155,2,COL.s6)}</g><g data-n="3">${badge(238,208,3,COL.s3)}</g><g data-n="4">${badge(266,126,4,COL.s1)}</g><g data-n="5">${badge(298,96,5,COL.s2)}</g>`
+   +lg.map(([n,s,k],i)=>{const y=196+i*19;return `<g data-n="${n}">${badge(20,y-4,n,COL[k])}${T(34,y,s,'sub')}</g>`}).join('')},
+ m:()=>{const it=[[0,TR('구동 회로: 5 V → 약 100 kHz 교류','Driver: 5 V → approx. 100 kHz AC'),'f'],[1,TR('피에조: 전압 → 길이 변화','Piezo: voltage → length change'),'s4'],[2,TR('공진기: 떨림을 키운다','Resonator: amplifies the vibration'),'s6'],[4,TR('팁: 타원 운동','Tip: elliptical motion'),'s1'],[5,TR('링: 마찰로 밀려 회전','Ring: pushed around by friction'),'s2']];
+  return it.map(([n,s,k],i)=>{const y=14+i*54;return `<g${n?` data-n="${n}"`:''}><rect x="52" y="${y}" width="250" height="32" rx="6" class="dev"/>${n?badge(30,y+16,n,COL[k]):''}${T(177,y+20,s,'sub','middle')}</g>`+(i<4?LN(177,y+32,177,y+52,'var(--muted)',{w:1.2,mk:'g'}):'')}).join('')},
+ read:[TR('ELL14K의 모터는 전자석으로 도는 모터가 아니다. 초음파로 떠는 금속 조각이 링을 조금씩 밀어서 돌린다.','The motor in the ELL14K does not turn by electromagnets. A piece of metal vibrating at ultrasonic frequency pushes the ring around a little at a time.'),
+  `${c(1,'s4')} `+TR('피에조 소자: 전압을 걸면 길이가 변한다. 모터의 힘이 나오는 곳이다.','Piezo element: its length changes with voltage. This is where the motor force comes from.'),
+  `${c(2,'s6')} `+TR('알루미늄 공진기: 피에조를 꽉 끼워 넣은 틀이다. 틀 전체가 같이 떨면서 진폭을 키운다.','Aluminum resonator: the frame the piezo is press-fit into. The whole frame vibrates with it and amplifies the amplitude.'),
+  `${c(3,'s3')} `+TR('스프링: 팁을 링 테두리에 늘 눌러 붙인다.','Spring: keeps the tip pressed against the ring rim at all times.'),
+  TR(`${c(4,'s1')} 팁이 ${c(5,'s2')} 링 테두리에 닿는 한 점에서 마찰로 힘이 전달된다. 기어가 없다.`,`Force passes by friction at the single point where the ${c(4,'s1')} tip touches the ${c(5,'s2')} ring rim. There are no gears.`)],
+ q:TR('이 모터에서 "회전하는 부품"은 모터 안에 있나?','Is the "rotating part" inside this motor?'),a:TR('없다. 모터는 제자리에서 떨기만 하고, 도는 것은 모터가 미는 링이다.','No. The motor only vibrates in place; what turns is the ring it pushes.')},
+
+{t:TR('피에조는 전압을 길이로 바꾼다. 하지만 너무 조금이다','A piezo turns voltage into length, but far too little'),ec:TR('피에조 소자에 전압을 걸면','Voltage applied to the piezo element'),mc:TR('전압과 길이 변화 (예시)','Voltage and length change (example)'),
+ slider:{min:0,max:5,step:.1,init:2.5,label:TR('전압','Voltage'),fmt:v=>v.toFixed(1)+' V'},
+ e:v=>{const x=100,w=120+v*8;return T(14,20,TR('늘어남은 보기 쉽게 과장','Elongation exaggerated for clarity'),'sub')
+  +T(160,84,TR('피에조 소자 (얇은 층을 쌓은 것)','Piezo element (stacked thin layers)'),'sub','middle')
+  +`<rect x="88" y="92" width="12" height="86" class="dev"/>`+T(62,140,TR('고정','fixed'),'sub','middle')
+  +`<g data-n="1"><rect x="${x}" y="100" width="${w}" height="70" style="fill:var(--s4);stroke:var(--s4)" fill-opacity=".25"/>${Array.from({length:9},(_,i)=>`<line x1="${x+w*(i+1)/10}" y1="100" x2="${x+w*(i+1)/10}" y2="170" style="stroke:var(--s4)" stroke-width=".8"/>`).join('')}</g>`
+  +`<line x1="220" y1="94" x2="220" y2="196" class="lvl2"/>`
+  +(v>.4?LN(220,188,x+w,188,COL.s1,{w:2,mk:'s1'}):'')+T(224,208,TR('늘어난 길이','length gained'),'sub')
+  +T(160,244,`V = ${v.toFixed(1)} V`,'lab','middle')},
+ m:v=>{const P=plot({x:[0,5],y:[0,1],xt:[0,1,2,3,4,5].map(u=>({v:u,l:String(u)})),xl:TR('전압 (V)','voltage (V)'),yl:TR('길이 변화 (상대, 예시)','length change (relative, example)')});
+  return P.s+crv(P,u=>u*.16,0,5,COL.s4)+`<g data-n="1">${elDot(P.X(v),P.Y(v*.16),'var(--s4)')}</g>`+T(70,40,TR('5 V에서도 1 µm보다 작다 (대략)','Below 1 µm even at 5 V (approx.)'),'sub')},
+ read:[`${c(1,'s4')} `+TR('피에조 소자는 전압에 비례해 늘어난다. 전압을 빼면 원래 길이로 돌아온다.','A piezo element lengthens in proportion to the voltage and returns to its original length when the voltage is removed.'),
+  TR('얇은 층을 여러 장 쌓으면 낮은 전압으로도 층마다 센 전기장이 걸린다. 그래서 5 V 전원으로 움직일 수 있다.','Stacking many thin layers gives a strong electric field in each layer even at low voltage. This is why a 5 V supply is enough.'),
+  TR('그래도 가만히 전압만 건 변위는 1 µm보다 작다(대략). 이것만으로는 링을 눈에 띄게 돌릴 수 없다.','Even so, the displacement from a steady voltage is below 1 µm (approx.). That alone cannot turn the ring noticeably.'),
+  TR('해결책은 두 가지다. 떨림을 키우고(다음 단계), 작은 걸음을 아주 빠르게 되풀이한다(5단계).','There are two remedies: amplifying the vibration (next step) and repeating a tiny stride very fast (step 5).')],
+ q:TR('전압을 5 V로 고정해 두면 링이 계속 도는가?','Does the ring keep turning if the voltage is held at 5 V?'),a:TR('돌지 않는다. 피에조가 한 번 늘어난 채 멈출 뿐이다. 계속 밀려면 전압을 빠르게 올렸다 내렸다 해야 한다.','No. The piezo only stretches once and stays there. Continuous pushing needs a voltage that rises and falls rapidly.')},
+
+{t:TR('공진: 같은 전압으로 진폭을 키운다','Resonance: more amplitude from the same voltage'),ec:TR('모터가 떠는 모습','How the motor vibrates'),mc:TR('주파수에 따른 팁 진폭 (예시)','Tip amplitude versus frequency (example)'),
+ slider:{min:70,max:130,step:.5,init:80,label:TR('구동 주파수','Drive frequency'),fmt:v=>v.toFixed(1)+' kHz',play:1},
+ e:v=>{const a=elAmp(v),d=a*9;return T(14,20,TR('떨림은 보기 쉽게 과장','Vibration exaggerated for clarity'),'sub')
+  +elBody(d*.8,-d,.28)+elBody(-d*.8,d,.28)+elBody()
+  +`<g data-n="4">${LN(282,110-d-2,282,110+d+2,COL.s1,{w:3})}</g>`+T(282,82,TR('팁 진폭','tip amplitude'),'sub','middle')
+  +T(160,226,TR('팁 진폭 (상대): ','Tip amplitude (relative): ')+a.toFixed(2),'lab','middle')+T(160,246,TR('구동 전압은 그대로 5 V','Drive voltage unchanged at 5 V'),'sub','middle')},
+ m:v=>{const P=elResPlot();return P.s+crv(P,elAmp,70,130,COL.s5,{n:300})
+  +T(P.X(92),P.Y(1.1),TR('공진 A','Res. A'),'sub','middle')+T(P.X(108),P.Y(1.0),TR('공진 B','Res. B'),'sub','middle')
+  +LN(P.X(v),P.T,P.X(v),P.B,'var(--muted)',{w:1,dash:1})+`<g data-n="4">${elDot(P.X(v),P.Y(elAmp(v)),'var(--s1)')}</g>`},
+ read:[TR('그네를 제 박자에 맞춰 밀면 작은 힘으로도 크게 흔들린다. 공진기도 같다. 고유 진동수에 맞춰 전압을 흔들면 떨림이 쌓여 커진다.','A swing pushed in time with its own rhythm swings high with small pushes. The resonator behaves the same way: driving at its natural frequency lets the vibration build up.'),
+  TR('이 모터의 공진은 약 100 kHz 근처다. 사람 귀에 들리지 않는 초음파다.','The resonances of this motor are near 100 kHz, which is ultrasonic and inaudible.'),
+  `${c(4,'s1')} `+TR('공진에 맞으면 팁이 수 µm까지 움직인다(5 V, 부하 없음, 제조사 설명). 공진에서 벗어나면 거의 떨지 않는다.','On resonance the tip moves up to a few µm (5 V, no load, per the manufacturer). Off resonance it hardly vibrates.'),
+  TR('쓸 만한 공진이 두 개 있다(공진 A, 공진 B). 두 개인 이유는 6단계에서 나온다.','There are two usable resonances (A and B). The reason for two appears in step 6.'),
+  TR('그래프의 92, 108 kHz는 예시 값이다. 실제 값은 모터마다 다르다.','The 92 and 108 kHz in the graph are example values. Real values differ from motor to motor.')],
+ q:TR('구동 주파수가 공진에서 몇 kHz만 어긋나면 어떻게 되나?','What happens if the drive frequency is a few kHz off resonance?'),a:TR('진폭이 크게 줄어 링을 미는 힘과 속도가 떨어진다. 그래서 공진 주파수를 정확히 찾아 저장해 두는 기능(주파수 탐색)이 있다.','The amplitude drops sharply, so push force and speed fall. This is why the unit can search for and store its exact resonance frequencies (frequency search).')},
+
+{t:TR('팁은 직선이 아니라 타원을 그린다','The tip traces an ellipse, not a straight line'),ec:TR('팁 끝이 그리는 길','Path traced by the tip end'),mc:TR('두 방향 떨림의 시간 변화','The two vibration components in time'),
+ slider:{min:0,max:360,step:2,init:40,label:TR('위상','Phase'),fmt:v=>Math.round(v)+'°',play:1},
+ e:v=>{const ph=v*Math.PI/180,cx=160,cy=160,px=cx+80*Math.sin(ph),py=cy-45*Math.cos(ph);
+  return T(14,20,TR('팁 끝을 크게 확대 (실제 진폭은 수 µm 이하)','Tip magnified (real amplitude: a few µm or less)'),'sub')
+   +T(160,84,TR('링 테두리','Ring rim'),'sub','middle')+elBar(40,93,240)
+   +`<ellipse cx="${cx}" cy="${cy}" rx="80" ry="45" fill="none" class="lvl2"/>`
+   +LN(240,154,240,168,'var(--muted)',{w:1.2,mk:'g'})+LN(80,166,80,152,'var(--muted)',{w:1.2,mk:'g'})
+   +`<g data-n="1">${LN(cx,cy,px,cy,COL.s2,{w:2.5})}</g><g data-n="2">${LN(px,cy,px,py,COL.s3,{w:2.5})}</g><g data-n="4">${elDot(px,py,'var(--s1)',6)}</g>`
+   +`<g data-n="1">${LN(20,250,40,250,COL.s2,{w:2.5})}${T(46,254,TR('표면 방향 떨림','along the surface'),'sub')}</g><g data-n="2">${LN(170,250,190,250,COL.s3,{w:2.5})}${T(196,254,TR('누르는 방향 떨림','into the surface'),'sub')}</g>`},
+ m:v=>{const P=plot({x:[0,360],y:[-1.2,1.2],xt:[0,90,180,270,360].map(u=>({v:u,l:String(u)})),yt:[{v:0,l:'0'}],xl:TR('한 주기 안의 위상 (°)','phase within one cycle (°)'),yl:TR('변위 (상대)','displacement (relative)'),T:46});
+  const fs=u=>Math.sin(u*Math.PI/180),fc=u=>Math.cos(u*Math.PI/180);
+  return P.s+LN(P.L,P.Y(0),P.R,P.Y(0),'var(--line)',{w:1})
+   +`<g data-n="1">${crv(P,fs,0,360,COL.s2)}${LN(64,14,84,14,COL.s2,{w:2.5})}${T(90,18,TR('표면 방향','along the surface'),'sub')}</g>`
+   +`<g data-n="2">${crv(P,fc,0,360,COL.s3)}${LN(64,30,84,30,COL.s3,{w:2.5})}${T(90,34,TR('누르는 방향 (90° 앞섬)','into the surface (leads by 90°)'),'sub')}</g>`
+   +LN(P.X(v),P.T,P.X(v),P.B,'var(--muted)',{w:1,dash:1})+`<g data-n="1">${elDot(P.X(v),P.Y(fs(v)),'var(--s2)',4)}</g><g data-n="2">${elDot(P.X(v),P.Y(fc(v)),'var(--s3)',4)}</g>`},
+ read:[TR('공진기 틀은 좌우가 다른 모양이라, 한 번 떨 때 팁이 두 방향으로 같이 움직인다.','The resonator frame is asymmetric, so one vibration moves the tip in two directions at once.'),
+  TR(`${c(1,'s2')} 표면을 따라 가는 떨림과 ${c(2,'s3')} 표면을 누르는 떨림이다.`,`These are the ${c(1,'s2')} vibration along the surface and the ${c(2,'s3')} vibration pressing into the surface.`),
+  TR('두 떨림의 박자가 90° 어긋나면 팁은 타원을 그린다. 박자가 똑같으면 직선으로 왔다 갔다만 한다.','When the two are 90° out of step, the tip traces an ellipse. If they were exactly in step, it would only move back and forth on a line.'),
+  `${c(4,'s1')} `+TR('타원 꼭대기(위상 0°)에서 팁은 링을 가장 세게 누르면서 오른쪽으로 간다. 바닥(180°)에서는 링에서 물러난 채 왼쪽으로 돌아온다.','At the top of the ellipse (phase 0°) the tip presses hardest on the ring while moving right. At the bottom (180°) it has backed away from the ring and returns to the left.'),
+  TR('한 방향으로만 미는 비결이 이 타원이다. 그림의 90°와 타원 모양은 원리를 보이는 단순화다.','This ellipse is what makes the push one-directional. The 90° and the ellipse shape in the figure are a simplification that shows the principle.')],
+ q:TR('두 떨림의 박자가 완전히 같다면(위상 차 0°) 링은 도는가?','If the two vibrations were exactly in step (0° phase difference), would the ring turn?'),a:TR('거의 돌지 않는다. 팁이 직선으로 왔다 갔다 하면 가는 길과 오는 길에 똑같이 눌러서 미는 양이 상쇄된다.','Hardly. A tip moving back and forth on a line presses equally on the way out and on the way back, so the pushes cancel.')},
+
+{t:TR('타원 한 바퀴가 한 걸음: 붙어서 밀고, 떨어져서 돌아온다','One loop of the ellipse is one stride: push in contact, return out of contact'),ec:TR('팁과 링 테두리','Tip and ring rim'),mc:TR('링이 간 거리','Distance moved by the ring'),
+ slider:{min:0,max:4,step:.01,init:.2,label:TR('시간','Time'),fmt:v=>v.toFixed(2)+TR(' 주기',' cycles'),play:1},
+ e:v=>{const s=elCyc(v),px=160+30*Math.sin(s.ph),py=Math.max(96,108-24*Math.cos(s.ph));let tk='';
+  for(let j=-5;j<6;j++){const x=50+52*j+s.d*52;if(x>16&&x<304)tk+=`<line x1="${x.toFixed(1)}" y1="78" x2="${x.toFixed(1)}" y2="94" style="stroke:var(--s2)" stroke-width="${j?1:4}"/>`}
+  return T(14,20,TR('단순화: 붙어 있는 동안만 링이 밀린다','Simplified: the ring moves only during contact'),'sub')+T(14,66,TR('링 테두리','Ring rim'),'sub')+LN(236,62,292,62,COL.s2,{mk:'s2'})
+   +`<ellipse cx="160" cy="108" rx="30" ry="24" fill="none" class="lvl2"/>`+elBar(10,76,300)+`<g data-n="5">${tk}</g>`
+   +`<g data-n="4"><path d="M${px.toFixed(1)},${py.toFixed(1)} l-14,48 h36 Z" style="fill:#e4e7ee;stroke:var(--fg)" stroke-width="1.2"/>${elDot(px,py,'var(--s1)',4)}</g>`
+   +T(160,206,s.on?TR('접촉: 팁이 링을 민다','In contact: the tip pushes the ring'):TR('떨어짐: 팁만 돌아온다','Out of contact: only the tip returns'),'lab','middle',s.on?COL.s1:undefined)
+   +T(160,228,TR('지금까지 ','So far: ')+s.d.toFixed(2)+TR(' 걸음',' strides'),'sub','middle')},
+ m:v=>{const P=plot({x:[0,4],y:[0,4.4],xt:[0,1,2,3,4].map(u=>({v:u,l:String(u)})),yt:[0,1,2,3,4].map(u=>({v:u,l:String(u)})),xl:TR('시간 (진동 주기)','time (vibration cycles)'),yl:TR('링이 간 거리 (걸음)','ring travel (strides)'),ylx:22});
+  return P.s+crv(P,u=>u,0,4,'var(--muted)',{dash:1,w:1.2})+T(P.X(1.1),P.Y(2.3),TR('평균 속도','average speed'),'sub')
+   +`<g data-n="5">${crv(P,u=>elCyc(u).d,0,4,COL.s2,{n:400})}${elDot(P.X(v),P.Y(elCyc(v).d),'var(--s2)')}</g>`},
+ read:[`${c(4,'s1')} `+TR('팁이 타원 윗부분을 지날 때는 링에 눌려 붙어 있다. 이때 마찰이 링을 팁과 같이 끌고 간다.','While passing the upper part of the ellipse the tip is pressed against the ring. Friction then drags the ring along with the tip.'),
+  TR('팁이 아랫부분을 지날 때는 누르는 힘이 약해진다. 팁만 빠르게 돌아오고 링은 따라오지 않는다.','While passing the lower part the pressing force is weak. Only the tip returns quickly; the ring does not follow.'),
+  `${c(5,'s2')} `+TR('한 바퀴에 한 걸음씩, 링은 한쪽으로만 간다.','One stride per loop, and the ring moves in one direction only.'),
+  TR('세어 보기: 최고 속도 430°/s를 초당 약 10만 걸음으로 나누면 한 걸음은 약 0.004°다(대략). 걸음 하나는 작지만 1초에 10만 번 되풀이해 빠르게 돈다.','Counting it out: 430°/s at top speed divided by about 100,000 strides per second gives about 0.004° per stride (approx.). Each stride is tiny, but 100,000 of them per second make the rotation fast.'),
+  TR('실제 링은 관성이 있어 계단처럼 멈췄다 가지 않고 거의 매끈하게 돈다. 계단 그림은 원리를 보이는 단순화다.','The real ring has inertia, so it turns almost smoothly rather than in stop-and-go stairs. The staircase is a simplification that shows the principle.')],
+ q:TR('스프링이 약해져 팁이 링에 잘 눌리지 않으면?','What if the spring weakens and the tip no longer presses well on the ring?'),a:TR('마찰이 줄어 팁이 링 위에서 미끄러진다. 걸음마다 링이 덜 가므로 속도와 힘이 떨어진다.','Friction drops and the tip slips on the ring. The ring advances less per stride, so speed and force fall.')},
+
+{t:TR('방향 전환: 다른 공진으로 떨면 타원이 반대로 돈다','Reversing: the other resonance makes the ellipse run backward'),ec:TR('타원이 도는 방향과 링의 방향','Sense of the ellipse and ring direction'),mc:TR('구동 주파수 고르기 (예시)','Choosing the drive frequency (example)'),
+ tg:[{k:'rev',l:TR('공진 B로 구동 (역방향)','Drive at resonance B (reverse)'),on:false}],
+ e:(v,g)=>{const r=g.rev,col=r?COL.s5:COL.s1,k=r?'s5':'s1';
+  return T(160,66,r?TR('링: 왼쪽으로','Ring: to the left'):TR('링: 오른쪽으로','Ring: to the right'),'lab','middle')
+   +(r?LN(190,82,130,82,COL.s2,{w:2,mk:'s2'}):LN(130,82,190,82,COL.s2,{w:2,mk:'s2'}))+elBar(40,93,240)
+   +`<ellipse cx="160" cy="160" rx="70" ry="45" fill="none" style="stroke:${col}" stroke-width="2"/>`
+   +(r?LN(232,168,232,150,col,{w:2,mk:k})+LN(88,152,88,170,col,{w:2,mk:k}):LN(232,152,232,170,col,{w:2,mk:k})+LN(88,168,88,150,col,{w:2,mk:k}))
+   +elDot(160,115,col,6)+T(160,164,TR('팁이 그리는 타원','ellipse traced by the tip'),'sub','middle')
+   +T(160,236,r?TR('공진 B → 타원이 반시계 방향','Resonance B → ellipse runs counterclockwise'):TR('공진 A → 타원이 시계 방향','Resonance A → ellipse runs clockwise'),'sub','middle',col)
+   +T(160,256,TR('(어느 공진이 어느 방향인지는 예시)','(which resonance gives which direction is an example)'),'sub','middle')},
+ m:(v,g)=>{const P=elResPlot(),r=g.rev,f=r?108:92,col=r?COL.s5:COL.s1;
+  return P.s+crv(P,elAmp,70,130,'var(--muted)',{n:300})
+   +T(P.X(92)+10,P.Y(1.12),TR('공진 A: 정방향','Res. A: forward'),'sub','end',r?undefined:COL.s1)+T(P.X(108)-10,P.Y(1.12),TR('공진 B: 역방향','Res. B: reverse'),'sub','start',r?COL.s5:undefined)
+   +LN(P.X(f),P.Y(.02),P.X(f),P.Y(r?.9:1),col,{w:2.5})+elDot(P.X(f),P.Y(r?.9:1),col)},
+ read:[TR('모터 하나에는 공진이 두 개 있다. 한 공진은 링을 밀고 다른 공진은 링을 당긴다.','Each motor has two resonances. One pushes the ring and the other pulls it.'),
+  TR('두 공진은 틀이 떠는 모양이 다르다. 그래서 두 방향 떨림의 박자 관계가 뒤집히고, 타원이 반대로 돈다.','The frame vibrates in a different shape at each resonance. The timing between the two vibration components flips, and the ellipse runs the other way.'),
+  TR('타원이 반대로 돌면, 팁이 링에 붙어 있는 동안 가는 방향도 반대가 된다. 5단계와 같은 논리로 링이 반대로 돈다.','With the ellipse reversed, the tip moves the other way while in contact. By the same logic as step 5, the ring turns the other way.'),
+  TR('즉 방향은 전압의 부호나 배선이 아니라 주파수로 고른다. 전선은 그대로 두고 주파수만 바꾼다.','So direction is chosen by frequency, not by voltage polarity or wiring. The wires stay the same; only the frequency changes.'),
+  TR('두 공진 모두 약 100 kHz 근처다(제조사 설명). 초기 소개 자료에는 약 85 kHz와 약 95 kHz로 나온다. 그래프 값은 예시다.','Both resonances are near 100 kHz (per the manufacturer). An early article quotes about 85 kHz and about 95 kHz. The graph values are examples.')],
+ q:TR('일반 직류 모터는 전압 부호를 바꿔 역회전한다. 이 모터는?','An ordinary DC motor reverses when the voltage polarity is swapped. What about this motor?'),a:TR('구동 주파수를 다른 공진으로 바꾼다. 그러면 팁의 타원이 반대로 돌아 링을 반대로 민다.','It switches the drive frequency to the other resonance. The tip ellipse then runs backward and pushes the ring the other way.')},
+
+{t:TR('전원을 꺼도 자리를 지킨다. 대신 닳는다','It holds position unpowered, but it wears'),ec:TR('전원이 꺼졌을 때','With the power off'),mc:TR('일반적인 스테퍼 모터와 비교 (대략)','Compared with a typical stepper motor (approx.)'),
+ e:()=>T(14,20,TR('전원 꺼짐: 떨림 없음','Power off: no vibration'),'lab')
+  +T(230,76,TR('마찰이 링을 붙잡는다','Friction holds the ring'),'sub','middle')+elBar(150,86,160)+elBody()
+  +`<g data-n="3">${elSpring(215,175,240)}${LN(215,268,215,250,COL.s3,{w:2,mk:'s3'})}${T(205,264,TR('스프링이 계속 누른다','The spring keeps pressing'),'sub','end')}</g>`+L(192,238,240),
+ m:()=>{const rows=[[TR('기어','Gears'),TR('없음','None'),TR('흔히 있음','Common')],[TR('자석·코일','Magnets, coils'),TR('없음','None'),TR('있음','Yes')],[TR('전원 끈 뒤 위치 유지','Holds position unpowered'),TR('마찰로 유지','By friction'),TR('기종에 따라','Depends')],[TR('쉬지 않는 연속 운전','Non-stop running'),TR('맞지 않음','Not suited'),TR('가능','Possible')],[TR('마모','Wear'),TR('접촉부가 닳음','Contact wears'),TR('적음','Low')]];
+  return T(196,26,TR('공진 피에조','Resonant piezo'),'lab','middle')+T(274,26,TR('스테퍼','Stepper'),'lab','middle')+L(10,310,38,'ax')
+   +rows.map(([a,b,d],i)=>{const y=66+i*42;return T(12,y,a,'sub')+T(196,y,b,'sub','middle',COL.s1)+T(274,y,d,'sub','middle')+L(10,310,y+16,'lvl2')}).join('')},
+ read:[`${c(3,'s3')} `+TR('전원을 꺼도 스프링은 팁을 링에 계속 누른다. 그 마찰이 브레이크 노릇을 해서 링이 제자리에 남는다.','With the power off the spring still presses the tip on the ring. That friction acts as a brake, and the ring stays where it is.'),
+  TR('기어가 없어 작고 가볍다. 자석과 코일이 없어 자기장에 민감한 곳에서도 쓸 수 있다(제조사 설명).','Without gears it is small and light. Without magnets and coils it can be used where magnetic fields are a concern (per the manufacturer).'),
+  TR('대신 마찰로 미는 방식이라 접촉부가 닳는다. 수명이 회전수로 정해져 있고, 쉬지 않고 계속 돌리는 용도로 만든 장치가 아니다.','In exchange, pushing by friction wears the contact. The lifetime is specified in revolutions, and the device is not designed for non-stop running.'),
+  TR('힘도 작다. 무거운 광학 소자나 힘이 걸리는 케이블을 달면 미끄러지거나 멈출 수 있다.','The force is also small. A heavy optic or a tugging cable can make it slip or stall.'),
+  TR('오른쪽 표는 감을 잡기 위한 대략적인 비교다.','The table on the right is a rough comparison for a sense of scale.')],
+ q:TR('반파장판을 한 각도에 맞춰 두고 몇 시간 측정한다. 그동안 모터가 전력을 쓰며 버텨야 하나?','A half-wave plate is set to one angle for hours of measurement. Must the motor consume power to hold it?'),a:TR('아니다. 구동을 멈추면 마찰이 링을 잡고 있다. 필요할 때만 잠깐 움직이는 용도에 잘 맞는다.','No. Once the drive stops, friction holds the ring. It suits uses that move briefly only when needed.')}
+];
+
+/* ================= 탭 2: ELL14K 마운트 ================= */
+const MOUNT=[
+{t:TR('모터 두 개가 링 테두리를 민다','Two motors push on the ring rim'),ec:TR('ELL14를 위에서 본 모습','ELL14 seen from above'),mc:TR('ELL14K 묶음의 연결','Connections in the ELL14K bundle'),
+ slider:{min:0,max:360,step:1,init:30,label:TR('회전각','Rotation angle'),fmt:v=>Math.round(v)+'°',play:1},
+ e:v=>{const hole=(x,y)=>`<circle cx="${x}" cy="${y}" r="4" style="fill:var(--panel);stroke:var(--muted)" stroke-width="1"/>`,coil=x=>`<circle cx="${x}" cy="200" r="6" fill="none" style="stroke:var(--s3)" stroke-width="1.6"/><circle cx="${x}" cy="200" r="3" fill="none" style="stroke:var(--s3)" stroke-width="1.2"/>`;
+  return T(14,20,TR('실물 사진을 보고 그린 모식도 (치수는 대략)','Sketch drawn from a photo of the unit (approx. proportions)'),'sub')
+  +`<rect x="80" y="30" width="160" height="226" rx="8" style="fill:#f7e3df;stroke:var(--fg)" stroke-width="1.2"/>`+hole(92,42)+hole(228,42)+hole(92,244)+hole(228,244)
+  +`<rect x="150" y="228" width="20" height="50" style="fill:#d9dce2;stroke:var(--muted)" stroke-width="1"/><rect x="146" y="214" width="28" height="14" rx="2" style="fill:var(--panel);stroke:var(--fg)" stroke-width="1"/>`
+  +`<g data-n="5"><circle cx="160" cy="112" r="56" style="fill:#4a505b;stroke:var(--s2)" stroke-width="2"/></g><circle cx="160" cy="112" r="40" style="fill:#c9a36a;stroke:var(--fg)" stroke-width="1"/><circle cx="160" cy="112" r="31" style="fill:var(--panel);stroke:var(--fg)" stroke-width="1"/>`
+  +`<g transform="rotate(${v} 160 112)"><line x1="160" y1="83" x2="160" y2="141" style="stroke:var(--s1)" stroke-width="2"/><circle cx="160" cy="64" r="3.5" style="fill:#fff"/></g>`
+  +`<g data-n="1">${elMini(117,148,15)}<rect x="92" y="206" width="22" height="14" rx="2" style="fill:#4a505b"/>${T(72,180,TR('모터 1','Motor 1'),'sub','end')}</g><g data-n="2">${elMini(203,148,-15)}<rect x="206" y="206" width="22" height="14" rx="2" style="fill:#4a505b"/>${T(248,180,TR('모터 2','Motor 2'),'sub')}</g>`
+  +`<g data-n="3">${coil(130)}${coil(190)}${T(160,204,TR('스프링','springs'),'sub','middle')}</g>`
+  +T(72,100,TR('회전 링','Ring'),'sub','end')+T(248,100,TR('빨간 선:','Red line:'),'sub')+T(248,114,TR('소자의 축','optic axis'),'sub')+T(178,272,TR('리본 케이블','Ribbon cable'),'sub')},
+ m:()=>T(14,20,TR('K = ELL14 + 인터페이스 보드 + 전원 + 케이블','K = ELL14 + interface board + supply + cables'),'sub')
+  +box(10,40,56,36,'PC')+LN(66,58,96,58,'var(--muted)',{w:1.2,mk:'g'})+T(81,50,'USB','sub','middle')
+  +box(96,40,108,36,TR('인터페이스 보드','Interface board'),TR('USB ↔ 직렬','USB ↔ serial'))
+  +box(240,40,70,36,TR('5 V 전원','5 V supply'))+LN(240,58,204,58,'var(--muted)',{w:1.2,mk:'g'})
+  +LN(150,76,150,132,'var(--muted)',{w:1.2,mk:'g'})+T(156,108,TR('리본 케이블: 5 V + 직렬 통신','Ribbon cable: 5 V + serial'),'sub')
+  +`<rect x="14" y="134" width="292" height="126" rx="8" class="dev"/>`+T(24,152,TR('ELL14 회로 기판','ELL14 circuit board'),'lab')
+  +box(24,168,58,40,'MCU',TR('제어','control'))+LN(82,188,92,188,'var(--muted)',{w:1.2,mk:'g'})
+  +box(92,168,62,40,TR('구동 회로','Driver'),'~100 kHz')+LN(154,188,164,188,'var(--muted)',{w:1.2,mk:'g'})
+  +`<g data-n="1">${box(164,168,62,40,TR('모터 ×2','Motors ×2'),TR('링을 민다','push ring'))}</g>`+LN(226,188,236,188,'var(--muted)',{w:1.2,mk:'g'})
+  +box(236,168,62,40,TR('인코더','Encoder'),TR('각도 읽기','angle'))
+  +PL([[267,208],[267,232],[53,232],[53,210]],'var(--muted)',{w:1.2,mk:'g'})+T(160,250,TR('읽은 각도를 MCU로 되돌린다','The measured angle goes back to the MCU'),'sub','middle'),
+ read:[`${c(5,'s2')} `+TR('ELL14는 SM1 나사(지름 약 1인치 광학 소자용)가 난 링을 돌린다. 링 가운데는 뚫려 있어 빛이 지나간다.','The ELL14 turns a ring with an SM1 thread (for optics about 1 inch in diameter). The ring center is open so that light passes through.'),
+  TR(`${c(1,'f')} 모터 1과 ${c(2,'f')} 모터 2는 기판 아래쪽에 나란히 서 있다. 가느다란 금속 팔 끝(팁)이 링 테두리의 왼쪽 아래와 오른쪽 아래에 닿는다.`,`${c(1,'f')} Motor 1 and ${c(2,'f')} motor 2 stand side by side at the bottom of the board. The end of each thin metal arm (the tip) touches the ring rim at the lower left and the lower right.`),
+  `${c(3,'s3')} `+TR('팔 밑동마다 코일 스프링이 있어 팁을 링에 누른다. 탭 1의 모터 그림은 이 팔을 원리만 남기고 단순화한 것이다.','A coil spring at the base of each arm presses the tip on the ring. The motor drawing in tab 1 is this arm reduced to its principle.'),
+  TR('두 모터는 좌우 대칭이다. 링을 시계 방향으로 돌리려면 왼쪽 팁은 위로, 오른쪽 팁은 아래로 가야 한다. 그래서 한쪽은 미는 공진, 다른 쪽은 당기는 공진을 같이 쓴다(배치에서 추론, 확인 필요).','The two motors are mirror images. To turn the ring clockwise, the left tip must go up and the right tip down. So one motor uses its pushing resonance while the other uses its pulling resonance (inferred from the layout; to be verified).'),
+  TR('탭 1의 막대 그림은 이 링 테두리를 곧게 편 것이다. 막대가 옆으로 가는 것이 여기서는 링의 회전이다.','The bar in tab 1 is this ring rim straightened out. The sideways motion of the bar is the rotation of the ring here.'),
+  TR('회전 범위에 끝이 없다. 같은 방향으로 계속 돌릴 수 있다.','There is no end stop. The ring can keep turning in the same direction.'),
+  TR('ELL14K는 마운트(ELL14)에 인터페이스 보드, 5 V 전원, 케이블을 묶은 것이다. 인터페이스 보드에는 5 V 잭, USB 단자, 손으로 돌려 보는 버튼이 있다. PC에는 직렬(COM) 포트로 보인다.','The ELL14K bundles the mount (ELL14) with an interface board, a 5 V supply, and cables. The interface board carries a 5 V jack, a USB socket, and buttons for moving by hand. To the PC it appears as a serial (COM) port.')],
+ q:TR('회전 스테이지인데 왜 링 가운데가 비어 있나?','Why is the center of the ring open in a rotation stage?'),a:TR('파장판이나 편광자처럼 빛이 통과하는 광학 소자를 돌리는 용도라서다. 모터가 가운데 축이 아니라 테두리를 밀기 때문에 가운데를 비울 수 있다.','Because it is meant to rotate optics that light passes through, such as waveplates and polarizers. The motors push the rim rather than a central shaft, so the center can stay open.')},
+
+{t:TR('각도는 인코더가 센다: 한 바퀴 143,360 눈금','The encoder counts the angle: 143,360 counts per turn'),ec:TR('링의 눈금과 센서','Ring scale and sensor'),mc:TR('각도 크기 비교 (제조사 값)','Angle scales compared (manufacturer values)'),
+ slider:{min:0,max:360,step:.5,init:90,label:TR('각도','Angle'),fmt:v=>v.toFixed(1)+'°'},
+ e:v=>{const n=Math.round(v/360*143360);let tk='';for(let i=0;i<36;i++){const a=i*Math.PI/18,s=Math.sin(a),co=Math.cos(a);tk+=`<line x1="${(160+58*s).toFixed(1)}" y1="${(150-58*co).toFixed(1)}" x2="${(160+70*s).toFixed(1)}" y2="${(150-70*co).toFixed(1)}" style="stroke:${i?'var(--muted)':'var(--s1)'}" stroke-width="${i?1:3}"/>`}
+  return T(14,20,TR('눈금은 줄여서 그림 (실제: 한 바퀴 143,360)','Fewer ticks drawn (real: 143,360 per turn)'),'sub')
+   +`<circle cx="160" cy="150" r="70" style="fill:#e4e7ee;stroke:var(--s2)" stroke-width="1.4"/><circle cx="160" cy="150" r="46" style="fill:var(--panel);stroke:var(--fg)" stroke-width="1"/>`
+   +`<g transform="rotate(${v} 160 150)">${tk}</g>`
+   +`<g data-n="1">${box(132,44,56,24,TR('센서','Sensor'))}${LN(160,68,160,78,'var(--muted)',{w:1.2,mk:'g'})}</g>`
+   +T(160,146,String(n),'lab','middle')+T(160,162,'counts','sub','middle')
+   +T(160,246,TR('명령에 쓰는 16진수: ','Hex used in commands: ')+elHex(n),'sub','middle')+T(160,264,TR('빨간 눈금 = 원점에서 0이던 자리','Red tick = where zero was at home'),'sub','middle')},
+ m:()=>{const P=plot({x:[.001,1],logx:1,noy:1,xt:[{v:.001,l:'0.001'},{v:.01,l:'0.01'},{v:.1,l:'0.1'},{v:1,l:'1'}],xl:TR('각도 (°, log 눈금)','angle (°, log scale)'),L:20,R:300,T:30,B:236});
+  const it=[[1,.0025,TR('인코더 눈금 하나: 0.0025°','One encoder count: 0.0025°'),'s6'],[2,.05,TR('양방향 반복도: 0.05°','Bidirectional repeatability: 0.05°'),'s3'],[3,.1,TR('원점 복귀 반복도: 0.1° (확인 필요)','Homing repeatability: 0.1° (to be verified)'),'s4'],[4,.4,TR('양방향 정확도: 0.4°','Bidirectional accuracy: 0.4°'),'s1']];
+  return P.s+it.map(([n,val,s,k],i)=>{const y=58+i*46;return `<g data-n="${n}">${T(P.L+2,y-8,s,'sub')}<rect x="${P.L}" y="${y}" width="${(P.X(val)-P.L).toFixed(1)}" height="12" rx="2" style="fill:${COL[k]}" fill-opacity=".6"/></g>`}).join('')},
+ read:[TR('모터의 걸음은 크기가 일정하지 않다(마찰, 하중, 온도에 따라 달라짐). 걸음 수를 세어서는 각도를 알 수 없다.','The motor strides are not uniform in size (they vary with friction, load, and temperature). Counting strides cannot give the angle.'),
+  `${c(1,'s6')} `+TR('그래서 링에 눈금이 있고 센서가 지나가는 눈금을 센다. 한 바퀴가 143,360 눈금이므로 눈금 하나는 약 0.0025°다.','So the ring carries a scale and a sensor counts the passing marks. One turn is 143,360 counts, so one count is about 0.0025°.'),
+  TR('세어 보기: 90°는 143,360 ÷ 4 = 35,840 눈금이다. 16진수로 00008C00이고, 이 값이 그대로 이동 명령에 들어간다(다음 단계).','Counting it out: 90° is 143,360 ÷ 4 = 35,840 counts. In hexadecimal this is 00008C00, and this value goes straight into the move command (next step).'),
+  TR('이 눈금은 "얼마나 움직였나"만 알려 준다. 전원을 켠 직후에는 절대 각도를 모르므로 먼저 원점 복귀(home)를 한다.','The scale tells only "how far it has moved." Right after power-up the absolute angle is unknown, so homing comes first.'),
+  TR(`${c(1,'s6')} 눈금은 0.0025°로 잘지만 ${c(4,'s1')} 정확도는 0.4°다. 같은 자리로 되돌아오는 ${c(2,'s3')} 반복도(0.05°)가 정확도보다 훨씬 좋다.`,`${c(1,'s6')} One count is as fine as 0.0025°, but the ${c(4,'s1')} accuracy is 0.4°. The ${c(2,'s3')} repeatability of returning to the same place (0.05°) is much better than the accuracy.`),
+  `${c(3,'s4')} `+TR('원점 복귀 반복도는 자료에 따라 0.1°와 0.25°가 있어 확인이 필요하다.','Homing repeatability is listed as 0.1° in some sources and 0.25° in others; to be verified.')],
+ q:TR('파장판 각도를 0.1° 단위로 바꿔 가며 측정했다. "절대 각도가 0.1°까지 맞다"고 말할 수 있나?','A waveplate was stepped in 0.1° increments during a measurement. Can one say the absolute angle is right to 0.1°?'),a:TR('아니다. 눈금과 반복도는 0.1°보다 좋지만 절대 정확도는 0.4°다. 절대 각도가 중요하면 편광자 소광 위치 같은 광학적 기준으로 0점을 따로 잡는다.','No. Resolution and repeatability are better than 0.1°, but the absolute accuracy is 0.4°. When the absolute angle matters, the zero is set separately from an optical reference such as the extinction position of a polarizer.')},
+
+{t:TR('닫힌 고리: 밀고, 세고, 목표에서 멈춘다','Closed loop: push, count, stop at the target'),ec:TR('제어 흐름 (개념도)','Control flow (concept)'),mc:TR('직렬 통신 예시 (주소 0)','Serial exchange example (address 0)'),
+ e:()=>T(14,20,TR('기판의 MCU가 스스로 되풀이한다','The on-board MCU repeats this by itself'),'sub')
+  +box(14,44,84,36,TR('목표 각도','Target angle'),TR('명령 ma','command ma'))+LN(98,62,122,62,'var(--muted)',{w:1.2,mk:'g'})
+  +box(122,44,76,36,'MCU',TR('차이 계산','difference'))+LN(198,62,222,62,'var(--muted)',{w:1.2,mk:'g'})
+  +`<g data-n="1">${box(222,44,84,36,TR('모터 구동','Motor drive'),TR('공진 A 또는 B','res. A or B'))}</g>`+LN(264,80,264,132,'var(--muted)',{w:1.2,mk:'g'})
+  +box(222,132,84,36,TR('링 회전','Ring turns'))+LN(222,150,198,150,'var(--muted)',{w:1.2,mk:'g'})
+  +`<g data-n="2">${box(122,132,76,36,TR('인코더','Encoder'),TR('현재 각도','current angle'))}</g>`+LN(160,132,160,80,'var(--muted)',{w:1.2,mk:'g'})
+  +T(160,206,TR('차이 > 0 → 정방향 공진으로 민다','difference > 0 → push with the forward resonance'),'sub','middle')
+  +T(160,226,TR('차이 < 0 → 역방향 공진으로 민다','difference < 0 → push with the reverse resonance'),'sub','middle')
+  +T(160,246,TR('차이 ≈ 0 → 구동을 멈춘다 (마찰이 잡음)','difference ≈ 0 → drive stops (friction holds)'),'sub','middle'),
+ m:()=>{const rows=[['→','0ho0',TR('원점 복귀 (home)','home')],['←','0PO00000000',TR('답: 위치 0','reply: position 0')],['→','0ma00008C00',TR('90°로 이동 (35,840 눈금)','move to 90° (35,840 counts)')],['←','0PO00008C00',TR('답: 도착한 위치','reply: position reached')],['→','0gp',TR('현재 위치 묻기','ask current position')],['←','0PO00008C00',TR('답: 35,840 눈금 = 90°','reply: 35,840 counts = 90°')]];
+  return T(14,22,TR('9600 baud, 8N1 (기본값). 값은 예시','9600 baud, 8N1 (default). Values are examples'),'sub')
+   +rows.map(([d,code,s],i)=>{const y=56+i*32,col=d==='→'?COL.s2:COL.s3;return `<g data-n="${d==='→'?1:2}">${elMono(14,y,d,col)}${elMono(32,y,code,col)}</g>`+T(126,y,s,'sub')}).join('')
+   +`<g data-n="1">${elMono(14,256,'→',COL.s2)}${T(30,256,TR('PC가 보냄','sent by the PC'),'sub')}</g><g data-n="2">${elMono(150,256,'←',COL.s3)}${T(166,256,TR('마운트가 답함','reply from the mount'),'sub')}</g>`},
+ read:[TR('PC는 목표 각도만 보낸다. 실제 제어는 마운트 기판의 MCU가 한다.','The PC sends only the target angle. The MCU on the mount board does the actual control.'),
+  TR('MCU는 인코더로 현재 각도를 읽고 목표와의 차이를 본다. 차이의 부호에 따라 정방향 또는 역방향 공진으로 모터를 떤다(탭 1의 6단계).','The MCU reads the current angle from the encoder and looks at the difference from the target. Depending on its sign, it vibrates the motors at the forward or the reverse resonance (tab 1, step 6).'),
+  TR('목표에 닿으면 구동을 멈춘다. 그 뒤로는 마찰이 링을 잡는다(탭 1의 7단계).','On reaching the target it stops driving. After that, friction holds the ring (tab 1, step 7).'),
+  TR(`명령은 글자다. ${c(1,'s2')} "주소 한 글자 + 명령 두 글자 + 값"을 보내면 ${c(2,'s3')} 마운트가 답한다. 값은 눈금 수를 16진수 8자리로 쓴다.`,`Commands are text. The PC sends ${c(1,'s2')} "one address character + two command letters + value" and ${c(2,'s3')} the mount replies. The value is the count written as 8 hexadecimal digits.`),
+  TR('ho = 원점 복귀, ma = 절대 위치로 이동, mr = 상대 이동, gp = 위치 묻기. 한 버스에 최대 16대(주소 0–F)를 물릴 수 있다.','ho = home, ma = move absolute, mr = move relative, gp = get position. Up to 16 units (addresses 0–F) can share one bus.'),
+  TR('답의 정확한 값(원점 오프셋 등)은 장치 설정에 따라 다르다. 오른쪽은 형식을 보이는 예시다.','The exact reply values (home offset, etc.) depend on device settings. The right side is an example that shows the format.')],
+ q:TR('45°로 보내려면 ma 뒤에 어떤 값을 쓰나?','What value follows ma to send the mount to 45°?'),a:TR('143,360 ÷ 8 = 17,920 눈금 = 16진수 4600. 8자리로 쓰면 00004600이므로 주소 0이면 0ma00004600이다.','143,360 ÷ 8 = 17,920 counts = hexadecimal 4600. Written as 8 digits it is 00004600, so for address 0 the command is 0ma00004600.')},
+
+{t:TR('주파수 탐색: 공진은 모터마다, 온도마다 조금씩 다르다','Frequency search: resonance shifts between motors and with temperature'),ec:TR('공진이 옮겨 가면 (예시)','When the resonance shifts (example)'),mc:TR('저장된 주파수로 구동할 때의 속도·힘 (예시)','Speed and force at the stored frequency (example)'),
+ slider:{min:-4,max:4,step:.1,init:0,label:TR('공진 이동','Resonance shift'),fmt:v=>(v>0?'+':'')+v.toFixed(1)+' kHz'},
+ e:v=>{const P=plot({x:[80,104],y:[0,1.2],xt:[80,84,88,92,96,100,104].map(u=>({v:u,l:String(u)})),xl:TR('주파수 (kHz, 예시 값)','frequency (kHz, example values)'),yl:TR('팁 진폭 (상대)','tip amplitude (relative)'),T:34});
+  return P.s+crv(P,f=>elLor(f,92),80,104,'var(--muted)',{dash:1,w:1.2})+`<g data-n="2">${crv(P,f=>elLor(f,92+v),80,104,COL.s5)}</g>`
+   +`<g data-n="1">${LN(P.X(92),P.T,P.X(92),P.B,COL.s1,{w:1.5})}${T(P.X(92),P.T-10,TR('저장된 구동 주파수','Stored drive frequency'),'sub','middle',COL.s1)}${elDot(P.X(92),P.Y(elLor(92,92+v)),'var(--s1)')}</g>`},
+ m:v=>{const P=plot({x:[-4,4],y:[0,1.2],xt:[-4,-2,0,2,4].map(u=>({v:u,l:(u>0?'+':'')+u})),xl:TR('공진이 옮겨 간 양 (kHz, 예시)','resonance shift (kHz, example)'),yl:TR('속도·힘 (상대, 예시)','speed, force (relative, example)'),T:34});
+  return P.s+LN(P.L,P.Y(1),P.R,P.Y(1),COL.s3,{w:1.2,dash:1})+T(P.R,P.Y(1)-7,TR('주파수 탐색 뒤: 다시 꼭대기','After a search: back at the peak'),'sub','end',COL.s3)
+   +crv(P,u=>elLor(u,0),-4,4,COL.s1)+`<g data-n="1">${elDot(P.X(v),P.Y(elLor(v,0)),'var(--s1)')}</g>`},
+ read:[TR('공진 주파수는 모터 하나하나가 조금씩 다르다. 온도가 바뀌거나, 무거운 소자를 달거나, 접촉부가 닳아도 옮겨 간다.','The resonance frequency differs slightly from one motor to the next. It also shifts with temperature, with a heavier optic, and as the contact wears.'),
+  TR(`${c(2,'s5')} 공진 곡선이 옮겨 갔는데 ${c(1,'s1')} 구동 주파수가 그대로면, 진폭이 꼭대기에서 내려온다. 3단계 점검 질문과 같은 상황이다.`,`If the ${c(2,'s5')} resonance curve has moved while the ${c(1,'s1')} drive frequency stays put, the amplitude comes down from the peak. This is the situation in the check question of tab 1, step 3.`),
+  TR('증상: 느려진다, 목표에 못 가고 멈춘다, 한 방향만 약하다.','Symptoms: slower motion, stalling short of the target, weakness in one direction only.'),
+  TR('주파수 탐색 명령(모터 1은 s1, 모터 2는 s2)은 주파수를 훑어 가장 잘 도는 값을 다시 찾는다. 정방향과 역방향 주파수를 따로 찾는다.','The frequency search commands (s1 for motor 1, s2 for motor 2) sweep the frequency and find again the value that drives best. Forward and reverse frequencies are found separately.'),
+  TR('찾은 값은 저장 명령(us)을 보내야 전원을 꺼도 남는다(확인 필요). 탐색 중에는 전류가 평소보다 많이 흐른다(확인 필요).','The values found survive power-off only after the save command (us) is sent (to be verified). The current during a search is higher than usual (to be verified).'),
+  TR('Thorlabs의 Elliptec 프로그램에도 같은 기능의 버튼이 있다.','The Thorlabs Elliptec software has buttons for the same functions.')],
+ q:TR('겨울에 잘 돌던 마운트가 여름에 정방향으로만 느려졌다. 먼저 해 볼 일은?','A mount that ran well in winter has become slow in the forward direction only in summer. What is the first thing to try?'),a:TR('주파수 탐색이다. 온도로 공진이 옮겨 가 저장된 정방향 주파수가 꼭대기에서 벗어났을 수 있다. 그래도 안 되면 하중, 케이블 걸림, 마모를 본다.','A frequency search. Temperature may have shifted the resonance so that the stored forward frequency is off the peak. If that does not help, load, cable drag, and wear come next.')},
+
+{t:TR('쓸 때 기억할 것: 짧게 움직이고 쉰다','In use: move briefly, then rest'),ec:TR('운전 방식 (예시)','Operating pattern (example)'),mc:TR('ELL14 주요 값 (제조사 자료)','Key ELL14 values (manufacturer data)'),
+ e:()=>T(14,20,TR('쉬지 않고 돌리는 장치가 아니다','Not a device for non-stop running'),'sub')
+  +`<g data-n="1">${T(14,58,TR('맞는 쓰임: 각도를 바꾸고 멈춰서 측정','Good use: change the angle, stop, measure'),'lab')}${[0,1,2,3,4,5].map(i=>`<rect x="${14+i*52}" y="68" width="12" height="20" rx="2" style="fill:var(--s3)" fill-opacity=".7"/>`).join('')}${L(14,306,88,'ax')}</g>`
+  +`<g data-n="2">${T(14,136,TR('피할 쓰임: 계속 돌리는 초퍼처럼 쓰기','Use to avoid: spinning it like a chopper'),'lab')}<rect x="14" y="146" width="292" height="20" rx="2" style="fill:var(--s1)" fill-opacity=".6"/>${L(14,306,166,'ax')}</g>`
+  +LN(14,200,306,200,'var(--muted)',{w:1.2,mk:'g'})+T(160,218,TR('시간','time'),'sub','middle')
+  +T(14,250,TR('색칠한 구간 = 모터가 떠는 시간','Shaded = time the motors are vibrating'),'sub'),
+ m:()=>{const rows=[[TR('전원','Supply'),'5 V'],[TR('최고 속도','Top speed'),'430 °/s'],[TR('인코더','Encoder'),TR('143,360 눈금 / 바퀴','143,360 counts / turn')],[TR('양방향 반복도','Bidir. repeatability'),'0.05°'],[TR('양방향 정확도','Bidir. accuracy'),'0.4°'],[TR('하중','Load'),TR('약 50 g (확인 필요)','approx. 50 g (to be verified)')],[TR('수명','Lifetime'),TR('회전수로 한정 (값 확인 필요)','limited in revolutions (to be verified)')],[TR('통신','Comms'),TR('9600 baud, 버스당 최대 16대','9600 baud, up to 16 per bus')]];
+  return rows.map(([a,b],i)=>{const y=28+i*31;return T(12,y,a,'sub')+T(TR(108,124),y,b,'lab')+L(10,310,y+11,'lvl2')}).join('')},
+ read:[`${c(1,'s3')} `+TR('맞는 쓰임: 파장판·편광자 각도를 바꾸고, 멈춘 채로 측정하고, 다시 바꾼다. 멈춰 있는 동안은 마찰이 잡아 준다.','Good use: change a waveplate or polarizer angle, measure while stopped, change again. While stopped, friction holds the position.'),
+  `${c(2,'s1')} `+TR('피할 쓰임: 쉬지 않고 계속 돌리기. 제조사도 연속 운전용이 아니라고 적는다. 접촉부가 닳고 열이 난다.','Use to avoid: non-stop running. The manufacturer also states it is not for continuous operation. The contact wears and heats up.'),
+  TR('링을 손으로 억지로 돌리지 않는다. 팁이 눌린 채로 미끄러져 접촉면이 상할 수 있다(확인 필요).','The ring is not to be forced round by hand. The tip would slide under pressure and could damage the contact surface (to be verified).'),
+  TR('무거운 소자, 긴 렌즈 튜브, 링에 걸리는 케이블은 힘이 작은 이 모터에 부담이다.','Heavy optics, long lens tubes, and cables dragging on the ring are a burden for this low-force motor.'),
+  TR('전원을 켠 뒤에는 원점 복귀를 먼저 한다(2단계). 느려지면 주파수 탐색을 한다(4단계).','After power-up, homing comes first (step 2). If motion slows down, a frequency search follows (step 4).'),
+  TR('"확인 필요"로 적은 값은 Thorlabs 설명서와 사양표에서 확인해야 한다.','Values marked "to be verified" need checking against the Thorlabs manual and spec sheet.')],
+ q:TR('편광 의존 측정에서 각도 36개를 차례로 재려 한다. 이 마운트에 맞는 방식인가?','A polarization-dependent measurement steps through 36 angles in turn. Does that suit this mount?'),a:TR('맞는다. 각도마다 잠깐 움직이고 멈춰서 측정하는 방식이라 모터가 떠는 시간이 짧다. 측정 내내 링을 계속 돌리며 재는 방식은 맞지 않는다.','Yes. Moving briefly to each angle and measuring while stopped keeps the vibration time short. Measuring while the ring spins throughout does not suit it.')}
+];
+
+const TABS=[
+{id:'motor',name:TR('공진 피에조 모터','Resonant piezo motor'),sub:TR('떨림이 회전이 되는 원리','How vibration becomes rotation'),title:TR('공진 피에조 모터','Resonant piezo motor'),desc:TR('ELL14K 안의 Elliptec 모터가 링을 미는 원리를 부품부터 차례로 본다. 그림은 단순화한 모식도다.','How the Elliptec motor inside the ELL14K pushes the ring, starting from its parts. The figures are simplified sketches.'),steps:MOTOR},
+{id:'mount',name:TR('ELL14K 마운트','ELL14K mount'),sub:TR('인코더, 제어, 주파수 탐색','Encoder, control, frequency search'),title:TR('ELL14K 회전 마운트','ELL14K rotation mount'),desc:TR('모터 두 개, 인코더, 닫힌 고리 제어, 주파수 탐색, 쓸 때 주의할 점.','Two motors, the encoder, closed-loop control, frequency search, and points of care in use.'),steps:MOUNT}
+];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>
