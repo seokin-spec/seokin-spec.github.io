@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Linear Stage Notes</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* 공통 스타일 — 디자인 토큰은 CLAUDE.md 5절 */
+:root{color-scheme:light;--f-sans:-apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",Roboto,Arial,sans-serif;--f-mono:ui-monospace,Menlo,Consolas,monospace;--bg:#ffffff;--panel:#ffffff;--fg:#1f2328;--muted:#5d636b;--line:#e3e6ec;--soft:#f6f7fa;--pump:#7b8392;--accent:#24407f;
+--s1:#c9512f;--s2:#2a66c9;--s3:#17806b;--s4:#a8730a;--s5:#6a4bb8;--s6:#6b7280;
+}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-sans);font-size:15px;line-height:1.6}
+.wrap{max-width:1080px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.tabs button{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--soft);color:var(--muted);border-radius:12px;padding:10px 14px;cursor:pointer;font:600 14px var(--f-sans)}
+.tabs button small{font-weight:400;font-size:12px;opacity:.85}
+.tabs button[aria-selected="true"]{background:#0d1630;border-color:#0d1630;color:#d5def0}
+.hero{border-radius:12px;padding:20px 22px;background:radial-gradient(120% 140% at 0% 0%,#1b2b57 0%,#0d1630 70%);color:#d5def0;display:flex;flex-direction:column;gap:4px}
+.hero .eyebrow{font:500 12px var(--f-mono);letter-spacing:.06em;color:#9cc2ff}
+.hero .hrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.hrow .lang{margin-left:auto;font:500 12px var(--f-sans);color:#d5def0;border:1px solid #3a4a78;border-radius:999px;padding:0 10px;line-height:15px;text-decoration:none;white-space:nowrap}
+.hrow .lang b{color:#fff;font-weight:700}
+.hrow .lang:hover{border-color:#9cc2ff}
+.status{font:600 11px var(--f-sans);color:#5a3d00;background:#f6dfa8;border-radius:999px;padding:1px 9px;letter-spacing:0}
+.hero h1{color:#fff;font-size:26px;font-weight:700;margin:0}
+.hero p{margin:0;font-size:14px;color:#d5def0;max-width:70ch}
+input[type=range]{accent-color:var(--accent)}
+.steprow{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.count{font:500 13px var(--f-mono);color:var(--muted);font-variant-numeric:tabular-nums}
+h2{font-size:18px;font-weight:600;margin:0}
+.stage{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:720px){.stage{grid-template-columns:minmax(0,1fr)}}
+.fig{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-width:0}
+.fig .cap{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em;margin:0 0 4px}
+svg{display:block;width:100%;height:auto}
+.ax{stroke:var(--muted);stroke-width:1}.lvl{stroke:var(--fg);stroke-width:1.6}.lvl2{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.beam{fill:none;stroke:var(--pump);stroke-width:1.5}.dev{fill:var(--soft);stroke:var(--fg);stroke-width:1.2}
+.lab,.sub{paint-order:stroke;stroke:var(--panel);stroke-width:3px;stroke-linejoin:round}.lab{fill:var(--fg);font:12px var(--f-sans)}.sub{fill:var(--muted);font:11px var(--f-sans)}.num{font:500 11px var(--f-mono)}.labn{fill:var(--fg);font:500 12px var(--f-sans)}.subn{fill:var(--muted);font:11px var(--f-sans)}
+.stage [data-n]{transition:opacity .15s}.stage.focus [data-n]:not(.on){opacity:.18}
+.ctl{display:flex;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+.ctl input[type=range]{flex:1;min-width:120px}.ctl output{font:500 14px var(--f-mono);min-width:72px;text-align:right;font-variant-numeric:tabular-nums}
+.ctl label.t{display:inline-flex;align-items:center;gap:6px;font-size:14px;cursor:pointer}
+.notes{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:12px}
+@media (max-width:720px){.notes{grid-template-columns:minmax(0,1fr)}}
+.read{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px;min-width:0}
+.read ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.case{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--soft);border-left:3px solid var(--s4);font-size:14px}.case b{font-weight:600}
+.quiz{background:var(--soft);border-radius:10px;padding:12px 16px;min-width:0}
+.quiz .k{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.quiz p{margin:4px 0 8px}
+.quiz details summary{cursor:pointer;color:var(--accent);font-weight:500}
+.chip{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:1.5px solid currentColor;font:500 11px var(--f-mono);vertical-align:1px;cursor:default}
+.k-s1{color:var(--s1)}.k-s2{color:var(--s2)}.k-s3{color:var(--s3)}.k-s4{color:var(--s4)}.k-s5{color:var(--s5)}.k-s6{color:var(--s6)}.k-g{color:var(--pump)}.k-f{color:var(--fg)}
+nav{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+nav button,.ctl button{font:500 14px var(--f-sans);padding:8px 18px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--fg);cursor:pointer}
+nav button:disabled{opacity:.4;cursor:default}
+.dots{display:flex;gap:6px}.dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:var(--line);cursor:pointer}.dots button.on{background:var(--accent)}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.k-b{color:var(--s1)}.k-r{color:var(--s2)}
+[hidden]{display:none!important} /* display:flex 같은 클래스 규칙이 hidden 속성을 덮지 않게 */
+</style>
+
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs"></div>
+  <header class="hero"><div class="hrow"><span class="eyebrow">ADVANCED SPECTROSCOPY LAB · how equipment works</span><span class="status" title="Draft before expert review. Read values together with their approx./example/to-be-verified marks.">Under review</span><a class="lang" id="langbtn" data-base="../linear-stage.html" href="../linear-stage.html" title="한국어">한 · <b>EN</b></a></div><h1 id="htitle"></h1><p id="hdesc"></p></header>
+  <div class="steprow"><span class="count" id="count"></span><h2 id="stitle"></h2></div>
+  <div class="stage" id="stage">
+    <div class="fig"><p class="cap" id="ecap"></p><svg id="esvg" viewBox="0 0 320 280" role="img" aria-label="Left figure"></svg></div>
+    <div class="fig"><p class="cap" id="mcap"></p><svg id="msvg" viewBox="0 0 320 280" role="img" aria-label="Right figure"></svg></div>
+  </div>
+  <div class="ctl" id="ctl" hidden>
+    <span id="slw" hidden><label for="sl" id="sll"></label></span><input type="range" id="sl"><output id="slo"></output><button id="play" type="button" hidden>Play</button>
+    <span id="tgl"></span>
+  </div>
+  <div class="notes">
+    <div class="read"><ul id="read"></ul><div class="case" id="case" hidden></div></div>
+    <div class="quiz"><span class="k">Check question</span><p id="q"></p><details id="ad"><summary>Show answer</summary><p id="a"></p></details></div>
+  </div>
+  <nav><button id="prev" type="button">← Previous</button><div class="dots" id="dots"></div><button id="next" type="button">Next →</button></nav>
+</div>
+
+<script>
+const LANG='en';
+/* ---------- 언어 ----------
+   build.py가 맨 앞에 const LANG='ko' 또는 'en'을 넣는다.
+   TR('한국어','English'): 영어판에서는 en, 없으면 ko를 쓴다 (조금씩 번역해도 빌드가 깨지지 않는다). */
+const TR=(ko,en)=>LANG==='en'&&en!=null?en:ko;
+/* ---------- SVG 헬퍼 (모든 노트 공통) ----------
+   색 키: s1~s6 데이터 색, g = pump(회색), f = 글자색, b/r = ΔT/T 부호(+ 빨강 / − 파랑, s1/s2와 같은 색) */
+const COL={s1:'var(--s1)',s2:'var(--s2)',s3:'var(--s3)',s4:'var(--s4)',s5:'var(--s5)',s6:'var(--s6)',g:'var(--pump)',f:'var(--fg)',b:'var(--s1)',r:'var(--s2)'};
+const DEFS=`<defs>${Object.keys(COL).map(k=>`<marker id="m${k}" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:${COL[k]}"/></marker>`).join('')}</defs>`;
+/* 글자 한 줄 / 여러 줄 */
+const T=(x,y,s,c='lab',a='start',col)=>`<text x="${x}" y="${y}" class="${c}" text-anchor="${a}"${col?` style="fill:${col}"`:''}>${s}</text>`;
+const TM=(x,y,lines,c='sub',a='start',dy=14)=>lines.map((l,i)=>T(x,y+i*dy,l,c,a)).join('');
+/* 가로 준위선, 임의 선, 꺾은선 */
+const L=(x1,x2,y,c='lvl')=>`<line x1="${x1}" x2="${x2}" y1="${y}" y2="${y}" class="${c}"/>`;
+const LN=(x1,y1,x2,y2,col='var(--pump)',o={})=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+const PL=(pts,col='var(--pump)',o={})=>`<polyline points="${pts.map(p=>p.join(',')).join(' ')}" fill="none" style="stroke:${col}" stroke-width="${o.w??1.5}"${o.dash?' stroke-dasharray="4 3"':''}${o.mk?` marker-end="url(#m${o.mk})"`:''}/>`;
+/* 번호 배지 ①② */
+function badge(x,y,n,col){return `<circle cx="${x}" cy="${y}" r="9" style="fill:var(--panel);stroke:${col}"/><text x="${x}" y="${y+4}" class="num" text-anchor="middle" style="fill:${col}">${n}</text>`}
+/* 전이 화살표: k = 색 키, n = 번호(data-n으로 짝 강조)
+   o.t 글자 위치: 기본은 화살표 가운데 기준(tx 8, ty 4), o.at='end'면 화살표 끝 x 기준(tx 6, ty 18) */
+function A(x1,y1,x2,y2,k,n,o={}){const col=COL[k];let s=`<g${n?` data-n="${n}"`:''}><line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" style="stroke:${col}" stroke-width="2"${o.dash?' stroke-dasharray="5 3"':''} marker-end="url(#m${k})"/>`;
+ if(n)s+=badge((x1+x2)/2+(o.dx??-14),(y1+y2)/2+(o.dy??0),n,col);
+ if(o.t)s+=o.at==='end'?T(x2+(o.tx??6),(y1+y2)/2+(o.ty??18),o.t,'sub','start',col):T((x1+x2)/2+(o.tx??8),(y1+y2)/2+(o.ty??4),o.t,'sub','start',col);
+ return s+'</g>'}
+/* 장치 상자 (한 줄 또는 두 줄 이름) */
+function box(x,y,w,h,a,b){return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" class="dev"/>`+T(x+w/2,y+(b?h/2-2:h/2+4),a,'sub','middle')+(b?T(x+w/2,y+h/2+12,b,'sub','middle'):'')}
+/* 그래프 틀: plot({x:[a,b], y:[c,d], xt, yt, xl, yl, logx, logy, L,R,T,B}) → {s, X, Y, ...} */
+function plot(c){const Lx=c.L??58,R=c.R??304,Tp=c.T??22,B=c.B??236,tf=(v,l)=>l?Math.log10(v):v;
+ const[x0,x1]=c.x.map(v=>tf(v,c.logx)),[y0,y1]=(c.y||[0,1]).map(v=>tf(v,c.logy));
+ const X=v=>Lx+(tf(v,c.logx)-x0)/(x1-x0)*(R-Lx),Y=v=>B-(tf(v,c.logy)-y0)/(y1-y0)*(B-Tp);
+ let s=`<line x1="${Lx}" y1="${B}" x2="${R}" y2="${B}" class="ax"/>`;if(!c.noy)s+=`<line x1="${Lx}" y1="${Tp}" x2="${Lx}" y2="${B}" class="ax"/>`;
+ (c.xt||[]).forEach(t=>s+=`<line x1="${X(t.v)}" x2="${X(t.v)}" y1="${B}" y2="${B+5}" class="ax"/>`+T(X(t.v),B+17,t.l,'sub','middle'));
+ (c.yt||[]).forEach(t=>s+=`<line x1="${Lx-5}" x2="${Lx}" y1="${Y(t.v)}" y2="${Y(t.v)}" class="ax"/>`+T(Lx-8,Y(t.v)+4,t.l,'sub','end'));
+ if(c.xl)s+=T((Lx+R)/2,B+33,c.xl,'lab','middle');
+ if(c.yl){const yx=c.ylx??14,ym=(Tp+B)/2;s+=`<text x="${yx}" y="${ym}" class="lab" text-anchor="middle" transform="rotate(-90 ${yx} ${ym})">${c.yl}</text>`}
+ return{s,X,Y,L:Lx,R,T:Tp,B}}
+/* 곡선: plot 결과 P 위에 f(v)를 a~b 구간으로 */
+function crv(P,f,a,b,col,o={}){const n=o.n??200;let d='';for(let i=0;i<=n;i++){const v=a+(b-a)*i/n;let y=f(v);if(!isFinite(y))continue;if(o.clip)y=Math.max(o.clip[0],Math.min(o.clip[1],y));d+=(d?' L':'M')+P.X(v).toFixed(1)+','+P.Y(y).toFixed(1)}
+ return `<path d="${d}" fill="none" style="stroke:${col}" stroke-width="${o.w??2}"${o.dash?' stroke-dasharray="5 4"':''}/>`}
+/* 본문 속 번호 칩: c(1,'s1') → 그림의 data-n="1"과 짝 */
+const c=(n,k)=>`<span class="chip k-${k}" data-n="${n}">${n}</span>`;
+// @title 리니어 스테이지 노트
+// @eyebrow ADVANCED SPECTROSCOPY LAB · 장비 원리
+// @status 검토 중
+// @lang ko en
+// @title.en Linear Stage Notes
+// @eyebrow.en ADVANCED SPECTROSCOPY LAB · how equipment works
+// @status.en Under review
+/* 리니어 스테이지 = 구동(미는 것) + 가이드(잡아 주는 것). 사양표를 읽고 고르기 위한 노트.
+   그림은 모두 단순화한 모식도다. 이 노트의 색은 신호 부호가 아니라 부품 종류다(구동 = 빨강, 가이드 = 파랑).
+   확인이 필요한 값은 REVIEW.md에 적었다. 글은 TR('한국어','English')로 쓴다.
+   4탭 4단계는 슬라이더가 둘이다(리드 = 엔진 슬라이더, 나사 지름 = NOTE.afterCtl로 넣은 둘째 슬라이더). */
+let lsDia=6;
+const NOTE={key:'linstage',
+ afterCtl:`<div class="ctl" id="lsctl" hidden><label for="lsd">${TR('나사 지름','Screw diameter')}</label><input type="range" id="lsd" min="4" max="16" step="0.5" value="6"><output id="lsdo">6.0 mm</output></div>`,
+ init(){$('lsd').oninput=e=>{lsDia=+e.target.value;$('lsdo').value=lsDia.toFixed(1)+' mm';draw()}},
+ onRender(s){$('lsctl').hidden=!s.dia}};
+
+/* ---------- 그림 헬퍼 (이 노트 전용, 이름은 ls로 시작) ---------- */
+const lsR=(x,y,w,h,fill='#e4e7ee',stroke='var(--fg)',fo)=>`<rect x="${(+x).toFixed(1)}" y="${(+y).toFixed(1)}" width="${(+w).toFixed(1)}" height="${(+h).toFixed(1)}" rx="2" style="fill:${fill};stroke:${stroke}" stroke-width="1.2"${fo?` fill-opacity="${fo}"`:''}/>`;
+const lsK=(k,fo=.25)=>(x,y,w,h)=>lsR(x,y,w,h,`var(--${k})`,`var(--${k})`,fo);
+const lsDr=lsK('s1'),lsDr2=lsK('s1',.45),lsGd=lsK('s2'),lsGd2=lsK('s2',.5),lsPz=lsK('s4',.3);
+const lsG=(n,s)=>n?`<g data-n="${n}">${s}</g>`:s;
+const lsDot=(x,y,col,r=5)=>`<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="${r}" style="fill:${col}"/>`;
+const lsC=(x,y,r,fill='var(--panel)',stroke='var(--fg)')=>`<circle cx="${(+x).toFixed(1)}" cy="${(+y).toFixed(1)}" r="${r}" style="fill:${fill};stroke:${stroke}" stroke-width="1.2"/>`;
+/* 범례 견본 */
+const lsSw=(x,y,k)=>`<rect x="${x}" y="${y-9}" width="14" height="10" rx="2" style="fill:var(--${k});stroke:var(--${k})" fill-opacity=".25"/>`;
+const lsLeg=(y=20)=>lsSw(14,y,'s1')+T(34,y,TR('구동 (민다)','Drive (pushes)'),'sub')+lsSw(150,y,'s2')+T(170,y,TR('가이드 (잡아 준다)','Guide (constrains)'),'sub');
+/* 나사: 가로 막대 + 비스듬한 나사산 */
+const lsScrew=(x1,x2,y,o={})=>{const h=o.h??8,p=o.p??6,off=(((o.off??0)%p)+p)%p;let s=`<rect x="${x1}" y="${y-h/2}" width="${x2-x1}" height="${h}" style="fill:var(--panel);stroke:var(--s1)" stroke-width="1.2"/>`;
+ for(let x=x1+off;x<x2-2;x+=p)s+=`<line x1="${x.toFixed(1)}" y1="${y+h/2}" x2="${(x+2).toFixed(1)}" y2="${y-h/2}" style="stroke:var(--s1)" stroke-width="1"/>`;return s};
+/* 가로 스프링 */
+const lsSpr=(x1,x2,y,n=6,w=6)=>{const p=[[x1,y]];for(let i=0;i<n;i++)p.push([+(x1+(x2-x1)*(i+.5)/n).toFixed(1),y+(i%2?-w:w)]);p.push([x2,y]);return PL(p,'var(--s3)',{w:1.6})};
+/* 스테이지 단면 (옆에서 봄). cx = 캐리지 가운데. 번호: 1 모터, 2 나사, 3 너트, 4 캐리지, 5 레일, 6 베어링 블록.
+   o.dg: 구동 부품은 1, 가이드 부품은 2로 묶는다 / o.N: 번호를 직접 준다 */
+function lsStage(cx,o={}){const x0=o.x0??24,x1=o.x1??296,N=o.N||(o.dg?[1,1,1,0,2,2]:[1,2,3,4,5,6]);
+ return lsR(x0,204,x1-x0,10)+lsG(N[4],lsGd(x0+40,192,x1-x0-44,12))
+  +lsR(x0,174,34,30)+lsG(N[0],lsDr(x0,142,34,32))+lsR(x1-12,146,8,46)
+  +lsG(N[3],lsR(cx-40,128,80,50))+lsG(N[1],lsScrew(x0+34,x1-12,158,{off:o.off}))
+  +lsG(N[2],lsDr2(cx-12,149,24,18))+lsG(N[5],lsGd2(cx-38,178,22,14)+lsGd2(cx+16,178,22,14))}
+/* 세로로 세운 그림: 가로 그림(중심 160,170)을 -90° 돌려 (px,py)에 둔다. 모터가 아래로 간다 */
+const lsVert=(px,py,inner)=>`<g transform="translate(${px},${py}) rotate(-90) translate(-160,-170)">${inner}</g>`;
+/* 성질 카드: 제목 + [이름, 값, 색] 줄 */
+function lsCard(y,title,rows){const h=36+rows.length*18,vx=TR(92,104);
+ return `<rect x="10" y="${y}" width="300" height="${h}" rx="8" class="dev"/>`+T(22,y+21,title,'lab')
+  +rows.map(([a,b,col],i)=>T(22,y+42+i*18,a,'sub')+T(vx,y+42+i*18,b,'sub','start',col||'var(--fg)')).join('')}
+/* 구동 방식 10가지. hk: 전원이 꺼졌을 때 0 유지 / 1 조건에 따라 / 2 흘러내림 */
+const lsHC=['var(--s3)','var(--s4)','var(--s5)'];
+const lsHS=[TR('유지','holds'),TR('조건부','depends'),TR('흘러내림','falls')];
+const LS_DR=[
+ {n:TR('스테퍼 + 리드스크류','Stepper + leadscrew'),p:TR('나사를 걸음 단위로 돌린다','turns the screw in steps'),h:TR('유지 (나사 마찰)','holds (thread friction)'),hk:0,sp:TR('느림','slow'),u:TR('위치 고정 작업','move-and-hold tasks')},
+ {n:TR('DC 서보 + 리드스크류','DC servo + leadscrew'),p:TR('엔코더를 보며 나사를 돌린다','encoder feedback turns the screw'),h:TR('유지 (나사 마찰)','holds (thread friction)'),hk:0,sp:TR('느림','slow'),u:TR('소형 스테이지, 부드러운 저속','compact stages, smooth low speed')},
+ {n:TR('볼스크류','Ball screw'),p:TR('나사와 너트 사이에 볼이 구른다','balls roll between screw and nut'),h:TR('흘러내릴 수 있음','may back-drive'),hk:1,sp:TR('빠름','fast'),u:TR('고속·고하중','high speed, high load')},
+ {n:TR('다이렉트 드라이브 (리니어 모터)','Direct drive (linear motor)'),p:TR('자석 위에서 코일이 직접 밀린다','coil pushed directly by magnets'),h:TR('흘러내림','falls'),hk:2,sp:TR('매우 빠름','very fast'),u:TR('고속 스캔','fast scanning')},
+ {n:TR('벨트 구동','Belt drive'),p:TR('풀리가 벨트를 당긴다','a pulley pulls a belt'),h:TR('흘러내림','falls'),hk:2,sp:TR('빠름','fast'),u:TR('긴 트래블','long travel')},
+ {n:TR('랙 앤 피니언','Rack and pinion'),p:TR('톱니바퀴가 톱니 막대를 타고 간다','a gear runs along a toothed bar'),h:TR('흘러내림','falls'),hk:2,sp:TR('빠름','fast'),u:TR('아주 긴 트래블','very long travel')},
+ {n:TR('피에조 관성 구동','Piezo inertia drive'),p:TR('천천히 밀고 빠르게 뺀다','slow push, fast retract'),h:TR('유지 (마찰)','holds (friction)'),hk:0,sp:TR('느림','slow'),u:TR('수십 nm 걸음, 짧은 트래블','tens-of-nm steps, short travel')},
+ {n:TR('보이스 코일','Voice coil'),p:TR('자기장 속 코일이 전류로 밀린다','current pushes a coil in a magnet'),h:TR('흘러내림','falls'),hk:2,sp:TR('매우 빠름','very fast'),u:TR('짧은 구간 고속 왕복','fast short-stroke shuttling')},
+ {n:TR('공압 실린더','Pneumatic cylinder'),p:TR('공기압이 피스톤을 민다','air pressure pushes a piston'),h:TR('공기압에 의존','depends on air pressure'),hk:1,sp:TR('빠름','fast'),u:TR('두 위치 전환','switching two positions')},
+ {n:TR('모터 액추에이터 + 수동 스테이지','Motor actuator + manual stage'),p:TR('마이크로미터 자리에 모터 나사를 단다','replaces the micrometer screw'),h:TR('유지 (나사 마찰)','holds (thread friction)'),hk:0,sp:TR('느림','slow'),u:TR('수동 스테이지 자동화','automating a manual stage')}];
+const lsDC=(i,y)=>{const d=LS_DR[i];return lsCard(y,d.n,[[TR('원리','Principle'),d.p],[TR('전원 꺼짐','Power off'),d.h,lsHC[d.hk]],[TR('속도','Speed'),d.sp],[TR('주 용도','Main use'),d.u]])};
+const lsHLeg=y=>T(14,y,TR('전원 꺼짐:','Power off:'),'sub')+[0,1,2].map(i=>lsDot(TR(82,80)+i*74,y-4,lsHC[i],4)+T(TR(90,88)+i*74,y,lsHS[i],'sub')).join('');
+/* 가이드 카드 */
+const lsGC=(title,a,b,d,u)=>lsCard(30,title,[[TR('닿는 방식','Contact'),a],[TR('장점','Strength'),b],[TR('한계','Limit'),d],[TR('주 용도','Main use'),u]]);
+/* log 축 범위 막대 */
+const lsBar=(P,y,lo,hi,k,s,n)=>lsG(n,T(P.L+2,y-8,s,'sub')+`<rect x="${P.X(lo).toFixed(1)}" y="${y}" width="${Math.max(3,P.X(hi)-P.X(lo)).toFixed(1)}" height="12" rx="2" style="fill:var(--${k})" fill-opacity=".65"/>`);
+
+/* ================= 탭 1: 구동과 가이드 ================= */
+const LS_BASIC=[
+{t:TR('스테이지는 두 부품의 조합이다: 미는 것과 잡아 주는 것','A stage is two parts combined: one pushes, one constrains'),ec:TR('리니어 스테이지 단면 (모식도)','Linear stage cross-section (sketch)'),mc:TR('두 부품의 역할','Roles of the two parts'),
+ slider:{min:0,max:100,step:1,init:30,label:TR('캐리지 위치','Carriage position'),fmt:v=>Math.round(v)+' mm',play:1},
+ e:v=>{const cx=110+v*1.3;return lsLeg(20)+T(14,40,TR('단순화한 그림 (실제 모양과 다름)','Simplified sketch (not the real shape)'),'sub')
+  +lsStage(cx,{dg:1,off:v*1.3})+T(cx,120,TR('캐리지','Carriage'),'sub','middle')
+  +T(160,246,TR('트래블(이동 범위) 100 mm, 예시','Travel range 100 mm, example'),'sub','middle')},
+ m:()=>{const cd=(y,n,k,ti,ls)=>lsG(n,`<rect x="10" y="${y}" width="300" height="112" rx="8" style="fill:var(--soft);stroke:var(--${k})" stroke-width="1.4"/>`+badge(28,y+22,n,COL[k])+T(44,y+26,ti,'lab')+TM(28,y+52,ls,'sub','start',20));
+  return cd(14,1,'s1',TR('구동 (drive)','Drive'),[TR('캐리지를 미는 힘이다.','The force that pushes the carriage.'),TR('원하는 위치에 멈춘다.','Stops at the requested position.'),TR('멈춘 자리에서 버틴다.','Holds that position.')])
+   +cd(146,2,'s2',TR('가이드 (guide)','Guide'),[TR('캐리지가 타고 가는 길이다.','The track the carriage rides on.'),TR('똑바로 가게 잡는다.','Keeps the motion straight.'),TR('흔들리거나 기울지 않게 한다.','Prevents wobble and tilt.')])},
+ read:[TR('리니어 스테이지는 짐을 실은 판(캐리지)을 한 직선 위에서 움직이는 장치다.','A linear stage moves a load-carrying plate (the carriage) along one straight line.'),
+  `${c(1,'s1')} `+TR('구동: 캐리지를 미는 쪽이다. 모터, 나사, 너트가 여기에 든다. 위치를 정하고 그 자리에서 버틴다.','Drive: the side that pushes the carriage. Motor, screw, and nut belong here. It sets the position and holds it.'),
+  `${c(2,'s2')} `+TR('가이드: 캐리지가 타고 가는 쪽이다. 레일과 베어링이 여기에 든다. 옆으로 흔들리거나 기울지 않게 잡는다.','Guide: the side the carriage rides on. Rail and bearings belong here. It prevents sideways wobble and tilt.'),
+  TR('두 부품은 따로 고를 수 있다. 같은 레일에 다른 구동을 달 수 있고, 같은 구동에 다른 레일을 쓸 수 있다.','The two are chosen separately. The same rail can carry a different drive, and the same drive can run on a different rail.'),
+  TR('이 노트의 색은 신호 부호가 아니다. 빨강은 구동, 파랑은 가이드를 나타낸다.','Colors in this note are not signal signs. Red marks the drive and blue marks the guide.')],
+ q:TR('슬라이더를 움직일 때 위치를 정하는 것은 어느 쪽인가?','As the slider moves, which side sets the position?'),a:TR('구동이다. 가이드는 캐리지가 어디에 있든 길만 잡아 준다. 위치는 나사가 얼마나 돌았는지가 정한다.','The drive. The guide only defines the path wherever the carriage is. The position is set by how far the screw has turned.')},
+
+{t:TR('단면에서 찾기: 모터·나사·너트는 구동, 레일·베어링 블록은 가이드','In the cross-section: motor, screw, nut drive; rail and bearing blocks guide'),ec:TR('부품 여섯 개','Six parts'),mc:TR('부품 이름과 하는 일','Part names and what they do'),
+ e:()=>T(14,20,TR('옆에서 본 단면 (모식도)','Side cross-section (sketch)'),'sub')+lsStage(170)
+  +lsG(1,badge(41,128,1,COL.s1))+lsG(2,badge(92,142,2,COL.s1))+lsG(3,badge(170,138,3,COL.s1))+lsG(4,badge(198,116,4,COL.s6))+lsG(5,badge(266,180,5,COL.s2))+lsG(6,badge(120,180,6,COL.s2))
+  +lsLeg(250),
+ m:()=>{const it=[[1,TR('모터','Motor'),TR('나사를 돌린다','turns the screw'),'s1'],[2,TR('리드스크류','Leadscrew'),TR('회전을 직선 이동으로 바꾼다','converts rotation into linear travel'),'s1'],[3,TR('너트','Nut'),TR('나사를 타고 가며 캐리지를 민다','rides the screw and pushes the carriage'),'s1'],[4,TR('캐리지','Carriage'),TR('짐을 싣는 판','the plate that carries the load'),'s6'],[5,TR('레일','Rail'),TR('가는 길을 정한다','defines the path'),'s2'],[6,TR('베어링 블록','Bearing block'),TR('레일을 타고 구른다','rolls along the rail'),'s2']];
+  return it.map(([n,a,b,k],i)=>{const y=30+i*42;return lsG(n,badge(22,y,n,COL[k])+T(40,y-2,a,'lab')+T(40,y+14,b,'sub')+(k==='s6'?'':T(306,y-2,k==='s1'?TR('구동','drive'):TR('가이드','guide'),'sub','end',COL[k])))}).join('')},
+ read:[TR(`${c(1,'s1')} 모터가 ${c(2,'s1')} 리드스크류(긴 나사)를 돌린다.`,`The ${c(1,'s1')} motor turns the ${c(2,'s1')} leadscrew (a long screw).`),
+  `${c(3,'s1')} `+TR('너트는 캐리지에 붙어 있어 같이 돌지 못한다. 그래서 나사가 돌면 너트가 나사를 따라 직선으로 간다.','The nut is fixed to the carriage and cannot rotate with the screw. So when the screw turns, the nut travels along it in a line.'),
+  `${c(4,'s6')} `+TR('캐리지는 구동도 가이드도 아니다. 두 부품이 함께 움직이는 대상이다.','The carriage is neither drive nor guide. It is what the two parts move together.'),
+  TR(`${c(5,'s2')} 레일은 바닥에 고정되어 있고, ${c(6,'s2')} 베어링 블록은 캐리지 밑에 붙어 레일을 타고 구른다.`,`The ${c(5,'s2')} rail is fixed to the base, and the ${c(6,'s2')} bearing blocks under the carriage roll along it.`),
+  TR('나사는 캐리지를 밀기만 한다. 나사가 조금 휘거나 흔들려도 캐리지가 똑바로 가는 것은 레일 덕분이다.','The screw only pushes. Even if the screw bends or wobbles slightly, the carriage stays straight because of the rail.')],
+ q:TR('너트가 캐리지에 붙어 있지 않고 나사와 같이 돌 수 있다면?','What if the nut were free to rotate with the screw?'),a:TR('캐리지가 가지 않는다. 너트가 나사와 같이 헛돌 뿐이다. 너트가 돌지 못하게 잡혀 있어야 회전이 직선 이동으로 바뀐다.','The carriage would not move; the nut would just spin with the screw. Rotation becomes linear travel only when the nut is kept from rotating.')},
+
+{t:TR('서랍 비유: 레일이 똑바로 가게 하고, 손이 위치를 정한다','Drawer analogy: the rails keep it straight, the hand sets the position'),ec:TR('위에서 본 서랍 (비유)','Drawer seen from above (analogy)'),mc:TR('서랍과 스테이지의 대응','Drawer and stage, term by term'),
+ slider:{min:0,max:100,step:1,init:40,label:TR('서랍 위치','Drawer position'),fmt:v=>Math.round(v)+' %',play:1},
+ e:v=>{const y=56+v*.5;return lsSw(14,20,'s1')+T(34,20,TR('미는 손 = 구동','Pushing hand = drive'),'sub')+lsSw(170,20,'s2')+T(190,20,TR('레일 = 가이드','Rails = guide'),'sub')
+  +PL([[60,200],[60,40],[260,40],[260,200]],'var(--fg)',{w:1.4})
+  +lsG(2,lsGd(72,50,10,196)+lsGd(238,50,10,196))
+  +lsR(84,y,152,110)+T(160,y+58,TR('서랍','Drawer'),'subn','middle')
+  +lsG(1,LN(160,(y+152).toFixed(1),160,(y+116).toFixed(1),COL.s1,{w:2.5,mk:'s1'}))},
+ m:()=>{const it=[[2,TR('서랍 레일','Drawer rails'),TR('→ 가이드 (레일, 베어링)','→ guide (rail, bearings)'),'s2'],[1,TR('서랍을 미는 손','The pushing hand'),TR('→ 구동 (모터, 나사, 너트)','→ drive (motor, screw, nut)'),'s1'],[2,TR('레일이 헐거우면 덜컹거린다','Loose rails rattle'),TR('→ 피치·요 오차가 커진다','→ larger pitch and yaw error'),'s2'],[1,TR('손을 떼면 누가 버티나','Who holds it when the hand lets go'),TR('→ 자기잠금 (탭 4)','→ self-locking (tab 4)'),'s1']];
+  return it.map(([n,a,b,k],i)=>{const y=34+i*60;return lsG(n,T(14,y,a,'sub')+T(24,y+20,b,'lab','start',COL[k]))+(i<3?L(10,310,y+34,'lvl2'):'')}).join('')},
+ read:[`${c(2,'s2')} `+TR('서랍 레일은 서랍이 똑바로 드나들게 한다. 서랍이 어디까지 나왔는지는 정하지 않는다.','Drawer rails make the drawer slide straight. They do not decide how far out it is.'),
+  `${c(1,'s1')} `+TR('손은 서랍을 밀어 위치를 정한다. 똑바로 가게 하는 일은 하지 않는다.','The hand pushes the drawer and sets its position. It does not keep the drawer straight.'),
+  TR('레일이 좋아도 손이 떨리면 위치가 흔들린다. 손이 정확해도 레일이 헐거우면 서랍이 비뚤게 간다. 두 문제는 원인이 다르다.','Good rails do not help a shaky hand, and a steady hand does not fix loose rails. The two problems have different causes.'),
+  TR('스테이지의 문제도 같은 식으로 나눈다. 위치가 틀리면 구동을, 기울거나 흔들리면 가이드를 먼저 본다.','Stage problems split the same way. A wrong position points to the drive; tilt or wobble points to the guide.')],
+ q:TR('캐리지가 목표 위치에는 정확히 가는데, 움직이는 동안 위에 올린 거울의 빔이 위아래로 흔들린다. 어느 쪽을 의심하나?','The carriage reaches the target exactly, but the beam from a mirror on it wanders up and down during travel. Which side is suspect?'),a:TR('가이드다. 위치는 맞으므로 구동은 제 일을 한다. 빔이 흔들리는 것은 캐리지가 가면서 기울기(피치) 때문이다.','The guide. The position is right, so the drive does its job. The beam wanders because the carriage tilts (pitch) as it travels.')},
+
+{t:TR('사양표도 둘로 나뉜다: 구동 쪽 수치와 가이드 쪽 수치','The spec sheet splits too: drive figures and guide figures'),ec:TR('힘의 방향과 받는 부품','Force direction and the part that takes it'),mc:TR('사양표 항목 나누기','Sorting spec-sheet items'),
+ e:()=>lsLeg(20)+lsStage(170,{dg:1})
+  +lsG(2,LN(170,64,170,122,COL.s2,{w:2.5,mk:'s2'})+T(162,84,TR('누르는 힘','pressing force'),'sub','end',COL.s2))
+  +lsG(1,LN(220,140,266,140,COL.s1,{w:2.5,mk:'s1'})+T(222,118,TR('이동 방향 힘','force along travel'),'sub','start',COL.s1))
+  +lsG(1,T(160,244,TR('이동 방향 힘 → 나사와 모터가 받는다','Force along travel → taken by screw and motor'),'sub','middle'))
+  +lsG(2,T(160,262,TR('그 밖의 힘과 기울이는 힘 → 레일이 받는다','All other forces and tilting → taken by the rail'),'sub','middle')),
+ m:()=>{const a=[TR('세로 하중 용량','Vertical load capacity'),TR('최대 속도','Max. speed'),TR('분해능 (최소 이동량)','Resolution (min. step)'),TR('백래시','Backlash')],b=[TR('수평 하중 용량','Horizontal load capacity'),TR('피치 · 요','Pitch, yaw'),TR('직진도 · 평탄도','Straightness, flatness'),TR('모멘트 하중','Moment load')];
+  return lsG(1,T(84,26,TR('구동 쪽 수치','Drive figures'),'lab','middle',COL.s1)+a.map((s,i)=>T(84,70+i*42,s,'sub','middle','var(--fg)')).join(''))
+   +lsG(2,T(236,26,TR('가이드 쪽 수치','Guide figures'),'lab','middle',COL.s2)+b.map((s,i)=>T(236,70+i*42,s,'sub','middle','var(--fg)')).join(''))
+   +L(10,310,38,'ax')+LN(160,14,160,214,'var(--line)',{w:1})+[0,1,2].map(i=>L(10,310,86+i*42,'lvl2')).join('')
+   +T(160,246,TR('항목 이름은 제조사마다 조금씩 다르다','Item names vary slightly between manufacturers'),'sub','middle')},
+ read:[`${c(1,'s1')} `+TR('이동 방향으로 걸리는 힘은 나사와 모터가 받는다. 세로 하중 용량, 속도, 분해능, 백래시가 구동 쪽 수치다.','Force along the travel direction is taken by the screw and motor. Vertical load capacity, speed, resolution, and backlash are drive figures.'),
+  `${c(2,'s2')} `+TR('그 밖의 방향으로 걸리는 힘과 기울이는 힘(모멘트)은 레일이 받는다. 수평 하중 용량, 피치·요, 직진도, 모멘트 하중이 가이드 쪽 수치다.','Forces in other directions and tilting forces (moments) are taken by the rail. Horizontal load capacity, pitch and yaw, straightness, and moment load are guide figures.'),
+  TR('피치는 캐리지가 가면서 앞뒤로 끄덕이는 기울기, 요는 좌우로 도는 기울기다. 둘 다 각도(µrad)로 적는다.','Pitch is the nodding tilt of the carriage as it travels, and yaw is the left-right turning. Both are given as angles (µrad).'),
+  TR('그래서 한 스테이지의 수평 하중 용량과 세로 하중 용량은 값이 다르다. 받는 부품이 다르기 때문이다. 세로 값이 더 작은 경우가 많다.','So one stage lists different horizontal and vertical load capacities, because different parts take the load. The vertical value is often the smaller one.'),
+  TR('사양표를 볼 때 필요한 조건을 먼저 둘로 나눈다. "어디에, 얼마나 빨리, 얼마나 잘게"는 구동, "얼마나 똑바로, 얼마나 무겁게"는 가이드다.','Reading a spec sheet starts by splitting the requirements in two. "Where, how fast, how finely" is the drive; "how straight, how heavy" is the guide.')],
+ q:TR('수평 하중 용량이 큰 스테이지는 세로로 세워도 같은 무게를 드는가?','Does a stage with a large horizontal load capacity lift the same weight when mounted vertically?'),a:TR('아니다. 수평에서는 레일이 무게를 받지만, 세로에서는 나사와 모터가 받는다. 세로 하중 용량을 따로 확인해야 한다 (탭 4).','No. Horizontally the rail takes the weight; vertically the screw and motor take it. The vertical load capacity needs a separate check (tab 4).')}
+];
+
+/* ================= 탭 2: 구동 방식 ================= */
+const LS_DRIVE=[
+{t:TR('나사로 민다: 스테퍼 + 리드스크류','Pushing with a screw: stepper + leadscrew'),ec:TR('모터 회전과 캐리지 이동','Motor turns and carriage travel'),mc:TR('이 방식의 성질','Properties of this type'),
+ slider:{min:0,max:10,step:.05,init:2,label:TR('모터 회전','Motor turns'),fmt:v=>v.toFixed(2)+TR(' 바퀴',' turns'),play:1},
+ e:v=>{const cx=105+v*13,a=v*2*Math.PI;return T(14,20,TR('가정: 리드 1 mm (나사 한 바퀴에 1 mm)','Assumed: lead 1 mm (1 mm per screw turn)'),'sub')
+  +lsStage(cx,{off:v*13})+lsC(41,112,14)+LN(41,112,(41+12*Math.sin(a)).toFixed(1),(112-12*Math.cos(a)).toFixed(1),COL.s1,{w:2})
+  +T(41,90,TR('모터 축','Motor shaft'),'sub','middle')
+  +T(160,244,TR('캐리지 이동 = ','Carriage travel = ')+v.toFixed(2)+' mm','lab','middle')+T(160,264,TR('이동은 보기 쉽게 과장','Travel exaggerated for clarity'),'sub','middle')},
+ m:()=>lsDC(0,10)+TM(14,150,[TR('리드: 나사 한 바퀴에 너트가 가는 거리','Lead: nut travel per screw turn'),TR('스테퍼: 한 바퀴를 정해진 걸음 수로 나눈다','Stepper: one turn divided into fixed steps'),TR('200걸음 × 리드 1 mm → 1걸음 5 µm (가정)','200 steps, lead 1 mm → 5 µm per step (assumed)')],'sub','start',20)+lsHLeg(262),
+ read:[TR('가장 흔한 방식이다. 모터가 나사를 돌리고, 너트가 나사를 타고 간다 (탭 1의 2단계와 같은 구조).','The most common type. The motor turns the screw and the nut travels along it (the structure of tab 1, step 2).'),
+  TR('리드는 나사 한 바퀴에 너트가 가는 거리다. 리드가 작을수록 같은 회전에 덜 가고, 대신 더 잘게 움직이고 더 세게 민다.','The lead is the nut travel per screw turn. A smaller lead gives less travel per turn, but finer motion and more push.'),
+  TR('스테퍼 모터는 한 바퀴를 정해진 걸음 수로 나눠 돈다. 걸음 수를 세면 위치를 알 수 있어 엔코더 없이도 쓸 수 있다.','A stepper motor turns in a fixed number of steps per revolution. Counting steps gives the position, so it can work without an encoder.'),
+  TR('세어 보기: 한 바퀴 200걸음(흔한 값, 가정), 리드 1 mm면 한 걸음에 1 mm ÷ 200 = 5 µm를 간다.','Counting it out: with 200 steps per turn (a common value, assumed) and a 1 mm lead, one step is 1 mm ÷ 200 = 5 µm.'),
+  TR('느리다. 한 바퀴에 1 mm씩 가므로 100 mm를 가려면 100바퀴를 돌아야 한다. 대신 전원을 꺼도 나사 마찰이 위치를 지킨다 (이유는 탭 4).','It is slow. At 1 mm per turn, 100 mm takes 100 turns. In return, thread friction keeps the position with the power off (the reason is in tab 4).')],
+ q:TR('리드를 1 mm에서 5 mm로 바꾸면 무엇이 좋아지고 무엇이 나빠지나?','What improves and what worsens when the lead goes from 1 mm to 5 mm?'),a:TR('같은 모터 회전수로 5배 빨리 간다. 대신 한 걸음이 5배 커지고, 미는 힘은 줄고, 전원이 꺼졌을 때 버티는 힘도 약해진다.','The same motor speed gives five times the travel speed. In exchange, each step is five times larger, the push is weaker, and holding with the power off is weaker.')},
+
+{t:TR('같은 나사, 다른 모터: DC 서보, 그리고 수동 스테이지에 다는 액추에이터','Same screw, different motor: DC servo, and an actuator on a manual stage'),ec:TR('수동 스테이지 + 모터 액추에이터','Manual stage + motor actuator'),mc:TR('두 방식의 성질','Properties of the two types'),
+ slider:{min:0,max:10,step:.1,init:3,label:TR('액추에이터 밀기','Actuator push'),fmt:v=>v.toFixed(1)+' mm'},
+ e:v=>{const dx=v*2;return T(14,20,TR('단순화한 그림 (이동은 과장)','Simplified sketch (travel exaggerated)'),'sub')
+  +T(14,112,TR('모터 액추에이터 (마이크로미터 자리)','Motor actuator (in place of the micrometer)'),'sub','start',COL.s1)
+  +lsR(110,176,180,14)+lsG(2,lsGd(118,168,164,8))+lsR(282,120,8,56)
+  +lsR(140+dx,128,100,40)+T(190+dx,152,TR('수동 스테이지','Manual stage'),'subn','middle')
+  +lsG(1,lsDr(20,137,60,24)+`<rect x="80" y="145" width="${(60+dx).toFixed(1)}" height="8" style="fill:var(--panel);stroke:var(--s1)" stroke-width="1.2"/>`)
+  +lsG(3,lsSpr(240+dx,282,148,5,6)+T(TR(261,248),212,TR('스프링이 되민다','The spring pushes back'),'sub','middle',COL.s3))
+  +lsSw(14,250,'s1')+T(34,250,TR('구동','Drive'),'sub')+lsSw(90,250,'s2')+T(110,250,TR('가이드','Guide'),'sub')+LN(170,246,190,246,COL.s3,{w:1.6})+T(196,250,TR('되미는 스프링','Return spring'),'sub')},
+ m:()=>lsDC(1,10)+lsDC(9,128)+lsHLeg(262),
+ read:[TR('DC 서보 방식은 나사는 그대로 두고 모터만 바꾼 것이다. DC 모터는 걸음이 없이 연속으로 돌기 때문에 엔코더로 위치를 읽으며 제어한다.','The DC servo type keeps the screw and changes only the motor. A DC motor turns continuously without steps, so an encoder reads the position for control.'),
+  TR('걸음이 없어 낮은 속도에서 움직임이 부드럽다. 작은 스테이지와 액추에이터에 많이 쓴다.','Without steps, motion at low speed is smooth. It is common in small stages and actuators.'),
+  `${c(1,'s1')} `+TR('모터 액추에이터는 모터와 나사를 막대 하나에 넣은 것이다. 수동 스테이지의 마이크로미터를 빼고 그 자리에 단다.','A motor actuator packs motor and screw into one rod. It replaces the micrometer of a manual stage.'),
+  `${c(3,'s3')} `+TR('액추에이터는 밀기만 한다. 돌아올 때는 스테이지의 스프링이 판을 액추에이터 끝에 붙여 준다.','The actuator only pushes. On the way back, the spring of the stage keeps the plate against the actuator tip.'),
+  `${c(2,'s2')} `+TR('이 조합에서 가이드는 수동 스테이지가 원래 가진 것이다. 구동만 바꿔 다는 셈이다. 탭 1의 "따로 고를 수 있다"가 그대로 보인다.','The guide in this combination is what the manual stage already had. Only the drive is swapped, which is the "chosen separately" of tab 1 in practice.')],
+ q:TR('이미 있는 수동 스테이지를 자동으로 바꾸고 싶다. 무엇을 사면 되나?','An existing manual stage needs to be motorized. What is needed?'),a:TR('마이크로미터와 같은 규격으로 물리는 모터 액추에이터와 그 컨트롤러다. 가이드는 그대로 쓴다. 직진도와 하중은 원래 스테이지의 값을 따른다.','A motor actuator that fits the micrometer mount, plus its controller. The guide stays. Straightness and load follow the original stage.')},
+
+{t:TR('나사에 볼을 넣으면: 볼스크류는 빠르고 힘이 세지만 흘러내릴 수 있다','Balls in the screw: a ball screw is fast and strong, but may back-drive'),ec:TR('나사와 너트가 닿는 곳 (확대, 모식도)','Where screw and nut meet (magnified sketch)'),mc:TR('볼스크류의 성질과 효율','Ball screw properties and efficiency'),
+ e:()=>{let a='',b='';for(let i=0;i<10;i++){a+=lsDr(40+i*24,52,11,22)+lsR(52+i*24,50,11,22);b+=lsC(52+i*24,190.5,10,'var(--panel)','var(--s1)')}
+  return T(14,22,TR('리드스크류: 나사산끼리 미끄러진다','Leadscrew: threads slide on each other'),'lab')+lsR(40,34,240,16)+T(48,46,TR('너트','nut'),'subn')+a+lsDr(40,74,240,16)+T(48,86,TR('나사','screw'),'subn')
+   +T(160,112,TR('면으로 닿아 미끄러진다 → 마찰이 크다','Sliding area contact → high friction'),'sub','middle')
+   +T(14,152,TR('볼스크류: 사이에서 볼이 구른다','Ball screw: balls roll in between'),'lab')+lsR(40,164,240,16)+T(48,176,TR('너트','nut'),'subn')+b+lsDr(40,201,240,16)+T(48,213,TR('나사','screw'),'subn')
+   +T(160,240,TR('점으로 닿아 구른다 → 마찰이 작다','Rolling point contact → low friction'),'sub','middle')},
+ m:()=>{const X=u=>20+u*2.8;return lsDC(2,10)
+   +T(14,146,TR('효율: 모터가 준 일 중 미는 데 쓰인 비율 (대략)','Efficiency: share of motor work that pushes (approx.)'),'sub')
+   +T(20,170,TR('리드스크류 (리드가 작을 때): 20–50%','Leadscrew (small lead): 20–50%'),'sub')+`<rect x="${X(20)}" y="176" width="${X(50)-X(20)}" height="12" rx="2" style="fill:var(--s3)" fill-opacity=".65"/>`
+   +T(20,210,TR('볼스크류: 약 90%','Ball screw: about 90%'),'sub')+`<rect x="${X(86)}" y="216" width="${X(94)-X(86)}" height="12" rx="2" style="fill:var(--s4)" fill-opacity=".65"/>`
+   +L(20,300,236,'ax')+[0,50,100].map(u=>T(X(u),252,u+'%','sub','middle')).join('')},
+ read:[TR('리드스크류에서는 너트의 나사산과 나사의 나사산이 면으로 닿아 미끄러진다. 마찰이 크다.','In a leadscrew, the nut thread and the screw thread touch over an area and slide. Friction is high.'),
+  TR('볼스크류는 그 사이에 볼을 넣었다. 미끄러지는 대신 구르기 때문에 마찰이 훨씬 작다.','A ball screw puts balls in between. Rolling replaces sliding, so friction is far lower.'),
+  TR('마찰이 작으면 모터 힘이 열로 덜 새고, 닳는 것도 적다. 그래서 빠르게, 무거운 것을, 오래 움직일 수 있다.','Low friction wastes less motor force as heat and wears less. This allows fast motion, heavy loads, and long life.'),
+  TR('대가가 있다. 마찰이 작으면 거꾸로도 잘 돈다. 너트를 밀면 나사가 돌아 버린다. 세로로 세우면 전원이 꺼졌을 때 흘러내릴 수 있다.','There is a price. Low friction also lets it run backward: pushing the nut turns the screw. Mounted vertically, it may slide down when the power is off.'),
+  TR('그래서 세로로 쓰는 볼스크류 스테이지에는 보통 브레이크를 단다. 효율 값은 대략적인 범위다.','This is why vertical ball-screw stages usually carry a brake. The efficiency values are approximate ranges.')],
+ q:TR('볼스크류의 "낮은 마찰"은 장점인가 단점인가?','Is the "low friction" of a ball screw an advantage or a drawback?'),a:TR('둘 다다. 빠르고 힘이 세고 오래 가는 것은 장점이다. 전원이 꺼졌을 때 스스로 버티지 못하는 것은 단점이다. 같은 성질의 양면이다.','Both. Speed, force, and lifetime are the advantage. Not holding by itself when the power is off is the drawback. They are two faces of the same property.')},
+
+{t:TR('나사 없이 민다: 리니어 모터(다이렉트 드라이브)와 보이스 코일','Pushing without a screw: linear motor (direct drive) and voice coil'),ec:TR('자석과 코일이 직접 민다','Magnets and a coil push directly'),mc:TR('두 방식의 성질','Properties of the two types'),
+ e:()=>{let mg='',tk='';for(let i=0;i<10;i++)mg+=lsR(30+i*26,92,26,16,i%2?'var(--soft)':'#d5d9e2')+T(43+i*26,104,i%2?'S':'N','subn','middle');for(let i=0;i<=26;i++)tk+=`<line x1="${30+i*10}" y1="122" x2="${30+i*10}" y2="128" class="ax"/>`;
+  return T(14,20,TR('리니어 모터: 자석 줄 위의 코일','Linear motor: a coil over a magnet track'),'lab')
+   +lsR(110,36,90,24)+T(155,52,TR('캐리지','carriage'),'subn','middle')+lsG(1,lsPz(120,62,70,22)+T(155,77,TR('코일','coil'),'subn','middle'))+LN(204,48,244,48,COL.s1,{w:2.5,mk:'s1'})
+   +mg+L(30,290,122,'ax')+tk+T(160,144,TR('리니어 엔코더 눈금 (위치를 읽는다)','Linear encoder scale (reads the position)'),'sub','middle')
+   +T(14,176,TR('보이스 코일: 스피커와 같은 원리','Voice coil: the principle of a loudspeaker'),'lab')
+   +lsR(40,190,100,56,'#d5d9e2')+T(64,222,TR('자석','magnet'),'subn','middle')+lsG(1,lsPz(92,200,74,36)+T(140,222,TR('코일','coil'),'subn','middle'))
+   +lsR(166,212,70,12)+LN(244,218,284,218,COL.s1,{w:2.5,mk:'s1'})+T(264,206,TR('짧은 구간','short stroke'),'sub','middle')},
+ m:()=>lsDC(3,10)+lsDC(7,128)+lsHLeg(262),
+ read:[TR('리니어 모터는 회전 모터를 펴 놓은 것이다. 자석 줄 위에서 코일에 전류를 흘리면 코일이 직접 밀린다. 나사도 벨트도 없다.','A linear motor is a rotary motor unrolled. Current in a coil above a magnet track pushes the coil directly. There is no screw and no belt.'),
+  TR('중간에 끼는 부품이 없어 매우 빠르고, 백래시가 없고, 닳는 곳이 없다. 고속 스캔에 맞다.','With nothing in between, it is very fast, has no backlash, and has no wearing contact. It suits fast scanning.'),
+  `${c(1,'s4')} `+TR('대신 코일은 힘만 낸다. 어디에 있는지는 모른다. 그래서 리니어 엔코더로 위치를 읽고 서보 제어로 계속 맞춰야 한다. 둘 다 필수다.','In exchange, the coil only produces force; it does not know where it is. A linear encoder must read the position and a servo loop must keep correcting it. Both are required.'),
+  TR('전류가 끊기면 붙잡는 것이 없다. 세로로 세우면 전원이 꺼질 때 떨어진다. 멈춰 있을 때도 서보가 계속 미세하게 고치느라 조금 떨 수 있다.','With no current, nothing holds it. Mounted vertically, it falls when the power goes off. Even at rest, the servo keeps making tiny corrections and may dither slightly.'),
+  TR('보이스 코일은 같은 원리를 짧은 구간에 쓴 것이다. 수 mm에서 수십 mm를 아주 빠르게 왕복한다 (대략).','A voice coil applies the same principle to a short stroke. It shuttles very fast over a few mm to a few tens of mm (approx.).')],
+ q:TR('리니어 모터 스테이지에서 리니어 엔코더를 빼면 쓸 수 있는가?','Can a linear-motor stage work without its linear encoder?'),a:TR('쓸 수 없다. 나사 방식은 회전수를 세어 위치를 알 수 있지만, 리니어 모터는 힘만 내므로 위치를 읽는 눈이 따로 있어야 한다.','No. A screw drive can infer position by counting turns, but a linear motor only produces force, so it needs a separate eye that reads the position.')},
+
+{t:TR('길게 간다: 벨트, 랙 앤 피니언','Going long: belt, rack and pinion'),ec:TR('긴 거리를 가는 두 방식','Two types for long distances'),mc:TR('두 방식의 성질','Properties of the two types'),
+ e:()=>{let th='',sp='';for(let i=0;i<28;i++)th+=`<rect x="${20+i*10}" y="216" width="5" height="8" style="fill:#e4e7ee;stroke:var(--fg)" stroke-width="1"/>`;for(let i=0;i<12;i++){const a=i*Math.PI/6;sp+=LN((160+18*Math.cos(a)).toFixed(1),(198+18*Math.sin(a)).toFixed(1),(160+23*Math.cos(a)).toFixed(1),(198+23*Math.sin(a)).toFixed(1),COL.s1,{w:3})}
+  return T(14,20,TR('벨트: 풀리가 벨트를 당긴다','Belt: a pulley pulls a belt'),'lab')
+   +lsG(1,LN(50,64,270,64,COL.s1,{w:2})+LN(50,96,270,96,COL.s1,{w:2})+lsC(50,80,16,'var(--panel)','var(--s1)')+lsC(270,80,16,'var(--panel)','var(--s1)'))
+   +lsR(130,44,60,22)+T(160,59,TR('캐리지','carriage'),'subn','middle')+T(50,118,TR('모터 풀리','motor pulley'),'sub','middle')+T(270,118,TR('풀리','pulley'),'sub','middle')
+   +T(14,150,TR('랙 앤 피니언: 톱니바퀴가 톱니 막대를 탄다','Rack and pinion: gear on a toothed bar'),'lab')
+   +lsR(120,157,80,14)+T(160,168,TR('캐리지 + 모터','carriage + motor'),'subn','middle')
+   +lsG(1,sp+lsC(160,198,18,'var(--panel)','var(--s1)'))+th+lsR(20,224,280,10)
+   +T(70,202,TR('피니언','pinion'),'sub','middle')+T(160,252,TR('랙 (이어 붙여 길게 만든다)','rack (joined end to end for length)'),'sub','middle')},
+ m:()=>lsDC(4,10)+lsDC(5,128)+lsHLeg(262),
+ read:[TR('나사는 길어지면 처지고 떨기 때문에 길이에 한계가 있다. 1 m를 넘게 가야 하면 다른 방식을 쓴다.','A long screw sags and whips, so its length is limited. Travel beyond about 1 m calls for another type.'),
+  TR('벨트 구동은 풀리 두 개에 벨트를 걸고, 벨트에 캐리지를 물린다. 모터가 풀리를 돌리면 벨트가 캐리지를 끈다.','A belt drive loops a belt over two pulleys and clamps the carriage to the belt. The motor turns a pulley and the belt drags the carriage.'),
+  TR('랙 앤 피니언은 바닥에 톱니 막대(랙)를 깔고, 캐리지에 단 톱니바퀴(피니언)가 그 위를 굴러간다. 랙을 이어 붙이면 길이에 제한이 거의 없다.','Rack and pinion lays a toothed bar (rack) on the base, and a gear (pinion) on the carriage rolls along it. Joining racks gives almost unlimited length.'),
+  TR('둘 다 빠르고 길게 가지만 정밀도는 나사보다 떨어진다. 벨트는 늘어나고, 톱니는 틈(백래시)이 있다.','Both are fast and long, but less precise than a screw. A belt stretches, and gear teeth have play (backlash).'),
+  TR('둘 다 거꾸로 잘 돌아간다. 세로로 세우면 전원이 꺼질 때 흘러내린다. 가정: 브레이크나 감속기가 없는 경우.','Both run backward easily. Mounted vertically, they slide down when the power goes off. Assumed: no brake and no reduction gear.')],
+ q:TR('광학 테이블 위에서 100 mm를 수 µm 정밀도로 움직이려 한다. 벨트 구동이 맞는가?','A 100 mm move on an optical table needs a few µm precision. Does a belt drive fit?'),a:TR('맞지 않는다. 벨트는 긴 거리를 빠르게 가는 데 쓴다. 100 mm와 수 µm면 나사 방식이 맞다.','No. A belt is for long, fast travel. For 100 mm at a few µm, a screw drive fits.')},
+
+{t:TR('특수한 경우: 피에조 관성 구동, 공압 실린더','Special cases: piezo inertia drive, pneumatic cylinder'),ec:TR('아주 잘게 가는 방식과 두 위치만 가는 방식','A very fine type and a two-position type'),mc:TR('두 방식의 성질','Properties of the two types'),
+ slider:{min:0,max:4,step:.01,init:.4,label:TR('시간','Time'),fmt:v=>v.toFixed(2)+TR(' 주기',' cycles'),play:1},
+ tg:[{k:'ext',l:TR('공압: 반대쪽에 공기 넣기','Pneumatic: air to the other side'),on:false}],
+ e:(v,g)=>{const k=Math.min(3,Math.floor(v)),u=v-k,slow=u<.85,ext=10*(slow?u/.85:(1-u)/.15),cx=150+10*(k+Math.min(1,u/.85)),px=g.ext?180:50;
+  return T(14,20,TR('피에조 관성 구동: 천천히 밀고, 빠르게 뺀다','Piezo inertia drive: slow push, fast retract'),'lab')
+   +lsR(20,40,10,50)+lsG(1,lsPz(30,54,50+ext,22))+T(55,100,TR('피에조','piezo'),'sub','middle')
+   +lsR(80+ext,60,180,10)+lsR(cx-25,46,50,38)+T(cx,69,TR('캐리지','carriage'),'subn','middle')
+   +T(160,122,slow?TR('천천히 늘어남: 캐리지가 막대와 같이 간다','Slow extension: the carriage goes with the rod'):TR('빠르게 줄어듦: 캐리지는 미끄러져 남는다','Fast retraction: the carriage slips and stays'),'sub','middle',slow?undefined:COL.s1)
+   +T(14,160,TR('공압 실린더: 공기압으로 끝에서 끝까지','Pneumatic cylinder: end to end by air pressure'),'lab')
+   +lsR(40,186,160,44,'var(--soft)')+lsG(2,lsDr(px,188,10,40)+lsR(px+10,204,110,8))
+   +LN(g.ext?60:180,254,g.ext?60:180,234,COL.s3,{w:2.5,mk:'s3'})+T(g.ext?60:180,268,TR('압축 공기','compressed air'),'sub','middle',COL.s3)
+   +T(256,196,g.ext?TR('위치 B','Position B'):TR('위치 A','Position A'),'sub','middle')},
+ m:()=>lsDC(6,10)+lsDC(8,128)+lsHLeg(262),
+ read:[`${c(1,'s4')} `+TR('피에조 관성 구동: 피에조가 천천히 늘어날 때는 캐리지가 마찰로 막대에 붙어 같이 간다.','Piezo inertia drive: while the piezo extends slowly, friction keeps the carriage on the rod and it goes along.'),
+  TR('피에조가 갑자기 줄어들면 막대만 돌아온다. 캐리지는 관성 때문에 따라가지 못하고 미끄러져 그 자리에 남는다. 이것을 되풀이해 한 걸음씩 간다.','When the piezo retracts suddenly, only the rod returns. The carriage cannot follow because of its inertia; it slips and stays. Repeating this advances it one step at a time.'),
+  TR('한 걸음이 수십 nm로 아주 잘다. 멈추면 마찰이 그대로 붙잡는다. 대신 느리고, 트래블이 짧고, 걸음 크기가 일정하지 않다 (ELL14K 노트의 공진 피에조 모터와 닮은 점).','One step is as fine as tens of nm. Once stopped, friction holds it. In exchange it is slow, travel is short, and the step size is not uniform (a trait shared with the resonant piezo motor in the ELL14K note).'),
+  `${c(2,'s1')} `+TR('공압 실린더: 피스톤 한쪽에 압축 공기를 넣으면 반대쪽 끝까지 간다. 중간에 멈추는 용도가 아니라 두 위치를 오가는 용도다.','Pneumatic cylinder: compressed air on one side of the piston sends it to the far end. It is for switching between two positions, not for stopping in between.'),
+  TR('공압은 공기압이 있는 동안만 버틴다. 공기가 끊기면 위치를 보장하지 못한다.','A pneumatic cylinder holds only while air pressure is present. Without air, the position is not guaranteed.')],
+ q:TR('피에조가 늘어날 때와 줄어들 때 속도가 같다면 캐리지는 가는가?','If the piezo extended and retracted at the same speed, would the carriage advance?'),a:TR('가지 않는다. 둘 다 느리면 캐리지가 갔다가 그대로 돌아온다. 둘 다 빠르면 두 번 다 미끄러진다. 느림과 빠름의 차이가 한 방향 이동을 만든다.','No. If both are slow, the carriage goes out and comes straight back. If both are fast, it slips both ways. The difference between slow and fast creates the one-way motion.')},
+
+{t:TR('한눈에 비교: 전원 꺼짐 시 위치 유지, 속도, 주 용도','At a glance: holding with power off, speed, main use'),ec:TR('방식과 전원 꺼짐 시 위치 유지','Type and holding with power off'),mc:TR('속도와 주 용도 (대략적인 경향)','Speed and main use (rough tendencies)'),
+ e:()=>T(34,22,TR('방식','Type'),'lab')+T(TR(226,222),22,TR('전원 꺼짐 시','Power off'),'lab')+L(10,310,30,'ax')
+  +LS_DR.map((d,i)=>{const y=50+i*24;return lsG(i+1,badge(18,y-4,i+1,COL.s6)+T(34,y,d.n,'sub','start','var(--fg)')+lsDot(TR(232,228),y-4,lsHC[d.hk],4)+T(TR(242,238),y,lsHS[d.hk],'sub'))}).join(''),
+ m:()=>T(34,22,TR('속도','Speed'),'lab')+T(104,22,TR('주 용도','Main use'),'lab')+L(10,310,30,'ax')
+  +LS_DR.map((d,i)=>{const y=50+i*24;return lsG(i+1,badge(18,y-4,i+1,COL.s6)+T(34,y,d.sp,'sub','start','var(--fg)')+T(104,y,d.u,'sub','start','var(--fg)'))}).join(''),
+ read:[TR('왼쪽과 오른쪽의 같은 번호가 같은 방식이다.','The same number on the left and right is the same type.'),
+  TR('전원이 꺼져도 위치를 지키는 방식은 넷이다(1, 2, 7, 10). 모두 마찰로 버틴다. 나사 마찰이 셋, 피에조의 접촉 마찰이 하나다.','Four types keep position with the power off (1, 2, 7, 10). All hold by friction: three by thread friction, one by the contact friction of the piezo.'),
+  TR('빠른 방식은 모두 마찰이 작다. 그래서 전원이 꺼지면 버티지 못한다. "빠르다"와 "스스로 버틴다"는 같이 얻기 어렵다.','Every fast type has low friction, so none of them holds with the power off. "Fast" and "holds by itself" rarely come together.'),
+  TR('"조건부"는 볼스크류(리드와 하중에 따라)와 공압(공기압이 있는 동안)이다.','"Depends" covers the ball screw (on lead and load) and pneumatics (while air pressure is present).'),
+  TR('표의 속도와 용도는 대략적인 경향이다. 브레이크를 달거나 감속기를 쓰면 달라진다.','Speed and use in the table are rough tendencies. A brake or a reduction gear changes them.')],
+ q:TR('세로로 세워 쓰고, 전원이 꺼져도 떨어지면 안 된다. 브레이크 없이 가능한 방식은?','The stage is vertical and must not fall when the power goes off. Which types manage without a brake?'),a:TR('1, 2, 10번(리드스크류를 쓰는 방식)과 7번(피에조 관성)이다. 하중이 1 kg쯤이면 7번은 힘이 모자라므로 리드스크류 방식이 남는다.','Types 1, 2, and 10 (those using a leadscrew) and type 7 (piezo inertia). For a load near 1 kg, type 7 lacks force, which leaves the leadscrew types.')}
+];
+
+/* ================= 탭 3: 가이드 방식 ================= */
+const lsTrack=()=>{let s=`<rect x="60" y="196" width="200" height="40" rx="20" fill="none" style="stroke:var(--muted)" stroke-width="1"/>`;const b=(x,y)=>lsC(x,y,5,'var(--panel)','var(--s2)');
+ for(let x=80;x<=240;x+=16)s+=b(x,196)+b(x,236);[-45,0,45].forEach(d=>{const a=d*Math.PI/180;s+=b(240+20*Math.cos(a),216+20*Math.sin(a))+b(80-20*Math.cos(a),216+20*Math.sin(a))});return s};
+/* 홈 단면: 볼 하나와 위아래 홈. gothic이면 4점 접촉 */
+function lsGroove(cx,cy,gothic){const st='fill="none" style="stroke:var(--s2)" stroke-width="3"',d=(x,y)=>lsDot(x,y,'var(--s1)',3.5);
+ return (gothic?`<path d="M${cx},${cy-30.6} A40 40 0 0 1 ${cx+28.8},${cy-6} M${cx},${cy-30.6} A40 40 0 0 0 ${cx-28.8},${cy-6} M${cx},${cy+30.6} A40 40 0 0 0 ${cx+28.8},${cy+6} M${cx},${cy+30.6} A40 40 0 0 1 ${cx-28.8},${cy+6}" ${st}/>`
+   :`<path d="M${cx-26},${cy-16.9} A36 36 0 0 1 ${cx+26},${cy-16.9} M${cx-26},${cy+16.9} A36 36 0 0 0 ${cx+26},${cy+16.9}" ${st}/>`)
+  +lsC(cx,cy,26.5,'var(--soft)')
+  +lsG(1,gothic?d(cx+19.8,cy-19.8)+d(cx-19.8,cy-19.8)+d(cx+19.8,cy+19.8)+d(cx-19.8,cy+19.8):d(cx,cy-28)+d(cx,cy+28))}
+const LS_GUIDE=[
+{t:TR('볼 베어링 레일: 가장 흔하고 길게 갈 수 있다','Ball bearing rail: the most common, and it goes long'),ec:TR('레일과 블록 사이의 볼','Balls between rail and block'),mc:TR('볼 베어링 레일의 성질','Properties of a ball bearing rail'),
+ e:()=>T(14,20,TR('끝에서 본 단면 (모식도)','End-view cross-section (sketch)'),'sub')
+  +lsR(120,140,80,10)+lsGd(140,70,40,70)+`<path d="M112,44 H208 V128 H192 V62 H128 V128 H112 Z" style="fill:#e4e7ee;stroke:var(--fg)" stroke-width="1.2"/>`
+  +lsG(1,[[134,86],[186,86],[134,112],[186,112]].map(([x,y])=>lsC(x,y,5.5,'var(--panel)','var(--s2)')).join(''))
+  +T(160,57,TR('블록','block'),'subn','middle')+T(160,110,TR('레일','rail'),'subn','middle')+T(222,100,TR('볼','balls'),'sub')
+  +T(14,178,TR('옆에서 본 볼의 길 (블록 안)','Side view of the ball path (inside the block)'),'sub')+lsG(1,lsTrack())
+  +T(160,262,TR('볼이 한 바퀴 돌아 다시 들어온다 (순환)','Balls loop round and come back in (recirculation)'),'sub','middle'),
+ m:()=>lsGC(TR('볼 베어링 레일','Ball bearing rail'),TR('점 (볼)','point (balls)'),TR('긴 트래블, 구하기 쉬움','long travel, widely available'),TR('강성·직진도는 중간 (대략)','medium stiffness, straightness (approx.)'),TR('일반 모터 스테이지','general motorized stages'))
+  +TM(14,176,[TR('다른 이름: 리니어 가이드, LM 가이드','Other names: linear guide, LM guide'),TR('주의: 볼스크류와는 다른 부품이다 (탭 4)','Note: not the same part as a ball screw (tab 4)')],'sub','start',20),
+ read:[TR('레일과 블록 사이에 볼이 끼어 구른다. 블록은 캐리지 밑에 붙어 있다 (탭 1의 6번).','Balls roll between the rail and the block. The block is fixed under the carriage (part 6 in tab 1).'),
+  `${c(1,'s2')} `+TR('볼은 블록 안의 길을 따라 한 바퀴 돈다. 뒤로 빠진 볼이 앞으로 다시 들어온다. 그래서 레일만 길면 얼마든지 멀리 갈 수 있다.','The balls circulate along a path inside the block. Balls leaving at the back re-enter at the front. So travel is limited only by the rail length.'),
+  TR('볼은 홈에 점으로 닿는다. 닿는 넓이가 작아 가볍게 구르지만, 센 힘을 받으면 그 점이 조금 눌린다.','A ball touches the groove at a point. The small contact rolls easily, but under heavy force that point deforms a little.'),
+  TR('볼이 길을 드나들 때 미세한 떨림이 생길 수 있다. 수십 µm 수준의 일에는 문제가 없고, nm 수준에서는 따져야 한다 (대략).','Balls entering and leaving the path can cause tiny ripples. This is no issue at the tens-of-µm level but matters at the nm level (approx.).'),
+  TR('연구실에서 보는 모터 스테이지 대부분이 이 방식이다.','Most motorized stages seen in a lab use this type.')],
+ q:TR('볼 베어링 레일이 긴 트래블에 유리한 까닭은?','Why does a ball bearing rail suit long travel?'),a:TR('볼이 블록 안에서 순환하기 때문이다. 블록은 볼을 데리고 다니므로 레일 길이만큼 갈 수 있다.','Because the balls recirculate inside the block. The block carries its balls with it, so it can travel the full rail length.')},
+
+{t:TR('크로스 롤러: 점 접촉이 선 접촉으로 바뀌면 단단해진다','Crossed roller: point contact becomes line contact, and stiffness rises'),ec:TR('V 홈 사이의 롤러','A roller between V-grooves'),mc:TR('크로스 롤러의 성질','Properties of crossed rollers'),
+ tg:[{k:'nx',l:TR('다음 롤러 보기 (90° 돌려 놓임)','Show the next roller (turned by 90°)'),on:false}],
+ e:(v,g)=>{const n=g.nx;return T(14,20,TR('끝에서 본 단면 (모식도)','End-view cross-section (sketch)'),'sub')
+  +`<polygon points="96,40 156,40 156,54 126,84 156,114 156,128 96,128" style="fill:var(--s2);stroke:var(--s2)" fill-opacity=".25" stroke-width="1.2"/><polygon points="224,40 164,40 164,54 194,84 164,114 164,128 224,128" style="fill:var(--s2);stroke:var(--s2)" fill-opacity=".25" stroke-width="1.2"/>`
+  +`<polygon points="131,84 160,55 189,84 160,113" style="fill:#e4e7ee;stroke:var(--fg)" stroke-width="1.2"/>`
+  +(n?LN(147,71,173,97,'var(--muted)',{w:1,dash:1}):LN(147,97,173,71,'var(--muted)',{w:1,dash:1}))
+  +lsG(1,n?LN(131,84,160,113,COL.s1,{w:3.5})+LN(160,55,189,84,COL.s1,{w:3.5}):LN(131,84,160,55,COL.s1,{w:3.5})+LN(160,113,189,84,COL.s1,{w:3.5}))
+  +T(86,88,TR('레일 1','rail 1'),'sub','end')+T(234,88,TR('레일 2','rail 2'),'sub')
+  +T(160,146,TR('굵은 선: 롤러가 홈에 닿는 선 / 점선: 롤러의 축','Thick: roller contact lines / dashed: roller axis'),'sub','middle')
+  +L(40,140,236)+lsC(90,216,20,'var(--soft)')+lsDot(90,236,'var(--s1)',3.5)+T(90,258,TR('볼: 점으로 닿는다','Ball: point contact'),'sub','middle')
+  +L(180,280,236)+lsR(200,206,60,30,'var(--soft)')+LN(200,236,260,236,COL.s1,{w:3.5})+T(230,258,TR('롤러: 선으로 닿는다','Roller: line contact'),'sub','middle')},
+ m:()=>lsGC(TR('크로스 롤러','Crossed roller'),TR('선 (원통 롤러)','line (cylindrical rollers)'),TR('강성과 직진도가 좋다','good stiffness and straightness'),TR('트래블이 짧다 (순환 없음)','short travel (no recirculation)'),TR('짧고 정밀한 이동','short, precise travel'))
+  +TM(14,176,[TR('롤러를 하나 걸러 90° 돌려 놓는다 (크로스)','Every other roller is turned by 90° (crossed)'),TR('그래서 모든 방향의 힘을 받는다','so forces from every direction are carried')],'sub','start',20),
+ read:[TR('마주 보는 V 홈 두 개 사이에 원통 롤러를 넣는다. 롤러는 홈의 면에 선으로 닿는다.','Cylindrical rollers sit between two facing V-grooves. A roller touches the groove faces along a line.'),
+  `${c(1,'s1')} `+TR('세어 보기: 볼은 한 점으로 힘을 받고, 롤러는 길이 전체로 받는다. 같은 힘이 더 넓게 퍼지므로 덜 눌린다. 그래서 더 단단하다.','Counting it out: a ball carries force at one point, a roller along its whole length. The same force is spread wider, so it deforms less. This makes it stiffer.'),
+  TR('롤러 하나는 한 쌍의 면만 누른다. 그래서 롤러를 하나 걸러 90° 돌려 놓는다. 체크박스로 다음 롤러를 보면 닿는 면이 바뀐다.','One roller presses only one pair of faces. So every other roller is turned by 90°. The checkbox shows the next roller, which touches the other pair.'),
+  TR('롤러는 순환하지 않는다. 두 레일 사이에 갇혀 같이 구른다. 그래서 트래블이 레일 길이보다 짧게 정해진다.','The rollers do not recirculate. They stay trapped between the two rails and roll with them. Travel is therefore limited to less than the rail length.'),
+  TR('순환하는 길이 없어 움직임이 고르다. 짧고 정밀한 이동에 쓴다. 수동 정밀 스테이지에 흔하다.','With no recirculation path, motion is even. It serves short, precise travel and is common in manual precision stages.')],
+ q:TR('크로스 롤러 스테이지에는 왜 300 mm 같은 긴 트래블이 드문가?','Why are long travels such as 300 mm rare in crossed-roller stages?'),a:TR('롤러가 순환하지 않기 때문이다. 길게 가려면 레일과 롤러 줄이 그만큼 길어져야 해서 크고 비싸진다. 긴 트래블은 볼 베어링 레일의 몫이다.','Because the rollers do not recirculate. Long travel needs equally long rails and roller rows, which gets large and costly. Long travel belongs to ball bearing rails.')},
+
+{t:TR('고딕 아치 베어링: 볼이 닿는 점이 2개에서 4개로','Gothic arch bearing: ball contacts go from 2 to 4'),ec:TR('홈 모양과 접촉점','Groove shape and contact points'),mc:TR('고딕 아치 베어링의 성질','Properties of a gothic arch bearing'),
+ e:()=>T(90,40,TR('원호 홈: 2점 접촉','Circular arc: 2 points'),'sub','middle')+T(230,40,TR('고딕 아치 홈: 4점 접촉','Gothic arch: 4 points'),'sub','middle')
+  +lsGroove(90,120,0)+lsGroove(230,120,1)
+  +T(90,72,TR('블록 쪽 홈','block groove'),'sub','middle')+T(90,180,TR('레일 쪽 홈','rail groove'),'sub','middle')
+  +lsDot(20,214,'var(--s1)',3.5)+T(30,218,TR('접촉점','contact point'),'sub')
+  +T(160,244,TR('홈의 굽은 정도는 보기 쉽게 과장','Groove curvature exaggerated for clarity'),'sub','middle'),
+ m:()=>lsGC(TR('고딕 아치 베어링','Gothic arch bearing'),TR('볼 하나가 4점','4 points per ball'),TR('2점 접촉보다 단단함 (대략)','stiffer than 2-point contact (approx.)'),TR('구름 마찰이 조금 큼 (확인 필요)','slightly higher friction (to be verified)'),TR('소형 정밀 스테이지 (확인 필요)','small precision stages (to be verified)'))
+  +TM(14,176,[TR('볼 베어링 레일의 한 갈래다','A variety of ball bearing rail'),TR('홈 모양만 다르다','Only the groove shape differs')],'sub','start',20),
+ read:[TR('볼 베어링 레일의 홈 모양을 바꾼 것이다. 보통 홈은 둥근 원호 하나라서 볼이 위아래 2점에서 닿는다.','This changes the groove shape of a ball bearing rail. An ordinary groove is a single circular arc, so the ball touches at 2 points, top and bottom.'),
+  `${c(1,'s1')} `+TR('고딕 아치 홈은 원호 두 개가 뾰족하게 만나는 모양이다. 볼이 홈마다 2점, 모두 4점에서 닿는다.','A gothic arch groove is two arcs meeting at a point. The ball touches at 2 points per groove, 4 in all.'),
+  TR('크로스 롤러와 같은 논리다. 닿는 곳이 늘면 같은 힘이 나뉘어 덜 눌린다. 그래서 더 단단하다.','The logic is the same as for crossed rollers. More contacts share the same force, so each deforms less. This makes it stiffer.'),
+  TR('4점이 비스듬히 벌어져 있어 볼 한 줄로 위·아래·옆 방향 힘을 모두 받는다. 볼 줄 수를 줄여 얇게 만들 수 있다.','The 4 contacts are spread at an angle, so one row of balls carries up, down, and sideways forces. Fewer ball rows allow a thinner build.'),
+  TR('대신 접촉점마다 구르는 조건이 조금씩 달라 마찰이 약간 커진다고 알려져 있다 (확인 필요).','In exchange, rolling conditions differ slightly between contacts, which is reported to raise friction a little (to be verified).')],
+ q:TR('고딕 아치 홈이 2점 접촉보다 단단한 까닭을 한 문장으로 말하면?','In one sentence, why is a gothic arch groove stiffer than 2-point contact?'),a:TR('같은 힘을 4점이 나눠 받아 한 점이 눌리는 양이 줄기 때문이다.','Because 4 points share the same force, so each point deforms less.')},
+
+{t:TR('에어 베어링: 닿지 않으면 마찰도 없다','Air bearing: no contact, no friction'),ec:TR('공기 막 위에 뜬 캐리지','A carriage floating on an air film'),mc:TR('에어 베어링의 성질','Properties of an air bearing'),
+ tg:[{k:'air',l:TR('압축 공기 켜기','Compressed air on'),on:true}],
+ e:(v,g)=>{const gp=g.air?8:0,y=170-gp-44;return T(14,20,g.air?TR('공기 켜짐: 틈은 보기 쉽게 과장 (실제 수 µm, 대략)','Air on: gap exaggerated (really a few µm, approx.)'):TR('공기 꺼짐: 캐리지가 레일에 내려앉는다','Air off: the carriage settles on the rail'),'sub')
+  +lsG(2,lsGd(50,170,220,26))+T(160,188,TR('레일','rail'),'subn','middle')+lsR(90,y,140,44)+T(160,y+18,TR('캐리지','carriage'),'subn','middle')
+  +(g.air?lsG(1,LN(160,70,160,y-4,COL.s3,{w:2.5,mk:'s3'})+T(168,84,TR('압축 공기','compressed air'),'sub','start',COL.s3)
+    +[110,135,185,210].map(x=>LN(x,y+34,x,y+43,COL.s3,{w:1.6,mk:'s3'})).join('')
+    +LN(92,166,58,166,COL.s3,{w:1.6,mk:'s3'})+LN(228,166,262,166,COL.s3,{w:1.6,mk:'s3'})+T(160,224,TR('공기가 틈으로 빠져나가며 캐리지를 띄운다','Air escaping through the gap lifts the carriage'),'sub','middle')):T(160,224,TR('닿은 채로 움직이면 면이 상한다','Moving in contact damages the surfaces'),'sub','middle',COL.s1))},
+ m:()=>lsGC(TR('에어 베어링','Air bearing'),TR('닿지 않음 (공기 막)','none (air film)'),TR('마찰·마모 없음, 초정밀','no friction or wear, ultra-precise'),TR('깨끗한 압축 공기가 늘 필요','needs clean compressed air at all times'),TR('초정밀 스캔·계측','ultra-precision scanning, metrology'))
+  +TM(14,176,[TR('구동은 보통 리니어 모터와 짝을 짓는다','Usually paired with a linear-motor drive'),TR('둘 다 닿는 곳이 없기 때문이다','because neither has a contact')],'sub','start',20),
+ read:[`${c(1,'s3')} `+TR('캐리지 밑의 작은 구멍으로 압축 공기를 내보낸다. 공기가 얇은 막을 만들어 캐리지를 레일에서 띄운다.','Compressed air leaves through small holes under the carriage. The air forms a thin film that lifts the carriage off the rail.'),
+  TR('닿는 곳이 없으므로 마찰도 마모도 없다. 볼이 드나드는 떨림도 없다. 가이드 가운데 가장 고르게 움직인다.','With no contact there is no friction and no wear, and no ripple from balls entering a path. It moves more evenly than any other guide.'),
+  TR('공기 막은 수 µm로 얇다 (대략). 레일 면의 작은 요철을 막이 고르게 평균해 준다.','The air film is only a few µm thick (approx.). The film averages out small irregularities of the rail surface.'),
+  TR('대가는 설비다. 깨끗하고 마른 압축 공기가 늘 흘러야 한다. 공기가 끊긴 채 움직이면 면이 상한다.','The price is infrastructure. Clean, dry compressed air must flow at all times. Moving without air damages the surfaces.'),
+  TR('마찰이 없다는 것은 붙잡는 것도 없다는 뜻이다. 가이드 스스로는 아무것도 버티지 않는다 (탭 4와 이어짐).','No friction also means nothing holds. The guide itself resists nothing along the travel (this connects to tab 4).')],
+ q:TR('수십 µm 정밀도로 시료를 바꿔 끼우는 일에 에어 베어링이 필요한가?','Is an air bearing needed for swapping samples at tens-of-µm precision?'),a:TR('필요 없다. 그 정도는 볼 베어링 레일로 충분하다. 에어 베어링은 nm 수준의 고른 움직임이 필요할 때 쓴다.','No. A ball bearing rail is enough at that level. Air bearings serve when nm-level smooth motion is needed.')}
+];
+
+/* ================= 탭 4: 세로 설치와 자기잠금 ================= */
+const LS_VERT=[
+{t:TR('세로로 세우면 하중이 구동 쪽으로 넘어온다','Standing the stage up moves the load onto the drive'),ec:TR('기울기와 하중의 방향','Tilt and the direction of the load'),mc:TR('하중을 나눠 받는 비율','How the load is shared'),
+ slider:{min:0,max:90,step:1,init:0,label:TR('기울기 θ','Tilt θ'),fmt:v=>Math.round(v)+'°',play:1},
+ e:v=>{const a=v*Math.PI/180,lx=160-43*Math.sin(a),ly=178-43*Math.cos(a);
+  return lsG(1,T(14,20,TR('구동이 받는 힘: W × sin θ = ','Force on the drive: W × sin θ = ')+Math.sin(a).toFixed(2)+' W','sub','start',COL.s1))
+   +lsG(2,T(14,38,TR('가이드가 받는 힘: W × cos θ = ','Force on the guide: W × cos θ = ')+Math.cos(a).toFixed(2)+' W','sub','start',COL.s2))
+   +T(14,56,TR('W: 하중의 무게 (예: 1 kg이면 9.8 N)','W: weight of the load (e.g. 1 kg gives 9.8 N)'),'sub')
+   +`<g transform="translate(160,178) rotate(${-v}) scale(.8) translate(-160,-170)">${lsStage(160,{x0:60,x1:260,dg:1})}${lsR(140,104,40,24,'var(--panel)')}</g>`
+   +LN(lx.toFixed(1),ly.toFixed(1),lx.toFixed(1),(ly+34).toFixed(1),'var(--fg)',{w:2.5,mk:'f'})},
+ m:v=>{const P=plot({x:[0,90],y:[0,1.1],xt:[0,30,60,90].map(u=>({v:u,l:u+'°'})),yt:[0,.5,1].map(u=>({v:u,l:String(u)})),xl:TR('기울기 θ (0° 수평, 90° 세로)','tilt θ (0° horizontal, 90° vertical)'),yl:TR('받는 힘 (W 단위)','force carried (units of W)'),ylx:16}),r=u=>u*Math.PI/180;
+  return P.s+lsG(1,crv(P,u=>Math.sin(r(u)),0,90,COL.s1)+lsDot(P.X(v),P.Y(Math.sin(r(v))),'var(--s1)')+T(P.X(86),P.Y(.86),TR('구동','drive'),'sub','end',COL.s1))
+   +lsG(2,crv(P,u=>Math.cos(r(u)),0,90,COL.s2)+lsDot(P.X(v),P.Y(Math.cos(r(v))),'var(--s2)')+T(P.X(4),P.Y(.86),TR('가이드','guide'),'sub','start',COL.s2))
+   +LN(P.X(v),P.T,P.X(v),P.B,'var(--muted)',{w:1,dash:1})},
+ read:[`${c(2,'s2')} `+TR('수평(0°)에서는 하중이 캐리지를 레일 쪽으로 누른다. 가이드가 전부 받는다. 나사는 무게를 느끼지 않는다.','Horizontal (0°): the load presses the carriage onto the rail. The guide takes all of it. The screw feels no weight.'),
+  `${c(1,'s1')} `+TR('세로(90°)에서는 하중이 이동 방향과 나란하다. 레일은 이 방향으로는 미끄러지도록 만든 부품이라 버티지 못한다. 나사와 너트가 전부 받는다.','Vertical (90°): the load is parallel to the travel. The rail is built to slide freely in that direction and cannot resist. The screw and nut take all of it.'),
+  TR('세어 보기: 1 kg은 9.8 N이다. 수평에서 나사가 받는 힘은 0 N, 30°에서 4.9 N, 세로에서 9.8 N이다.','Counting it out: 1 kg weighs 9.8 N. The screw carries 0 N when horizontal, 4.9 N at 30°, and 9.8 N when vertical.'),
+  TR('탭 1의 4단계와 같은 논리다. 이동 방향 힘은 구동, 그 밖의 힘은 가이드다. 세우면 무게가 "이동 방향 힘"이 된다.','This is the logic of tab 1, step 4: force along travel goes to the drive, other forces to the guide. Standing the stage up turns the weight into a force along travel.'),
+  TR('그래서 세로 설치에서는 물어야 할 것이 바뀐다. "레일이 무게를 견디나"가 아니라 "구동이 무게를 붙잡고 있나"다.','So vertical mounting changes the question, from "can the rail bear the weight" to "does the drive hold the weight".')],
+ q:TR('세로로 세운 스테이지에서 가이드가 받는 힘은 정말 0인가?','Is the force on the guide really zero for a vertical stage?'),a:TR('이동 방향 힘은 0이다. 다만 하중이 캐리지 면에서 떨어져 달려 있으면 캐리지를 기울이는 힘(모멘트)이 생기고, 이것은 가이드가 받는다. 사양표의 모멘트 하중이 이 값이다.','The force along travel is zero. But a load hanging away from the carriage face creates a tilting force (moment), which the guide takes. This is the moment load in the spec sheet.')},
+
+{t:TR('전원 켜짐: 스테퍼의 유지 토크가 버틴다','Power on: the holding torque of the stepper holds'),ec:TR('세로로 세운 스테이지','A stage mounted vertically'),mc:TR('토크 비교 (대략)','Torque comparison (approx.)'),
+ e:()=>T(14,20,TR('전원 켜짐, 멈춰 있음','Power on, at rest'),'lab')
+  +lsVert(96,160,lsStage(175,{x0:60,x1:260,N:[3,2,0,0,0,0]})+lsR(155,104,40,24,'var(--panel)'))
+  +lsG(1,LN(42,168,42,204,'var(--fg)',{w:2.5,mk:'f'}))
+  +lsG(1,badge(168,76,1,COL.f)+T(182,80,TR('하중이 너트를 민다','The load pushes the nut'),'sub'))
+  +lsG(2,badge(168,106,2,COL.s1)+T(182,110,TR('나사가 돌려고 한다','The screw wants to turn'),'sub'))
+  +lsG(3,badge(168,136,3,COL.s1)+T(182,140,TR('모터가 축을 붙잡는다','The motor holds the shaft'),'sub'))
+  +T(160,176,TR('= 유지 토크','= holding torque'),'lab')+T(160,196,TR('전류가 흐르는 동안만','only while current flows'),'sub')
+  +T(150,250,TR('← 모터 (아래)','← motor (bottom)'),'sub'),
+ m:()=>{const P=plot({x:[.1,1000],logx:1,noy:1,xt:[.1,1,10,100,1000].map(u=>({v:u,l:String(u)})),xl:TR('토크 (mN·m, log 눈금)','torque (mN·m, log scale)'),L:20,R:300,T:30,B:236});
+  return P.s+lsBar(P,64,.1,1.6,'s1',TR('버티는 데 필요한 토크: 약 1.6 mN·m','Torque needed to hold: about 1.6 mN·m'),1)+T(P.L+2,94,TR('가정: 하중 1 kg, 리드 1 mm, 마찰 무시','Assumed: 1 kg load, 1 mm lead, no friction'),'sub')
+   +lsBar(P,150,200,500,'s3',TR('소형 스테퍼의 유지 토크: 수백 mN·m','Holding torque of a small stepper: hundreds of mN·m'),3)+T(P.L+2,180,TR('대략 (기종마다 다름)','approx. (varies by model)'),'sub')},
+ read:[`${c(1,'f')} `+TR('세로에서 하중은 너트를 아래로 민다.','In the vertical position the load pushes the nut downward.'),
+  `${c(2,'s1')} `+TR('너트가 나사산의 비탈을 누르므로 나사는 돌려고 한다. 나사가 돌면 너트가 내려간다.','The nut presses on the slope of the thread, so the screw tries to turn. If the screw turns, the nut descends.'),
+  `${c(3,'s1')} `+TR('스테퍼 모터는 멈춰 있을 때도 코일에 전류를 흘려 축을 자석의 힘으로 붙잡는다. 이 힘이 유지 토크다.','A stepper motor keeps current in its coils even at rest and locks the shaft magnetically. This is the holding torque.'),
+  TR('세어 보기: 하중 9.8 N이 나사를 돌리려는 토크는 힘 × 리드 ÷ 2π다. 9.8 N × 1 mm ÷ 6.28 = 약 1.6 mN·m다 (마찰을 무시한 값, 실제로는 마찰이 도와 더 작다).','Counting it out: the torque with which a 9.8 N load tries to turn the screw is force × lead ÷ 2π. 9.8 N × 1 mm ÷ 6.28 = about 1.6 mN·m (friction ignored; in reality friction helps and it is smaller).'),
+  TR('소형 스테퍼의 유지 토크는 대략 수백 mN·m다. 100배 넘는 여유가 있다. 전원이 켜져 있으면 문제가 없다.','A small stepper has a holding torque of roughly hundreds of mN·m, a margin of over 100 times. With the power on there is no problem.')],
+ q:TR('리드가 작을수록 모터가 버티기 쉬운 까닭은?','Why does a smaller lead make holding easier for the motor?'),a:TR('필요한 토크가 힘 × 리드 ÷ 2π라서 리드에 비례하기 때문이다. 리드가 작으면 나사산의 비탈이 완만해져 같은 무게가 나사를 덜 돌리려 한다.','Because the required torque, force × lead ÷ 2π, is proportional to the lead. A small lead makes the thread slope gentle, so the same weight tries less to turn the screw.')},
+
+{t:TR('전원 꺼짐: 나사의 자기잠금이 버틴다. 조건은 tan λ < μ','Power off: self-locking of the screw holds. The condition is tan λ < μ'),ec:TR('나사산을 펼치면 비탈이다','An unrolled thread is a slope'),mc:TR('경사각과 자기잠금 조건','Lead angle and the self-locking condition'),
+ slider:{min:1,max:20,step:.5,init:3,label:TR('경사각 λ','Lead angle λ'),fmt:v=>v.toFixed(1)+'°',play:1},
+ e:v=>{const a=v*Math.PI/180,tn=Math.tan(a),ok=tn<.15,h=260*tn;
+  return T(160,22,ok?TR('자기잠금: 마찰이 이긴다','Self-locking: friction wins'):TR('흘러내림: 하중이 이긴다','Back-driving: the load wins'),'lab','middle',lsHC[ok?0:2])
+   +T(160,42,`tan λ = ${tn.toFixed(3)},  μ = 0.15 `+TR('(가정)','(assumed)'),'sub','middle')
+   +`<polygon points="30,226 290,226 290,${(226-h).toFixed(1)}" style="fill:var(--soft);stroke:var(--fg)" stroke-width="1.2"/>`
+   +`<g transform="rotate(${-v} 30 226)">${lsR(130,199,50,26)}${T(155,216,TR('너트','nut'),'subn','middle')}${lsG(1,LN(128,212,(120-200*Math.sin(a)).toFixed(1),212,COL.s1,{w:2.5,mk:'s1'}))}${lsG(2,LN(182,212,(190+30*Math.cos(a)).toFixed(1),212,COL.s3,{w:2.5,mk:'s3'}))}</g>`
+   +lsG(1,LN(14,248,34,248,COL.s1,{w:2.5})+T(40,252,TR('내리미는 힘: W sin λ','Sliding force: W sin λ'),'sub'))
+   +lsG(2,LN(14,266,34,266,COL.s3,{w:2.5})+T(40,270,TR('마찰이 버티는 최대 힘: μ W cos λ','Maximum friction force: μ W cos λ'),'sub'))},
+ m:v=>{const P=plot({x:[0,20],y:[0,.4],xt:[0,5,10,15,20].map(u=>({v:u,l:u+'°'})),yt:[0,.1,.2,.3,.4].map(u=>({v:u,l:String(u)})),xl:TR('경사각 λ','lead angle λ'),yl:'tan λ, μ',ylx:16}),f=u=>Math.tan(u*Math.PI/180);
+  return P.s+lsG(2,LN(P.L,P.Y(.15),P.R,P.Y(.15),COL.s3,{w:2,dash:1})+T(P.R-4,P.Y(.15)-6,TR('μ = 0.15 (가정)','μ = 0.15 (assumed)'),'sub','end',COL.s3))
+   +lsG(1,crv(P,f,0,20,COL.s1)+T(P.X(17.2),P.Y(.36),'tan λ','sub','end',COL.s1)+lsDot(P.X(v),P.Y(f(v)),'var(--s1)'))
+   +LN(P.X(8.53),P.T,P.X(8.53),P.B,'var(--muted)',{w:1,dash:1})+T(P.X(8.53)-5,P.Y(.3),TR('경계 약 8.5°','limit approx. 8.5°'),'sub','end')
+   +T(P.X(TR(4.2,5.6)),P.Y(.02),TR('자기잠금','self-locking'),'sub','middle',lsHC[0])+T(P.X(14.5),P.Y(.02),TR('흘러내림','back-driving'),'sub','middle',lsHC[2])},
+ read:[TR('전원이 꺼지면 유지 토크가 사라진다. 남는 것은 나사산의 마찰뿐이다.','When the power goes off, the holding torque disappears. Only thread friction remains.'),
+  TR('나사산 한 바퀴를 펼치면 비탈(경사면)이 된다. 너트는 그 비탈 위에 놓인 블록이다. 경사각 λ는 나사산이 기운 각도다.','One turn of thread unrolled is a slope (an inclined plane). The nut is a block resting on it. The lead angle λ is the tilt of the thread.'),
+  `${c(1,'s1')} `+TR('하중이 블록을 비탈 아래로 내리미는 힘은 W sin λ다.','The load pushes the block down the slope with W sin λ.'),
+  `${c(2,'s3')} `+TR('마찰이 버틸 수 있는 최대 힘은 μ W cos λ다. μ는 마찰계수다.','Friction can resist up to μ W cos λ, where μ is the friction coefficient.'),
+  TR('W sin λ < μ W cos λ면 블록이 미끄러지지 않는다. 양쪽을 W cos λ로 나누면 tan λ < μ다. 무게 W가 사라진다. 즉 버티는지는 하중의 크기와 상관없고 각도와 마찰로만 정해진다.','The block stays if W sin λ < μ W cos λ. Dividing both sides by W cos λ gives tan λ < μ. The weight W cancels: holding depends only on angle and friction, not on the size of the load.'),
+  TR('이것이 자기잠금이다. 가정: μ = 0.15로 고정, 사각 나사. 실제 사다리꼴 나사는 조건이 조금 더 느슨하다.','This is self-locking. Assumed: μ fixed at 0.15, square thread. A real trapezoidal thread locks slightly more easily.')],
+ q:TR('자기잠금 조건에 하중의 무게가 들어 있지 않다. 그러면 아무리 무거워도 버티는가?','The self-locking condition does not contain the weight. Does it then hold any load, however heavy?'),a:TR('미끄러지지 않는다는 점에서는 그렇다. 다만 너무 무거우면 나사산이나 너트가 상한다. 그 한계가 사양표의 세로 하중 용량이다. 진동이 있으면 마찰이 순간적으로 줄어 조금씩 내려갈 수도 있다.','As far as slipping goes, yes. But too heavy a load damages the thread or the nut; that limit is the vertical load capacity in the spec sheet. Vibration can also reduce friction momentarily and let it creep down.')},
+
+{t:TR('리드와 지름을 바꾸면: 경사각과 자기잠금 여부','Changing lead and diameter: lead angle and self-locking'),ec:TR('나사산 한 바퀴를 펼친 삼각형 (각도는 실제 비율)','One thread turn unrolled (true angle)'),mc:TR('리드에 따른 tan λ','tan λ versus lead'),
+ dia:1,slider:{min:.5,max:6,step:.25,init:1,label:TR('리드','Lead'),fmt:v=>v.toFixed(2)+' mm'},
+ e:v=>{const tn=v/(Math.PI*lsDia),lam=Math.atan(tn)*180/Math.PI,h=240*tn,st=tn<.1?0:tn<.2?1:2;
+  return T(160,22,[TR('자기잠금: 전원이 꺼져도 버틴다','Self-locking: holds with the power off'),TR('경계: 마찰 상태에 따라 다르다','Borderline: depends on the friction state'),TR('흘러내릴 수 있다','May back-drive')][st],'lab','middle',lsHC[st])
+   +T(160,42,`λ = ${lam.toFixed(1)}°,  tan λ = ${tn.toFixed(3)}`,'sub','middle')
+   +T(160,60,TR('μ = 0.1–0.2 (윤활된 리드스크류, 대략)','μ = 0.1–0.2 (lubricated leadscrew, approx.)'),'sub','middle')
+   +`<polygon points="40,214 280,214 280,${(214-h).toFixed(1)}" style="fill:var(--soft);stroke:var(--fg)" stroke-width="1.2"/>`
+   +lsG(1,LN(280,214,280,(214-h).toFixed(1),COL.s4,{w:3.5}))
+   +T(160,234,TR('밑변: 나사 둘레 π × 지름 = ','Base: circumference π × diameter = ')+(Math.PI*lsDia).toFixed(1)+' mm','sub','middle')
+   +lsG(1,T(160,252,TR('높이: 리드 = ','Height: lead = ')+v.toFixed(2)+' mm','sub','middle',COL.s4))
+   +T(160,270,TR('가정: 사각 나사, 지름은 나사산 중간 지름','Assumed: square thread, mid-thread diameter'),'sub','middle')},
+ m:v=>{const P=plot({x:[0,6],y:[0,.5],xt:[0,1,2,3,4,5,6].map(u=>({v:u,l:String(u)})),yt:[0,.1,.2,.3,.4,.5].map(u=>({v:u,l:String(u)})),xl:TR('리드 (mm)','lead (mm)'),yl:TR('tan λ = 리드 / (π × 지름)','tan λ = lead / (π × diameter)'),ylx:16}),tn=v/(Math.PI*lsDia);
+  return P.s+`<rect x="${P.L}" y="${P.Y(.2).toFixed(1)}" width="${P.R-P.L}" height="${(P.Y(.1)-P.Y(.2)).toFixed(1)}" style="fill:var(--s4)" fill-opacity=".18"/>`
+   +T(P.L+8,P.Y(.46),TR('흘러내릴 수 있음','may back-drive'),'sub','start',lsHC[2])+T(P.L+8,P.Y(.4),TR('선: 지름 ','Line: diameter ')+lsDia.toFixed(1)+' mm','sub','start',COL.s1)
+   +T(P.R-4,P.Y(.15)+4,TR('μ = 0.1–0.2 (경계)','μ = 0.1–0.2 (borderline)'),'sub','end')+T(P.R-4,P.Y(.03),TR('자기잠금','self-locking'),'sub','end',lsHC[0])
+   +crv(P,u=>u/(Math.PI*lsDia),0,6,COL.s1,{clip:[0,.5]})+lsDot(P.X(v),P.Y(Math.min(.5,tn)),'var(--s1)')},
+ read:[TR('나사산 한 바퀴를 펼치면 직각삼각형이다. 밑변은 나사 둘레(π × 지름), 높이는 리드다. 그래서 tan λ = 리드 ÷ (π × 지름)이다.','One turn of thread unrolls into a right triangle. The base is the screw circumference (π × diameter) and the height is the lead. So tan λ = lead ÷ (π × diameter).'),
+  TR('세어 보기: 리드 1 mm, 지름 6 mm면 tan λ = 1 ÷ 18.8 = 0.053, λ는 약 3.0°다. 지름 8 mm면 0.040, 약 2.3°다.','Counting it out: lead 1 mm and diameter 6 mm give tan λ = 1 ÷ 18.8 = 0.053, λ about 3.0°. Diameter 8 mm gives 0.040, about 2.3°.'),
+  TR('윤활된 리드스크류의 마찰계수는 보통 0.1–0.2다 (대략). 0.05는 0.1보다 충분히 작다. 조건을 여유 있게 만족한다.','The friction coefficient of a lubricated leadscrew is typically 0.1–0.2 (approx.). 0.05 is well below 0.1, so the condition is met with margin.'),
+  TR('리드를 키우면 삼각형이 가팔라진다. 지름 6 mm에서 리드가 약 1.9 mm를 넘으면 tan λ가 0.1을 넘어 경계 구간에 들어간다.','A larger lead steepens the triangle. At 6 mm diameter, a lead above about 1.9 mm pushes tan λ past 0.1 into the borderline band.'),
+  TR('지름을 키우면 같은 리드에서도 밑변이 길어져 완만해진다. 가는 나사에 큰 리드가 가장 위험한 조합이다.','A larger diameter lengthens the base and flattens the slope at the same lead. A thin screw with a large lead is the riskiest combination.'),
+  TR('빠른 스테이지는 리드가 크다. 속도와 자기잠금은 서로 맞바꾸는 관계다 (탭 2의 7단계와 같은 결론).','Fast stages have large leads. Speed and self-locking trade against each other (the conclusion of tab 2, step 7).')],
+ q:TR('지름 6 mm 나사에서 리드를 1 mm에서 4 mm로 바꿨다. 세로로 써도 되는가?','On a 6 mm screw the lead changes from 1 mm to 4 mm. Is vertical use still safe?'),a:TR('장담할 수 없다. tan λ = 4 ÷ 18.8 = 0.21로 마찰계수 범위(0.1–0.2)를 넘는다. 전원이 꺼지면 흘러내릴 수 있으므로 브레이크가 필요하다.','Not reliably. tan λ = 4 ÷ 18.8 = 0.21 exceeds the friction range (0.1–0.2). It may slide down with the power off, so a brake is needed.')},
+
+{t:TR('볼스크류는 왜 안 버티나. 그리고 "볼 베어링 레일"과 "볼스크류"는 다른 부품이다','Why a ball screw does not hold, and why "ball bearing rail" and "ball screw" are different parts'),ec:TR('같은 비탈 위의 블록과 볼','A block and a ball on the same slope'),mc:TR('tan λ와 마찰계수 비교 (대략)','tan λ against friction coefficients (approx.)'),
+ e:()=>T(14,20,TR('같은 경사 3° (리드 1 mm, 지름 6 mm에 해당)','The same 3° slope (lead 1 mm, diameter 6 mm)'),'sub')
+  +`<polygon points="30,120 290,120 290,106.4" style="fill:var(--soft);stroke:var(--fg)" stroke-width="1.2"/>`
+  +`<g transform="rotate(-3 30 120)">${lsR(190,94,44,24)}${lsC(90,108,10,'var(--panel)','var(--s1)')}${LN(74,104,46,104,COL.s5,{w:2.5,mk:'s5'})}</g>`
+  +T(214,66,TR('리드스크류 너트: 멈춤','Leadscrew nut: stays'),'sub','middle',lsHC[0])+T(84,66,TR('볼: 굴러 내려감','Ball: rolls down'),'sub','middle',lsHC[2])
+  +T(14,160,TR('이름이 비슷한 두 부품','Two parts with similar names'),'lab')
+  +lsG(2,lsSw(14,186,'s2')+T(34,186,TR('볼 베어링 레일 = 가이드 (탭 3)','Ball bearing rail = guide (tab 3)'),'sub'))
+  +lsG(1,lsSw(14,208,'s1')+T(34,208,TR('볼스크류 = 구동 (탭 2)','Ball screw = drive (tab 2)'),'sub'))
+  +T(14,236,TR('레일의 볼은 길을 잡는다. 나사의 볼은 민다.','Rail balls guide. Screw balls push.'),'sub')+T(14,254,TR('한쪽이 있다고 다른 쪽도 있는 것은 아니다.','Having one does not imply having the other.'),'sub'),
+ m:()=>{const P=plot({x:[.001,1],logx:1,noy:1,xt:[.001,.01,.1,1].map(u=>({v:u,l:String(u)})),xl:TR('값 (단위 없음, log 눈금)','value (dimensionless, log scale)'),L:20,R:300,T:30,B:236});
+  return P.s+[[68,92],[124,148],[180,P.B]].map(([a,b])=>LN(P.X(.045).toFixed(1),a,P.X(.045).toFixed(1),b,'var(--muted)',{w:1,dash:1})).join('')
+   +lsBar(P,56,.04,.053,'s1',TR('tan λ: 0.04–0.05 (리드 1 mm, 지름 6–8 mm)','tan λ: 0.04–0.05 (lead 1 mm, diameter 6–8 mm)'),1)
+   +lsBar(P,112,.1,.2,'s3',TR('μ 리드스크류: 0.1–0.2 (윤활)','μ leadscrew: 0.1–0.2 (lubricated)'),2)
+   +lsBar(P,168,.003,.01,'s5',TR('μ 볼스크류: 0.003–0.01 (구름)','μ ball screw: 0.003–0.01 (rolling)'),3)
+   +T(P.X(.045)+6,212,TR('μ가 점선보다 오른쪽: 버틴다','μ right of line: holds'),'sub')},
+ read:[TR(`${c(1,'s1')} 리드 1 mm, 지름 6–8 mm 나사의 tan λ는 0.04–0.05다 (앞 단계).`,`${c(1,'s1')} A screw with 1 mm lead and 6–8 mm diameter has tan λ of 0.04–0.05 (previous step).`),
+  `${c(2,'s3')} `+TR('리드스크류의 마찰계수 0.1–0.2는 이보다 크다. tan λ < μ가 성립해 버틴다.','The leadscrew friction coefficient of 0.1–0.2 is larger. tan λ < μ holds, so it stays.'),
+  `${c(3,'s5')} `+TR('볼스크류는 미끄러지지 않고 구른다. 구름 마찰계수는 대략 0.003–0.01로, 같은 tan λ보다 훨씬 작다. tan λ < μ가 성립하지 않아 흘러내린다.','A ball screw rolls instead of sliding. The rolling friction coefficient is roughly 0.003–0.01, far below the same tan λ. tan λ < μ fails, and it slides down.'),
+  TR('같은 리드, 같은 지름이어도 결과가 반대다. 나사 모양이 아니라 닿는 방식(미끄럼 대 구름)이 가른다.','The same lead and diameter give the opposite result. What decides is the type of contact (sliding versus rolling), not the screw geometry.'),
+  TR(`이름에 주의한다. ${c(2,'s2')} "볼 베어링 레일"은 가이드이고 ${c(1,'s1')} "볼스크류"는 구동이다. 둘 다 볼이 들어가지만 하는 일이 다르다.`,`The names need care. A ${c(2,'s2')} "ball bearing rail" is a guide and a ${c(1,'s1')} "ball screw" is a drive. Both contain balls, but they do different jobs.`),
+  TR('사양표에 "볼 베어링"이라고 적혀 있어도 그것은 가이드 이야기다. 구동이 리드스크류면 자기잠금에는 영향이 없다.','A spec sheet saying "ball bearing" is describing the guide. If the drive is a leadscrew, self-locking is unaffected.')],
+ case:TR('<b>주의</b> "볼 베어링 레일 + 리드스크류" 스테이지는 흔하다. 볼이 들어 있다고 해서 흘러내리는 것이 아니다. 흘러내림을 정하는 것은 구동 쪽 나사가 볼스크류인지 리드스크류인지다.','<b>Note</b> A "ball bearing rail + leadscrew" stage is common. Containing balls does not make it slide down. What decides back-driving is whether the screw on the drive side is a ball screw or a leadscrew.'),
+ q:TR('사양표에 "가이드: 볼 베어링, 구동: 리드스크류"라고 적힌 스테이지는 세로에서 전원이 꺼지면 흘러내리는가?','A spec sheet says "guide: ball bearing, drive: leadscrew". Does this stage slide down when vertical with the power off?'),a:TR('리드가 작다면 흘러내리지 않는다. 볼 베어링은 가이드라서 이동 방향으로는 원래 아무것도 버티지 않는다. 버티는 것은 리드스크류의 자기잠금이다.','Not if the lead is small. The ball bearing is the guide, which never resists along the travel anyway. What holds is the self-locking of the leadscrew.')}
+];
+
+/* ================= 탭 5: 적용 사례 ================= */
+const LS_CASE=[
+{t:TR('조건에서 요구 사항으로: 액체 셀 2개를 세로로 번갈아 넣기','From conditions to requirements: two liquid cells swapped vertically'),ec:TR('셀 교환 장치 (앞에서 본 모식도)','Cell changer (front-view sketch)'),mc:TR('조건 → 스테이지에 요구할 것','Condition → what to ask of the stage'),
+ tg:[{k:'p2',l:TR('셀 2를 빔에 넣기','Put cell 2 in the beam'),on:false}],
+ e:(v,g)=>{const cy=g.p2?97.5:162.5;return T(14,16,TR('치수는 대략','approx. proportions'),'sub')
+  +lsR(40,26,70,236)+lsGd(46,30,8,200)+lsGd(96,30,8,200)+LN(75,30,75,232,COL.s1,{w:3})+lsDr(52,234,46,26)+T(75,251,TR('모터','motor'),'subn','middle')
+  +lsR(34,cy-30,82,60)+T(75,cy+4,TR('캐리지','carriage'),'subn','middle')+lsR(116,cy-6,54,12)+lsR(170,cy-60,60,120,'var(--panel)')
+  +lsG(1,lsC(200,cy-32.5,16,'var(--soft)')+T(236,cy-28.5,TR('셀 1','Cell 1'),'sub'))+lsG(2,lsC(200,cy+32.5,16,'var(--soft)')+T(236,cy+36.5,TR('셀 2','Cell 2'),'sub'))
+  +LN(272,cy-32.5,272,cy+32.5,'var(--muted)',{w:1})+T(277,cy+4,'65 mm','sub')
+  +lsDot(200,130,'var(--s4)',6)+lsDot(126,272,'var(--s4)',5)+T(136,276,TR('빔 (종이에 수직, 고정)','Beam (normal to page, fixed)'),'sub')},
+ m:()=>{const it=[[TR('세로 설치, 하중 약 1 kg','Vertical mounting, load approx. 1 kg'),TR('→ 세로 하중 용량이 1 kg보다 넉넉히 클 것','→ vertical load capacity well above 1 kg')],[TR('셀 간격 65 mm','Cell spacing 65 mm'),TR('→ 트래블이 65 mm보다 길 것','→ travel longer than 65 mm')],[TR('정밀도는 수십 µm면 충분','Tens of µm precision is enough'),TR('→ nm급 분해능은 필요 없다','→ nm-level resolution is not needed')],[TR('측정하는 동안은 멈춰 있다','At rest during a measurement'),TR('→ 멈춘 동안 떨림이 없을 것','→ no dither while at rest')],[TR('정전이나 전원 꺼짐','Power failure or power off'),TR('→ 셀이 떨어지지 않을 것','→ the cells must not fall')]];
+  return it.map(([a,b],i)=>{const y=28+i*50;return T(14,y,a,'sub')+T(24,y+19,b,'lab')+(i<4?L(10,310,y+31,'lvl2'):'')}).join('')},
+ read:[TR('가정: 적외선 분광용 액체 셀 2개(시료와 기준)를 세로로 65 mm 떨어뜨려 달고, 번갈아 빔에 넣는다. 셀과 홀더를 합친 하중은 약 1 kg이다.','Assumed: two liquid cells for infrared spectroscopy (sample and reference) are mounted 65 mm apart vertically and placed in the beam in turn. Cells plus holder weigh about 1 kg.'),
+  TR('빔은 고정이고 셀이 움직인다. 체크박스를 켜면 캐리지가 65 mm 올라가 셀 2가 빔 자리에 온다.','The beam is fixed and the cells move. With the checkbox on, the carriage rises by 65 mm and cell 2 arrives at the beam.'),
+  TR('먼저 조건을 사양표의 말로 바꾼다. 세로 설치이므로 수평 하중 용량이 아니라 세로 하중 용량을 본다 (탭 4의 1단계).','The conditions are first translated into spec-sheet terms. Vertical mounting means looking at vertical load capacity, not horizontal (tab 4, step 1).'),
+  TR('셀의 창은 빔보다 넉넉히 크다. 수십 µm 어긋나도 빔은 같은 곳을 지난다. 그래서 정밀도 요구가 낮다.','The cell window is comfortably larger than the beam. A shift of tens of µm leaves the beam in the same place, so the precision requirement is low.'),
+  TR('움직이는 시간보다 멈춰서 측정하는 시간이 훨씬 길다. 속도는 중요하지 않고, 멈춘 동안의 안정성과 전원이 꺼졌을 때의 안전이 중요하다.','Far more time is spent measuring at rest than moving. Speed is unimportant; stability at rest and safety with the power off are what matter.')],
+ q:TR('이 요구 사항 가운데 가이드에 관한 것은 무엇인가?','Which of these requirements concern the guide?'),a:TR('거의 없다. 다섯 가지가 모두 구동 쪽이다. 가이드에는 셀이 캐리지 옆으로 나와 달려서 생기는 기울이는 힘(모멘트)만 견디면 된다. 이 사례에서는 구동 선택이 전부다.','Almost none. All five are on the drive side. The guide only has to bear the tilting force (moment) from the cells hanging off the side of the carriage. In this case the choice of drive is everything.')},
+
+{t:TR('선택과 이유: 스테퍼 + 리드스크류가 맞고, 다이렉트 드라이브가 맞지 않는 까닭','Choice and reasons: why stepper + leadscrew fits and direct drive does not'),ec:TR('두 구동 방식을 요구 사항에 대 보기','Two drive types against the requirements'),mc:TR('필요한 값과 사양 (제조사 값)','Needed values and specs (manufacturer values)'),
+ e:()=>{const it=[[TR('세로에서 전원이 꺼지면','Power off while vertical'),TR('버팀 (확인 필요)','holds (to be verified)'),TR('낙하 (브레이크 없을 때)','falls (without a brake)')],[TR('멈춰 있는 동안','While at rest'),TR('가만히 있음','still'),TR('서보 미세 떨림','servo dither')],[TR('속도','Speed'),TR('느림 (여기서는 충분)','slow (enough here)'),TR('매우 빠름 (불필요)','very fast (unneeded)')],[TR('세로 하중 용량','Vertical load capacity'),TR('4 kg (필요 약 1 kg)','4 kg (approx. 1 kg needed)'),TR('기종에 따라 다름','depends on model')]];
+  return T(24,22,TR('스테퍼 + 리드스크류','Stepper + leadscrew'),'lab','start',lsHC[0])+T(176,22,TR('다이렉트 드라이브','Direct drive'),'lab','start',lsHC[2])+L(10,310,32,'ax')
+   +it.map(([a,b,d],i)=>{const y=56+i*56;return T(14,y,a,'sub')+lsG(1,T(24,y+20,b,'sub','start',lsHC[0]))+lsG(2,T(176,y+20,d,'sub','start',lsHC[2]))+(i<3?L(10,310,y+34,'lvl2'):'')}).join('')},
+ m:()=>{const b=(y,s,need,have,max,u)=>{const X=q=>20+q/max*270;return T(20,y,s,'lab')
+    +T(20,y+22,TR('필요: ','Needed: ')+need+' '+u,'sub')+`<rect x="20" y="${y+28}" width="${(X(need)-20).toFixed(1)}" height="12" rx="2" style="fill:var(--s6)" fill-opacity=".65"/>`
+    +T(20,y+62,TR('사양: ','Spec: ')+have+' '+u,'sub')+`<rect x="20" y="${y+68}" width="${(X(have)-20).toFixed(1)}" height="12" rx="2" style="fill:var(--s3)" fill-opacity=".65"/>`};
+  return b(26,TR('세로 하중 (약)','Vertical load (approx.)'),1,4,4.5,'kg')+b(150,TR('이동 거리','Travel'),65,150,170,'mm')},
+ read:[TR('고른 것: Thorlabs LTS150C/M. 스테퍼 + 리드스크류 구동, 볼 베어링 레일 가이드, 트래블 150 mm, 세로 하중 용량 4 kg이다 (제조사 값).','Chosen: Thorlabs LTS150C/M. Stepper + leadscrew drive, ball bearing rail guide, 150 mm travel, 4 kg vertical load capacity (manufacturer values).'),
+  `${c(1,'s3')} `+TR('세로에서 버틴다. 켜져 있을 때는 유지 토크가, 꺼졌을 때는 리드스크류의 자기잠금이 붙잡는다 (탭 4의 2, 3단계).','It holds vertically. With the power on the holding torque holds it; with the power off the self-locking of the leadscrew does (tab 4, steps 2 and 3).'),
+  `${c(1,'s3')} `+TR('속도가 필요 없다. 65 mm를 몇 초에 가도 측정 시간에 비하면 짧다. 멈춘 동안에는 스테퍼가 한 자리에 가만히 있다.','Speed is not needed. A few seconds for 65 mm is short next to the measurement time. At rest the stepper sits still in one place.'),
+  `${c(2,'s5')} `+TR('다이렉트 드라이브가 맞지 않는 까닭 하나: 전원이 꺼지면 붙잡는 것이 없어 셀이 떨어진다. 브레이크나 균형추를 따로 달아야 한다.','First reason direct drive does not fit: with the power off nothing holds, and the cells fall. A brake or a counterweight would have to be added.'),
+  `${c(2,'s5')} `+TR('까닭 둘: 멈춰 있을 때도 서보가 위치를 계속 고치느라 미세하게 떤다. 장점인 속도는 여기서 쓸 데가 없다.','Second reason: even at rest the servo keeps correcting the position and dithers slightly. Its advantage, speed, has no use here.'),
+  TR('볼 베어링 레일은 가이드다. 이름에 "볼"이 있어도 자기잠금과는 상관없다 (탭 4의 5단계).','The ball bearing rail is the guide. The "ball" in its name has nothing to do with self-locking (tab 4, step 5).')],
+ case:TR('<b>확인 필요</b> LTS150C/M 리드스크류의 정확한 리드와 지름, 그리고 전원이 꺼졌을 때 위치를 유지한다는 공식 사양은 확인하지 못했다. 자기잠금 판단은 "리드가 1 mm 안팎"이라는 가정 위에 있다. 실제 하중을 달고 전원을 꺼서 내려가는지 보는 것이 가장 확실하다.','<b>To be verified</b> The exact lead and diameter of the LTS150C/M leadscrew, and an official statement that it keeps position with the power off, have not been confirmed. The self-locking judgment rests on the assumption of a lead near 1 mm. The surest check is switching the power off with the real load attached and watching for descent.'),
+ q:TR('같은 일을 수평으로, 1초에 수십 번 오가야 한다면 선택이 어떻게 바뀌나?','If the same job were horizontal and had to shuttle tens of times per second, how would the choice change?'),a:TR('다이렉트 드라이브나 보이스 코일이 맞다. 수평이라 전원이 꺼져도 떨어지지 않고, 리드스크류로는 그 속도를 낼 수 없다. 조건이 바뀌면 답도 바뀐다.','Direct drive or a voice coil fits. Horizontal mounting removes the falling risk, and a leadscrew cannot reach that speed. A different condition gives a different answer.')}
+];
+
+const TABS=[
+{id:'basic',name:TR('구동과 가이드','Drive and guide'),sub:TR('스테이지를 이루는 두 부품','The two parts of a stage'),title:TR('구동과 가이드','Drive and guide'),desc:TR('리니어 스테이지는 미는 부품(구동)과 잡아 주는 부품(가이드)의 조합이다. 사양표도 이 둘로 나눠 읽는다.','A linear stage combines a part that pushes (drive) and a part that constrains (guide). The spec sheet is read in the same two halves.'),steps:LS_BASIC},
+{id:'drive',name:TR('구동 방식','Drive types'),sub:TR('캐리지를 미는 열 가지 방법','Ten ways to push the carriage'),title:TR('구동 방식','Drive types'),desc:TR('나사로 미는 방식부터 나사 없는 방식까지. 방식마다 전원이 꺼졌을 때 위치를 지키는지, 속도, 주 용도를 본다.','From screw drives to screwless ones. For each type: holding with the power off, speed, and main use.'),steps:LS_DRIVE},
+{id:'guide',name:TR('가이드 방식','Guide types'),sub:TR('똑바로 가게 잡는 네 가지 방법','Four ways to keep it straight'),title:TR('가이드 방식','Guide types'),desc:TR('볼, 롤러, 공기. 무엇이 어떻게 닿는지가 강성, 트래블, 고른 움직임을 정한다.','Balls, rollers, air. What touches and how sets stiffness, travel, and smoothness.'),steps:LS_GUIDE},
+{id:'vert',name:TR('세로 설치','Vertical mounting'),sub:TR('자기잠금: tan λ < μ','Self-locking: tan λ < μ'),title:TR('세로 설치와 자기잠금','Vertical mounting and self-locking'),desc:TR('스테이지를 세우면 무게를 구동이 받는다. 전원이 켜졌을 때와 꺼졌을 때 무엇이 버티는지 본다.','Standing a stage up puts the weight on the drive. What holds it with the power on, and with the power off.'),steps:LS_VERT},
+{id:'case',name:TR('적용 사례','Worked case'),sub:TR('액체 셀 2개를 번갈아 넣기','Swapping two liquid cells'),title:TR('적용 사례: 세로 셀 교환','Worked case: a vertical cell changer'),desc:TR('조건을 사양표의 말로 바꾸고, 구동 방식을 고르는 과정.','Translating conditions into spec-sheet terms and choosing a drive type.'),steps:LS_CASE}
+];
+/* ---------- 공통 엔진: 탭, 단계, 슬라이더, 체크박스, 번호 강조, 저장 ----------
+   노트 파일이 정의해야 하는 것:
+     TABS = [{id, name, sub, desc, steps, (선택) title, ec, mc, tl, ev, mv}]
+       title: 헤더 제목(없으면 name) / ec, mc, tl: 단계에 없을 때 쓰는 캡션 기본값 / ev, mv: 기본 viewBox
+     NOTE = {key, (선택) ev, mv, top, afterCtl, init(), onRender()}
+       key: localStorage 키 / top: 헤더 바로 아래 넣을 HTML / afterCtl: 컨트롤 줄 아래 넣을 HTML
+   단계 형식은 CLAUDE.md 3절. 오른쪽 캡션 = mc + ' · ' + tl.
+   주소 끝 #t=<탭 id>&s=<단계 번호>로 현재 위치를 적고 읽는다. 언어 전환 버튼(#langbtn)도 이 위치를 따라간다. */
+let tab=0,idx=0,V=0,TG={},raf=0;
+const $=id=>document.getElementById(id);
+if(NOTE.top)document.querySelector('.hero').insertAdjacentHTML('afterend',NOTE.top);
+if(NOTE.afterCtl)$('ctl').insertAdjacentHTML('afterend',NOTE.afterCtl);
+if(NOTE.init)NOTE.init();
+$('tabs').innerHTML=TABS.map((t,i)=>`<button role="tab" data-t="${i}" aria-selected="false">${t.name}<small>${t.sub}</small></button>`).join('');
+$('tabs').onclick=e=>{const b=e.target.closest('button');if(b){tab=+b.dataset.t;idx=0;render()}};
+const S=()=>TABS[tab].steps[idx];
+function draw(){const s=S();$('esvg').innerHTML=DEFS+s.e(V,TG);$('msvg').innerHTML=DEFS+s.m(V,TG)}
+function fmt(v){const sl=S().slider;return sl?(sl.fmt?sl.fmt(v):String(v)):''}
+function render(){const T0=TABS[tab],set=T0.steps,s=S();cancelAnimationFrame(raf);raf=0;
+ $('htitle').textContent=T0.title||T0.name;$('hdesc').textContent=T0.desc||'';$('count').textContent=(idx+1)+' / '+set.length;$('stitle').textContent=s.t;
+ const mc=s.mc||T0.mc||'',tl=s.tl||T0.tl;$('ecap').innerHTML=s.ec||T0.ec||'';$('mcap').innerHTML=mc+(tl?(mc?' · ':'')+tl:'');
+ $('esvg').setAttribute('viewBox',s.ev||T0.ev||NOTE.ev||'0 0 320 280');$('msvg').setAttribute('viewBox',s.mv||T0.mv||NOTE.mv||'0 0 320 280');
+ $('read').innerHTML=s.read.map(r=>`<li>${r}</li>`).join('');$('case').hidden=!s.case;$('case').innerHTML=s.case||'';$('q').textContent=s.q;$('a').textContent=s.a;$('ad').open=false;
+ const sl=s.slider;$('ctl').hidden=!(sl||s.tg);$('slw').hidden=!sl;$('sl').hidden=!sl;$('slo').hidden=!sl;$('play').hidden=!(sl&&sl.play);$('play').textContent=TR('재생','Play');
+ if(sl){$('sl').min=sl.min;$('sl').max=sl.max;$('sl').step=sl.step;V=sl.init??sl.min;$('sl').value=V;$('sll').textContent=sl.label;$('slo').value=fmt(V)}else V=0;
+ TG={};$('tgl').innerHTML=(s.tg||[]).map((t,i)=>{TG[t.k]=t.on;return `<label class="t" for="tg${i}"><input type="checkbox" id="tg${i}" data-k="${t.k}"${t.on?' checked':''}>${t.l}</label>`}).join('');
+ $('prev').disabled=idx===0;$('next').disabled=idx===set.length-1;
+ $('dots').innerHTML=set.map((_,i)=>`<button aria-label="${TR((i+1)+'단계','Step '+(i+1))}" class="${i===idx?'on':''}" data-i="${i}"></button>`).join('');
+ [...$('tabs').children].forEach((b,i)=>b.setAttribute('aria-selected',i===tab));
+ if(NOTE.onRender)NOTE.onRender(s);
+ draw();try{localStorage.setItem(NOTE.key,JSON.stringify({tab,idx}))}catch(e){}
+ const h='#t='+T0.id+'&s='+(idx+1);try{history.replaceState(null,'',h)}catch(e){}
+ const lb=$('langbtn');if(lb)lb.href=lb.dataset.base+h}
+function go(i){idx=Math.max(0,Math.min(TABS[tab].steps.length-1,i));render()}
+$('prev').onclick=()=>go(idx-1);$('next').onclick=()=>go(idx+1);
+$('dots').onclick=e=>{const b=e.target.closest('button');if(b)go(+b.dataset.i)};
+document.addEventListener('keydown',e=>{if(e.target.tagName==='INPUT')return;if(e.key==='ArrowRight')go(idx+1);if(e.key==='ArrowLeft')go(idx-1)});
+$('sl').oninput=e=>{V=+e.target.value;$('slo').value=fmt(V);draw()};
+$('tgl').onchange=e=>{const k=e.target.dataset.k;if(k){TG[k]=e.target.checked;draw()}};
+$('play').onclick=()=>{if(raf){cancelAnimationFrame(raf);raf=0;$('play').textContent=TR('재생','Play');return}
+ const sl=S().slider,rate=(sl.max-sl.min)/6000;if(V>=sl.max)V=sl.min;let last=performance.now();$('play').textContent=TR('정지','Stop');
+ const step=t=>{V=Math.min(sl.max,V+(t-last)*rate);last=t;$('sl').value=V;$('slo').value=fmt(V);draw();if(V<sl.max)raf=requestAnimationFrame(step);else{raf=0;$('play').textContent=TR('재생','Play')}};raf=requestAnimationFrame(step)};
+const stage=$('stage'),notes=document.querySelector('.notes');
+function hl(n){stage.classList.toggle('focus',!!n);stage.querySelectorAll('[data-n]').forEach(el=>el.classList.toggle('on',el.dataset.n===n))}
+[stage,notes].forEach(el=>{el.addEventListener('mouseover',e=>{const t=e.target.closest('[data-n]');hl(t?t.dataset.n:'')});el.addEventListener('mouseleave',()=>hl(''))});
+try{const s=JSON.parse(localStorage.getItem(NOTE.key)||'null');if(s&&TABS[s.tab]){tab=s.tab;idx=Math.min(s.idx,TABS[tab].steps.length-1)}}catch(e){}
+/* 주소 #t=<탭 id>&s=<단계> 가 있으면 그 위치로 연다 (언어 전환 버튼이 같은 단계로 넘어가게) */
+{const m=location.hash.match(/t=([\w-]+)&s=(\d+)/),i=m?TABS.findIndex(t=>t.id===m[1]):-1;if(i>=0){tab=i;idx=Math.max(0,Math.min(+m[2]-1,TABS[i].steps.length-1))}}
+render();
+</script>
